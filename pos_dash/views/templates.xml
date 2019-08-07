@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="dashboard">
+            <!--<t t-call="website.layout">-->
+            <t t-call="web.layout">
+                <!--<t t-call="web.layout">-->
+                <t t-set="head">
+                    <t t-call-assets="web.assets_common" t-js="false"/>
+                    <t t-call-assets="web.assets_frontend" t-js="false"/>
+
+                    <t t-call-assets="web.assets_common" t-css="false"/>
+                    <t t-call-assets="web.assets_frontend" t-css="false"/>
+                    <!--<t t-call-assets="survey.survey_assets"/>-->
+                </t>
+                <title>dashboard</title>
+                <meta charset="utf-8"/>
+
+                <script type="text/javascript" src='/pos_dash/static/src/js/Chart.min.js'></script>
+
+                <link href='/pos_dash/static/src/css/style.css'></link>
+
+                <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>-->
+                <!--<div class="container">-->
+
+                <div>
+                    <center>
+                        <h1 class="center">Dashboard</h1>
+
+                        <a href="/dashboard/day">
+                            <button type="button" class="btn btn-lg btn-info d">Day</button>
+                        </a>
+                        <a href="/dashboard/week">
+                            <button type="button" class="btn btn-lg btn-info w" id="w">Week</button>
+                        </a>
+                        <a href="/dashboard/month">
+                            <button type="button" class="btn btn-lg btn-info m" id="m">month</button>
+                        </a>
+                        <a href="/dashboard/3months">
+                            <button type="button" class="btn btn-lg btn-info 3m" id="3m">3 months</button>
+                        </a>
+                        <a href="/dashboard/6months">
+                            <button type="button" class="btn btn-lg btn-info 6m" id="6m">6 months</button>
+                        </a>
+
+                        <a href="/dashboard/year">
+                            <button type="button" class="btn btn-lg btn-info y" id="y">Year</button>
+                        </a>
+                        <br/>
+                        <br/>
+                        <div class="col-md-3"></div>
+                        <div class="col-md-6">
+                            <div class="col-md-5">
+                                <label class="control-label" for="start">from :</label>
+                                <input type="date" id="start" name="start" size="20" t-att-value="start"
+                                       class="input form-control"/>
+
+
+                            </div>
+                            <div class="col-md-5">
+                                <label class="control-label" for="end">to :</label>
+                                <input type="date" id="end" name="end" size="20" t-att-value="end"
+                                       class="input form-control"/>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-lg btn-info check" id="check">Check</button>
+                            </div>
+                            <div class="clearfix">
+
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="clearfix">
+
+                        </div>
+
+
+                        <script>
+                            $(function(){
+                            // bind change event to select
+                            $('#check').on('click', function () {
+                            var q = "?q="+$('#start').val() + "?"+$('#end').val() ; // get selected value
+                            if (q) { // require a URL
+                            var url = window.location.origin +'/dashboard'+q
+                            window.location = url; // redirect
+                            }
+                            return false;
+                            });
+                            });
+                        </script>
+
+                        <!--<t t-esc="rush_hour"></t>-->
+                    </center>
+
+                </div>
+                <div hidden="hidden">
+
+
+                    <t t-foreach="prods_name" t-as="p">
+                        <p class="pr">
+                            <t t-esc="p"/>
+                        </p>
+                    </t>
+                </div>
+                <div class="panels">
+                    <div class="row">
+
+                        <!-- orders -->
+                        <div class="col-md-3">
+                            <div class=" panel panel-blue">
+                                <div class="panel-heading row">
+                                    <div class="col-md-3">
+                                        <i class="fa fa-shopping-cart fa-7x"></i>
+                                    </div>
+
+                                    <div class="col-xs-9 text-right">
+                                        <div>
+                                            <h2 class="huge num">
+                                                <t t-esc="orders_n"></t>
+                                            </h2>
+
+                                        </div>
+                                        <div>
+                                            <h4>
+                                                Orders
+                                            </h4>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-3">
+
+                            <!--total money-->
+                            <div class="panel panel-green">
+                                <div class="panel-heading row">
+                                    <div class="col-md-3">
+                                        <i class="fa fa-dollar fa-7x"></i>
+                                    </div>
+
+                                    <div class="col-xs-9 text-right">
+                                        <div>
+                                            <h2 class="huge num">
+                                                <t t-esc="total_amount"></t>
+                                            </h2>
+
+                                        </div>
+                                        <div>
+                                            <h4>
+                                                Total Payment
+                                            </h4>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--average -->
+                        <div class="col-md-3">
+
+                            <div class="panel panel-orange">
+                                <div class="panel-heading row">
+                                    <div class="col-md-3">
+                                        <i class="fa fa-dashboard fa-7x"></i>
+                                    </div>
+
+                                    <div class="col-xs-9 text-right">
+                                        <div>
+                                            <h2 class="huge num">
+                                                <t t-esc="average"></t>
+                                            </h2>
+
+                                        </div>
+                                        <div>
+                                            <h4>
+                                                Recieipt Average
+                                            </h4>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="panel panel-yellow">
+                                <div class="panel-heading row">
+                                    <div class="col-md-3">
+                                        <i class="fa fa-clock-o  fa-7x"></i>
+                                    </div>
+
+                                    <div class="col-xs-9 text-right">
+                                        <div>
+                                            <h2 class="huge num">
+                                                <t t-esc="rush_hour"></t>
+                                            </h2>
+
+                                        </div>
+                                        <div>
+                                            <h4>
+                                                Rush Hour
+                                            </h4>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <!--<div class="chart col-md-6" >-->
+                <!--<canvas id="myChart" width="400" height="200"></canvas>-->
+                <!--</div>-->
+                <!--<div class="col-md-2"></div>-->
+                <div class="chart col-md-12">
+                    <canvas id="myChart2" width="400" height="200"></canvas>
+                </div>
+
+
+                <div class="chart col-md-12">
+                    <canvas id="myChart3" width="400" height="200"></canvas>
+                </div>
+                <div class="chart col-md-12">
+                    <canvas id="myChart4" width="400" height="200"></canvas>
+                </div>
+                <div class="chart col-md-12">
+                    <canvas id="myChart5" width="400" height="200"></canvas>
+                </div>
+                <div id="chartjs-tooltip"></div>
+                <!--</div>-->
+            </t>
+
+            <style>
+                @charset "UTF-8";
+
+                .form-control {
+                display: inline-block;
+                width: 75%;
+                height: 40px;
+                padding: 6px 8px;
+                font-size: 15px;
+                line-height: 1.5;
+                color: #555555;
+                background-color: #fff;
+                }
+                label{
+                font-size:16px;
+                }
+
+                button:focus{
+                background:blue;
+                }button:active{
+                background:blue;
+                }
+                .btn-lg{margin-left:20px;}
+                .panels{padding-left : 80px;padding-right: 80px;}
+                .panels{
+                margin-top:20px;
+                margin-bottom:20px;
+                }
+                .panel{
+                border-radius: 15px;
+                padding:6px;
+                color:#fff;
+                }
+                .panel-blue {
+                border-color:#337ab7;
+                background-color: #337ab7;
+                }
+                .panel-green {
+                border-color: #5cb85c;
+                background-color: #009933;
+                }
+                .panel-orange{
+                border-color: #c70039;
+                background-color: #c70039;
+                }
+                .panel-yellow{
+                border-color: #e85c00;
+                background-color: #e85c00;
+                }
+                .huge{
+                font-size:38px;
+                }
+
+            </style>
+
+
+            <script charset="UTF-8">
+
+                function numberWithCommas(x) {
+                return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+                /*
+                $( ".num" ).each(function() {
+
+                var val = parseInt( $( this ).text());
+                val = numberWithCommas(val);
+                $( this ).text(val);
+                });
+                */
+                var l = [];
+                var x = document.querySelectorAll('.pr');
+                for(var i = 0; x.length > i; i++){
+                var y = document.querySelectorAll('.pr')[i].innerText;
+                l.push(y);
+                }
+
+
+                function getRandomColor() {
+                var letters = '0123456789ABCDEF'.split('');
+                var color = '#';
+                for (var i = 0; 6>i; i++ ) {
+                color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+                }
+
+                //// 1
+                /*
+                var ctx = document.getElementById('myChart').getContext('2d');
+                var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'bar', // also try bar or other graph types
+
+                // The data for our dataset
+                data: {
+                labels:<t t-esc="users_names"/>,
+                // Information about the dataset
+                datasets: [{
+                label: "NO Order",
+                backgroundColor:
+                [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
+                borderColor: 'royalblue',
+                data:<t t-esc="orders_num"/>,
+                }]
+                },
+
+                // Configuration options
+                options: {
+                layout: {
+                padding: 10,
+                },
+                legend: {
+                position: 'bottom',
+                },
+                title: {
+                display: true,
+                text: 'Number of orders for every sales Person'
+                },
+                scales: {
+                yAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Orders number'
+                }
+                }],
+                xAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Sales Persons'
+                }
+                }]
+                }
+                }
+                });
+                */
+
+
+                //// 2
+                var ctx = document.getElementById('myChart2').getContext('2d');
+                var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'bar', // also try bar or other graph types
+
+                // The data for our dataset
+                data: {
+                labels:<t t-esc="users_names"/>,
+                // Information about the dataset
+                datasets: [{
+                //label: "Total Payment",
+                backgroundColor:
+                [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
+                borderColor: 'royalblue',
+                data:<t t-esc="amount"/>,
+                }]
+                },
+
+                // Configuration options
+                options: {
+                layout: {
+                padding: 10,
+                },
+                legend: {
+                position: 'bottom',
+                },
+                title: {
+                display: true,
+                text: 'Total Payments for every sales Person'
+                },
+                scales: {
+                yAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Total Payment'
+                }
+                }],
+                xAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Sales Persons'
+                }
+                }]
+                }
+                }
+                });
+
+
+                //// 3
+                var ctx = document.getElementById('myChart3').getContext('2d');
+                var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'bar', // also try bar or other graph types
+
+                // The data for our dataset
+                data: {
+                labels:<t t-esc="cat_names"/>,
+                // Information about the dataset
+                datasets: [{
+                label: "categories",
+                backgroundColor:
+                [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
+                borderColor: 'royalblue',
+                data:<t t-esc="cat_num"/>,
+                }]
+                },
+
+                // Configuration options
+                options: {
+                layout: {
+                padding: 10,
+                },
+                legend: {
+                position: 'bottom',
+                },
+                title: {
+                display: true,
+                text: 'Total Payments for every Product Category'
+                },
+                scales: {
+                yAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Total Payment'
+                }
+                }],
+                xAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Product Category'
+                }
+                }]
+                }
+                }
+                });
+
+
+                //// 4
+                var ctx = document.getElementById('myChart4').getContext('2d');
+                var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'bar', // also try bar or other graph types
+
+                // The data for our dataset
+                data: {
+                labels: l,
+                // Information about the dataset
+                datasets: [{
+                label:"products",
+                backgroundColor:
+                [getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor(),getRandomColor()],
+                borderColor: 'royalblue',
+                data:<t t-esc="prods_num"/>,
+                }]
+                },
+
+                // Configuration options
+                options: {
+                layout: {
+                padding: 10,
+                },
+                legend: {
+                position: 'bottom',
+                },
+                title: {
+                display: true,
+                text: 'Total Payments for every Product'
+                },
+                scales: {
+                yAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Total Payment'
+                }
+                }],
+                xAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Products'
+                }
+                }]
+                }
+                }
+                });
+
+
+                //// 5
+                var ctx = document.getElementById('myChart5').getContext('2d');
+                var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'line', // also try bar or other graph types
+
+                // The data for our dataset
+                data: {
+                labels:<t t-esc="hours"/>,
+                // Information about the dataset
+                datasets: [{
+                label:"orders per hour",
+                borderColor: "#c45850",
+                data:<t t-esc="num_hours"/>,
+                }]
+                },
+
+                // Configuration options
+                options: {
+                layout: {
+                padding: 10,
+                },
+                legend: {
+                position: 'bottom',
+                },
+                title: {
+                display: true,
+                text: 'Total Orders for every hour'
+                },
+                scales: {
+                yAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Number Of Orders'
+                }
+                }],
+                xAxes: [{
+                scaleLabel: {
+                display: true,
+                labelString: 'Hour'
+                }
+                }]
+                }
+                }
+                });
+
+
+                var a = "<t t-esc="act"/>" ;
+                var c = "."+a;
+                $(c).css("background-color", "#337ab7");
+
+
+            </script>
+        </template>
+
+    </data>
+</odoo>

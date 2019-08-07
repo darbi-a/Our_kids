@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_product_season_form" model="ir.ui.view">
+        <field name="name">product.season.form</field>
+        <field name="model">product.season</field>
+        <field name="arch" type="xml">
+            <form string="MODEL" create="true" duplicate="true" edit="true" delete="true">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="view_product_season_tree" model="ir.ui.view">
+        <field name="name">product.season.tree</field>
+        <field name="model">product.season</field>
+        <field name="arch" type="xml">
+            <tree create="true" duplicate="true" edit="true" delete="true">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="view_product_season_action" model="ir.actions.act_window">
+        <field name="name">Product Season</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.season</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    
+    <menuitem id="menuitem_product_season" name="Product Season" parent="stock.menu_stock_inventory_control" action="view_product_season_action" sequence="10"/>
+    
+</odoo>

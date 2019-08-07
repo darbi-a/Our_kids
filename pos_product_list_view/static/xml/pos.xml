@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="ProductListWidget">
+        <t t-jquery="div.product-list-container" t-operation="extend">
+            <div class='product-list-container'>
+            <div class="product-list-scroller touch-scrollable">
+                <table class="product-list">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Code</th>
+                        <th>Season</th>
+                        <th>Name</th>
+                        <th>UoM</th>
+                        <th>Sale Price</th>
+                        <th class="text-center">Available Qty</th>
+                        <th class="text-center">View Stock Qty</th>
+                    </tr>
+                </thead>
+                    <tbody class='product-list-contents'>
+                </tbody>
+                </table>
+            </div>
+                <span class="placeholder-ScrollbarWidget"/>
+        </div>
+        </t>
+    </t>
+    <t t-extend="Product">
+        <t t-jquery="article" t-operation="replace">
+            <tr class='product-list' t-att-data-product-id="product.id">
+                <td>
+                    <img t-att-src='image_url' height='45px'/>
+                </td>
+                <td>
+                    <t t-esc="product.default_code"/>
+                </td>
+                <td>
+                    <t t-esc="product.season_id &amp;&amp; product.season_id[1] || ''"/>
+                </td>
+                <td>
+                    <t t-esc="product.display_name"/>
+                </td>
+                <td>
+                    <span t-if="!product.to_weight">
+                       <t t-esc="widget.pos.units_by_id[product.uom_id[0]].name"/>
+                    </span>
+                </td>
+                <td class="text-right">
+                    <span class="price-tag text-right">
+<!--                        <t t-esc="widget.format_currency(product.list_price,'Product Price')"/>-->
+                        <t t-if="!product.to_weight">
+                            <span>
+                                <t t-esc="widget.format_currency(product.get_price(pricelist, 1),'Product Price')"/>
+                            </span>
+                        </t>
+                        <t t-if="product.to_weight">
+                            <span>
+                                <t t-esc="widget.format_currency(product.get_price(pricelist, 1),'Product Price')+'/'+widget.pos.units_by_id[product.uom_id[0]].name"/>
+                            </span>
+                        </t>
+                    </span>
+                </td>
+                <td class="text-center qty_tag">
+                    <t t-esc="product.qty_available"/>
+                </td>
+                <td class="text-center">
+                    <button class="product-stock" t-att-id="product.id">View Stock Qty</button>
+                </td>
+            </tr>
+        </t>
+    </t>
+
+    <t t-name="StockProductsQuantWidget">
+       <div class="modal-dialog">
+            <div class="popup popup-confirm" style="height: 450px; width:700px">
+                <p class="title" style="background-color: #7f82ac; color: #fff;height: 10px;">Quantities For Product <t t-esc="widget.options.product_name"/></p>
+
+                <div class="body" style="height: 300px;">
+
+                    <table style='width:100%'>
+                        <thead>
+                            <tr style="border:1px solid black; line-height:30px;">
+                                <th style='width:25%; padding-left: 10px; text-align:left'>Location</th>
+                                <th style='width:25%; padding-left: 10px; text-align:left'>Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border:1px solid black; line-height:30px; font-size:15px;" t-foreach="widget.options.data || []" t-as="line1">
+                                <td style='width:25%; padding-left: 10px; text-align:left'><t t-esc='line1.location' /></td>
+                                <td style='width:25%; padding-left: 10px; text-align:left'><t t-esc='line1.quantity' /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <div class="footer" style="background-color: #7f82ac; color: #fff;">
+
+                    <div class="button cancel" style="background-color: #E0E0E0; color: black;">
+                        Cancel
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>
