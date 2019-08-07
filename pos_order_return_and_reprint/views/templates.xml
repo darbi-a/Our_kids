@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="assets_backend_index" name="index pos ui" inherit_id="point_of_sale.index">
+            <xpath expr="//head" position="inside">
+                <script type="text/javascript" src="/pos_order_return_and_reprint/static/src/libs/js/jquery-barcode-last.min.js"/>
+            </xpath>
+        </template>
+
+        <!-- Add custom js for pos_order_return_and_reprint -->
+        <template id="assets_for_pos_order_return_and_reprint" inherit_id="point_of_sale.assets">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/pos_order_return_and_reprint/static/src/libs/js/jquery-barcode-last.min.js"/>
+
+                <link rel="stylesheet" href="/pos_order_return_and_reprint/static/src/css/custom.css"/>
+                <script type="text/javascript" src="/pos_order_return_and_reprint/static/src/js/pos_reprint.js"/>
+                <script type="text/javascript" src="/pos_order_return_and_reprint/static/src/js/pos_return.js"/>
+                
+            </xpath>
+        </template>
+
+    </data>
+</odoo>
