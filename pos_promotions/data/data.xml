@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="seq_pos_promotion" model="ir.sequence">
+            <field name="name">Pos Promotion Sequence/</field>
+            <field name="code">pos.promotion</field>
+            <field name="prefix">PROMO/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

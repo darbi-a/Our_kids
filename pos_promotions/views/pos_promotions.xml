@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_pos_promotion_form" model="ir.ui.view">
+            <field name="name">pos.promotion.form</field>
+            <field name="model">pos.promotion</field>
+            <field name="arch" type="xml">
+                <form string="MODEL" create="true" duplicate="true" edit="true" delete="true">
+                    <sheet>
+                        <div class="oe_button_box" name="oe_button_box">
+
+                            <button class="oe_stat_button"
+                                    name="action_show_orders" type="object" icon="fa-money">
+                                <field string="Orders" name="order_count" widget="statinfo"/>
+                            </button>
+                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                                <field name="active" widget="boolean_button"/>
+                            </button>
+
+                        </div>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="code" readonly="True"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="name" required="1"/>
+                                <field name="ordered_product_id" required="1"/>
+                                <field name="ordered_quantity" required="1"/>
+                                <field name="gift_product_id" required="1"/>
+                                <field name="gift_quantity" required="1"/>
+<!--                                <field name="automatically_applied" required="1"/>-->
+                            </group>
+                            <group>
+                                <field name="date_from" required="1"/>
+                                <field name="date_to" required="1"/>
+<!--                                <field name="applied_on_customers" required="1" />-->
+<!--                                <field name="partner_ids" widget="many2many_tags" attrs="{'invisible':[('applied_on_customers','=','all')],'required':[('applied_on_customers','=','specific')]}"/>-->
+<!--                                <field name="applied_on_pos" required="1"/>-->
+<!--                                <field name="pos_ids" widget="many2many_tags" attrs="{'invisible':[('applied_on_pos','=','all')],'required':[('applied_on_pos','=','specific')]}"/>-->
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="view_pos_promotion_tree" model="ir.ui.view">
+            <field name="name">pos.promotion.tree</field>
+            <field name="model">pos.promotion</field>
+            <field name="arch" type="xml">
+                <tree create="true" duplicate="true" edit="true" delete="true">
+                    <field name="code"/>
+                    <field name="ordered_quantity"/>
+                    <field name="ordered_product_id"/>
+                    <field name="gift_quantity"/>
+                    <field name="gift_product_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_pos_promotion_action" model="ir.actions.act_window">
+            <field name="name">Pos Promotions</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pos.promotion</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menuitem_pos_promotions" name="Promotions" parent="point_of_sale.menu_point_config_product" action="view_pos_promotion_action" sequence="10"/>
+
+    </data>
+</odoo>
