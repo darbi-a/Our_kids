@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="pos_speed_up.template" inherit_id="point_of_sale.template">
+    <t t-extend="Chrome">
+        <t t-jquery=".pos .loader .loader-feedback" t-operation="prepend">
+            <h1 class='my-message'>Performing first time setup...</h1>
+        </t>
+        <t t-jquery=".pos .loader .loader-feedback" t-operation="append">
+            <h2 class='my-percent'>20%</h2>
+        </t>
+    </t>
+
+    <t t-name="ChangeDetectorWidget">
+        <div class="oe_status js_synch">
+            <span class='jane_msg oe_hidden'>0</span>
+            <div class="jane_connected oe_icon oe_green">
+                <i class='fa fa-fw fa-refresh'></i>
+            </div>
+            <div class="jane_connecting oe_icon oe_hidden">
+                <i class='fa fa-fw fa-refresh fa-spin'></i>
+            </div>
+            <div class="jane_disconnected oe_icon oe_red oe_hidden">
+                <i class='fa fa-fw fa-refresh'></i>
+            </div>
+            <div class="jane_error oe_icon oe_red oe_hidden">
+                <i class='fa fa-fw fa-warning'></i>
+            </div>
+        </div>
+    </t>
+</templates>

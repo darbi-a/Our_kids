@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="pos_speed_up_assets" inherit_id="point_of_sale.assets" name="point_of_sale assets">
+            <xpath expr="." position="inside">
+                <script type="text/javascript" src="/pos_speed_up/static/src/js/indexed_db.js"></script>
+                <script type="text/javascript" src="/pos_speed_up/static/src/js/loading.js"></script>
+                <script type="text/javascript" src="/pos_speed_up/static/src/js/pos_model.js"/>
+                <script type="text/javascript" src="/pos_speed_up/static/src/js/optimize_load_products.js"></script>
+                <script type="text/javascript" src="/pos_speed_up/static/src/js/optimize_load_customers.js"></script>
+                <script type="text/javascript" src="/pos_speed_up/static/src/js/change_detector.js"></script>
+            </xpath>
+        </template>
+    </data>
+</odoo>
