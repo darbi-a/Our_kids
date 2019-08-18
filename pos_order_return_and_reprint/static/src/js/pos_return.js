@@ -69,6 +69,9 @@ var field_utils = require('web.field_utils');
 		                        args: [order],
 
 		                        }).then(function(output) {
+                                    var order_date = new Date(output.date_order);
+                                    var order_date_local = moment(order_date).add(2, 'hours');
+                                    output.date_order = moment(order_date_local).format('YYYY-MM-DD HH:mm:ss');
 		                            self.db.all_orders_list.unshift(output);
 		                            self.db.get_orders_by_id[output.id] = output;
 		                    });
@@ -204,7 +207,7 @@ var field_utils = require('web.field_utils');
     });
 
 // Load Models here...
-var dateOffset = 13 ;
+var dateOffset = 30 ;
 var myDate = new Date();
 myDate.setDate(myDate.getDate() - dateOffset);
 myDate.setHours(0);
@@ -224,6 +227,8 @@ myDate.setSeconds(0);
             orders.forEach(function(order) {
             var order_date = new Date(order.date_order);
             if(order.amount_total > 0.0 && order_date > myDate){
+                    var order_date_local = moment(order_date).add(2, 'hours');
+                    order.date_order = moment(order_date_local).format('YYYY-MM-DD HH:mm:ss');
                     self.db.get_orders_by_id[order.id] = order;
                     self.orders.push(order);
                     self.db.all_orders_list.push(order);
@@ -851,6 +856,7 @@ myDate.setSeconds(0);
 //		            tax = output[5];
 		            var sub_total_before_discount = output[4];
 		            var global_discount_percent = output[5];
+		            var date_order = output[6];
 		            self.gui.show_screen('ReceiptScreenWidgetNew');
 		            $('.pos-receipt-container').html(QWeb.render('PosTicket1',{
 		                widget:self,
@@ -864,6 +870,7 @@ myDate.setSeconds(0);
 		                global_discount_percent: global_discount_percent,
 		                sub_total_before_discount: sub_total_before_discount,
 		                tax: tax,
+		                date_order: date_order,
 		            }));
 				});
             });
