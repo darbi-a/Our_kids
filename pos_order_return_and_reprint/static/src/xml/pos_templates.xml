@@ -450,32 +450,32 @@
          <div class="pos-sale-ticket">
                 <div>
                     <div style="width: 55%; float: left; padding: 20px 0px;">
-                        <t t-if="widget.pos.company.phone">
-                            Phone: <t t-esc="widget.pos.company.phone || ''"/><br />
-                        </t>
+<!--                        <t t-if="widget.pos.company.phone">-->
+<!--                            Phone: <t t-esc="widget.pos.company.phone || ''"/><br />-->
+<!--                        </t>-->
                         Cashier: <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br />
                         <t t-esc="order.pos_reference"/>
-                        <t t-esc="moment().format('L LT')"/>
+                        <t t-esc="moment(date_order).format('L LT')"/>
                     </div>
-                    <div style="width: 45%;float: left; ">
-                        <t t-if='widget.pos.config.image'>
-                            <!--<t t-set="a2" t-value="'/web/image?model=pos.config&amp;field=image&amp;id=' + widget.pos.config.id"/>-->
-                            <img t-att-src="a2" style="width:100%"/>
-                        </t>
-                        <t t-if='!widget.pos.config.image'>
-                            <img src='/web/binary/company_logo' style="width:100%"/>
-                        </t>
-                    </div>
+<!--                    <div style="width: 45%;float: left; ">-->
+<!--                        <t t-if='widget.pos.config.image'>-->
+<!--                            &lt;!&ndash;<t t-set="a2" t-value="'/web/image?model=pos.config&amp;field=image&amp;id=' + widget.pos.config.id"/>&ndash;&gt;-->
+<!--                            <img t-att-src="a2" style="width:100%"/>-->
+<!--                        </t>-->
+<!--                        <t t-if='!widget.pos.config.image'>-->
+<!--                            <img src='/web/binary/company_logo' style="width:100%"/>-->
+<!--                        </t>-->
+<!--                    </div>-->
                 </div>
-                <t t-if="widget.pos.config.name">
-                    <div style="width:100%;text-align:right;"><t t-esc="widget.pos.config.name"/></div>
-                </t>
-                <t t-if="widget.pos.company.name">
-                    <div style="width:100%;text-align:right;"><t t-esc="widget.pos.company.name"/></div>
-                </t>
-                <t t-if="widget.pos.company.email">
-                    <div style="width:100%;text-align:right;"><t t-esc="widget.pos.company.email"/></div>
-                </t>
+<!--                <t t-if="widget.pos.config.name">-->
+<!--                    <div style="width:100%;text-align:right;"><t t-esc="widget.pos.config.name"/></div>-->
+<!--                </t>-->
+<!--                <t t-if="widget.pos.company.name">-->
+<!--                    <div style="width:100%;text-align:right;"><t t-esc="widget.pos.company.name"/></div>-->
+<!--                </t>-->
+<!--                <t t-if="widget.pos.company.email">-->
+<!--                    <div style="width:100%;text-align:right;"><t t-esc="widget.pos.company.email"/></div>-->
+<!--                </t>-->
                 <br />
                 <t t-if="widget.pos.config.receipt_header">
                     <div style='text-align:center'>
@@ -618,6 +618,14 @@
                     </div>
                     <br/>
                 </t>
+
+                 <table >
+                     <tr>
+
+                         <img id="barcode" style="width:220px;height:70px;display:block;margin:auto;margin-top:20px;"/>
+                     </tr>
+                 </table>
+
             </div>
 
          <!--<div class="pos-sale-ticket">-->
@@ -702,12 +710,7 @@
          <!--<t t-esc="widget.format_currency(change)"/>-->
          <!--</td></tr>-->
          <!--</table>-->
-         <!--&lt;!&ndash;<table >&ndash;&gt;-->
-         <!--&lt;!&ndash;<tr>&ndash;&gt;-->
 
-         <!--&lt;!&ndash;<img id="barcode" style="width:220px;height:70px;display:block;margin:auto;margin-top:20px;"/>&ndash;&gt;-->
-         <!--&lt;!&ndash;</tr>&ndash;&gt;-->
-         <!--&lt;!&ndash;</table>&ndash;&gt;-->
 
          <!--</div>-->
     </t>
