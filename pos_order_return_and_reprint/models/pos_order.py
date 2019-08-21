@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """ init object """
+import pytz
 from odoo import fields, models, api, _ ,tools, SUPERUSER_ID
 from odoo.exceptions import ValidationError,UserError
 from datetime import datetime , date ,timedelta
@@ -33,6 +34,12 @@ class pos_order(models.Model):
 
         return order_fields
 
+    def convert_date_to_local(self,date, tz):
+        local = pytz.timezone(tz)
+        date = date.replace(tzinfo=pytz.utc)
+        date = date.astimezone(local)
+        date.strftime('%Y-%m-%d: %H:%M:%S')
+        return date.replace(tzinfo=None)
 
     def return_new_order(self):
         lines = []
@@ -136,8 +143,8 @@ class pos_order(models.Model):
         if global_discount and total_without_discount:
             global_discount_percent = 100*global_discount/total_without_discount
 
-
-        return [output, discount, paymentlines, change, sub_total_before_discount,global_discount_percent]
+        date_order = self.convert_date_to_local(self.date_order,self.env.user.tz)
+        return [output, discount, paymentlines, change, sub_total_before_discount,global_discount_percent,date_order]
 
 
 class PosOrderLine(models.Model):

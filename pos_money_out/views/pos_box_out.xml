@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_cash_box_out_form_inherit" model="ir.ui.view">
+        <field name="name">cash.box.out.form.inherit</field>
+        <field name="model">cash.box.out</field>
+        <field name="inherit_id" ref="account.cash_box_out_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='name']" position="after">
+                 <field name="type_id" class="oe_inline" required="True" options="{'no_quick_create': True,'no_open': True, 'no_create_edit' : True}"/>
+            </xpath>
+
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            
+        </field>
+    </record>
+    
+</odoo>
