@@ -627,7 +627,6 @@
                     <br/>
                 </t>
 
-<<<<<<< HEAD
                 <script>
                     var barcode = <t t-esc="order.barcode" />;
                     JsBarcode("#barcode", barcode, {
@@ -636,14 +635,7 @@
                         fontSize: 25
                     })
                 </script>
-=======
-                 <table >
-                     <tr>
 
-                         <img id="barcode" style="width:220px;height:70px;display:block;margin:auto;margin-top:20px;"/>
-                     </tr>
-                 </table>
->>>>>>> 300e54fa2c34641e73a38c3035b84376878b94ef
 
             </div>
 
