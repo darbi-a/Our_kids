@@ -84,17 +84,28 @@ class ImportProductVariant(models.TransientModel):
                     if col_idx in fields_dict:
                         field_name = fields_dict[col_idx]
                         values[field_name] = cell_obj.value
+                        print("cell_obj.value == >> ", fields_dict[col_idx])
                         if col_idx == product_idx :
                             product_name = values[field_name]
                         elif fields_dict[col_idx] == 'barcode':
                             values[field_name] = str(int(cell_obj.value))
                         elif fields_dict[col_idx] == 'default_code':
-                            values[field_name] = str(cell_obj.value)
+                            values[field_name] = str(int(cell_obj.value))
                         elif fields_dict[col_idx] == 'season_id':
                             season_id=self.env['product.season'].search([('name','=',cell_obj.value)])
                             if not season_id:
                                 season_id = self.env['product.season'].create({'name':cell_obj.value})
                             values[field_name] = season_id.id
+
+                        elif fields_dict[col_idx] == 'categ_id':
+                            print("*************")
+                            print("categ_id == ",cell_obj.value)
+                            category=self.env['product.category'].search([('name','=',cell_obj.value)])
+                            print('category == ',category)
+                            if not category:
+                                raise UserError(_('Product category %s not exist!' %cell_obj.value))
+                            else:    # season_id = self.env['product.season'].create({'name':cell_obj.value})
+                                values[field_name] = category.id
                         elif fields_dict[col_idx] == 'tag_ids':
                             tags = cell_obj.value.split(',')
                             tag_ids = []
