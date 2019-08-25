@@ -13,7 +13,7 @@ class PurchaseOrderLine(models.Model):
     def compute_percentage(self):
         for rec in self:
             if rec.sale_price:
-                rec.percentage = 100.0 * ( rec.price_unit / rec.sale_price )
+                rec.percentage = 100.0 * ( rec.sale_price / rec.price_unit)
 
 
 

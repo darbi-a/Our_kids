@@ -636,7 +636,6 @@
                     })
                 </script>
 
-
             </div>
 
          <!--<div class="pos-sale-ticket">-->
@@ -858,16 +857,16 @@
                     <tr t-foreach="orderlines" t-as="orderline">
                         <td>
                             <t t-esc="orderline.get_product().display_name"/>
-                             <t t-if="orderline.get_discount() > 0">
-                                <div class="pos-disc-font">
-                                    With a <t t-esc="orderline.get_discount()"/>% discount
-                                </div>
-                            </t>
-                            <t t-if="orderline.get_display_price() * order.get_total_with_tax() &lt; 0">
-<!--                                <t t-set="discount" t-value="Math.abs(orderline.get_display_price())"/>-->
-                                <t t-set="sub_total" t-value="Math.abs(order.get_total_without_tax())"/>
-                                (<t t-esc="Math.round(1000*discount/(sub_total + discount))/10" /> %)
-                            </t>
+<!--                             <t t-if="orderline.get_discount() > 0">-->
+<!--                                <div class="pos-disc-font">-->
+<!--                                    With a <t t-esc="orderline.get_discount()"/>% discount-->
+<!--                                </div>-->
+<!--                            </t>-->
+<!--                            <t t-if="orderline.get_display_price() * order.get_total_with_tax() &lt; 0">-->
+<!--&lt;!&ndash;                                <t t-set="discount" t-value="Math.abs(orderline.get_display_price())"/>&ndash;&gt;-->
+<!--                                <t t-set="sub_total" t-value="Math.abs(order.get_total_without_tax())"/>-->
+<!--                                (<t t-esc="Math.round(1000*discount/(sub_total + discount))/10" /> %)-->
+<!--                            </t>-->
                         </td>
                         <td style='text-align:center'>
                             <t t-esc="orderline.get_quantity_str_with_unit()"/>
