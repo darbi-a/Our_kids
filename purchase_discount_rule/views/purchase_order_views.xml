@@ -1,0 +1,62 @@
+<odoo>
+    <record  id="purchase_order_line_form2" model="ir.ui.view">
+        <field name="name">purchase.order.line.form2</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_form2"/>
+        <field name="arch" type="xml">
+            <field name="price_unit" position="after">
+                <field name="discount"/>
+                <field name="fixed_discount"/>
+                <field name="discount_qty"/>
+                <field name="discounted_unit_price" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="purchase_order_line_tree" model="ir.ui.view">
+        <field name="name">purchase.order.line.tree</field>
+        <field name="model">purchase.order.line</field>
+        <field name="inherit_id" ref="purchase.purchase_order_line_tree"/>
+        <field name="arch" type="xml">
+            <field name="price_unit" position="after">
+                <field name="discount"/>
+                <field name="fixed_discount"/>
+                <field name="discount_qty"/>
+                <field name="discounted_unit_price" invisible="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="purchase_order_form" model="ir.ui.view">
+        <field name="name">purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <button name="button_confirm" position="after">
+                <button name="action_apply_discount_rules" type="object"
+                        string="Apply Discount Rules"
+                        attrs="{'invisible': ['|', ('is_shipped', '=', True), ('state','!=', 'purchase')]}"
+                        class="oe_highlight"/>
+            </button>
+            <field name="order_line" position="before">
+                <group>
+                      <button name="%(purchase_global_discount_wizard_action)d" class="oe_highlight"
+                            string="Set Global Discount"
+                            type="action" attrs="{'invisible':[('state','not in',['draft','sent'])]}"/>
+                </group>
+            </field>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                <field name="discount"/>
+                <field name="fixed_discount"/>
+                <field name="discount_qty"/>
+                <field name="discounted_unit_price" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="after">
+                <field name="discount"/>
+                <field name="fixed_discount"/>
+                <field name="discount_qty"/>
+                <field name="discounted_unit_price" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
