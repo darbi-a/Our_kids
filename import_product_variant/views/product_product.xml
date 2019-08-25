@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_product_product_form_inherit" model="ir.ui.view">
+        <field name="name">product.product.form.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//field[@name='barcode']" position="after">
+                 <field name="vendor_num" />
+                 <field name="categ_num" />
+            </xpath>
+            
+        </field>
+    </record>
+
+    <record id="view_product_product_tree_inherit" model="ir.ui.view">
+        <field name="name">product.product.form.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='default_code']" position="after">
+                 <field name="vendor_num" />
+                 <field name="categ_num" />
+            </xpath>
+
+        </field>
+    </record>
+    <record id="view_product_product_filter_inherit" model="ir.ui.view">
+        <field name="name">product.product.form.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="stock.stock_product_search_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//filter[@name='inactive']" position="after">
+                <field name="categ_num" string="Category Number" filter_domain="[('categ_num', 'ilike', self)]"/>
+                <field name="categ_num" string="Vendor Number" filter_domain="[('vendor_num', 'ilike', self)]"/>
+
+<!--                 <field name="vendor_num" />-->
+<!--                 <field name="categ_num" />-->
+            </xpath>
+
+        </field>
+    </record>
+
+
+
+    
+</odoo>
