@@ -25,11 +25,11 @@ class PORule(models.Model):
         copy=True
     )
     date_from = fields.Date(
-        default=lambda self: fields.Datetime.now(),
+        default=lambda self: fields.Date.today(),
         required=True,
     )
     date_to = fields.Date(
-        default=lambda self: fields.Datetime.now(),
+        default=lambda self: fields.Date.today(),
         required=True,
     )
     state = fields.Selection(
