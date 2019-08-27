@@ -4,6 +4,7 @@ from odoo import api, fields, models
 
 class ProductIndex(models.Model):
     _name = 'product.index'
+    _description = 'Product Index'
 
     updated = fields.Char('Updated', default='')
     created = fields.Char('Created', default='')
