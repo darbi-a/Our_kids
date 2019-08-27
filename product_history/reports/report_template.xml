@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="layout_header">
+        <div class="header" style="border: 3px solid green;width:100%;">
+
+            <div class="row mt32 mb32" style="font-size:11px; line-height=80%">
+
+                <div class="col-xs-6">
+                    <img t-if="res_company.logo" t-att-src="'data:image/png;base64,%s' % to_text(res_company.logo)" style="max-height: 140px;"/>
+                </div>
+                <div class="col-xs-6" >
+
+                     <span t-field="res_company.name" style="color:blue"/><br/>
+                     <span t-field="res_company.street"/><br/>
+                     <span t-field="res_company.city"/><br/>
+                     <span t-field="res_company.country_id"/><span t-field="res_company.zip"/><br/>
+
+                     Phone: <span t-field="res_company.phone"/><br/>
+
+                     Email: <span t-field="res_company.email"/><br/>
+
+                    <span t-field="res_company.website"/><br/>
+                </div>
+            </div>
+            <!--<hr style="height:0px;border:none;color:#E0E0E0;background-color:#E0E0E0;margin-top:0px;margin-bottom:5px"/>-->
+        </div>
+
+            <div class="article">
+          <t t-raw="0" />
+        </div>
+             <div class="footer">
+            <div class="text-center" style="border-top: 1px solid black;">
+                <ul class="list-inline mb4">
+                    <li t-if="res_company.phone">Phone: <span t-field="res_company.phone"/></li>
+                    <li t-if="res_company.email">Email: <span t-field="res_company.email"/></li>
+                    <li t-if="res_company.website">Web: <span t-field="res_company.website"/></li>
+                    <li t-if="res_company.vat"><t t-esc="res_company.country_id.vat_label or 'TIN'"/>: <span t-field="res_company.vat"/></li>
+                </ul>
+
+                <div name="financial_infos">
+                    <span t-field="res_company.report_footer"/>
+                </div>
+
+                <div class="text-muted">
+                    Page: <span class="page"/> / <span class="topage"/>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <record model="report.paperformat" id="4A_paperformat__report">
+        <field name="name">paperformat.product.history.report</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_width">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">43</field>
+        <field name="margin_right">2</field>
+        <field name="margin_bottom">28</field>
+        <field name="margin_left">2</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">40</field>
+        <field name="dpi">90</field>
+    </record>
+
+
+
+    <report id="report_product_history_id"
+            model="product.template"
+            string="Print Product History"
+            report_type="qweb-pdf"
+            name="product_history.report_product_history_view"
+            paperformat="4A_paperformat__report"
+            menu="True"/>
+
+    <template id="report_product_history_view">
+        <t t-call="web.html_container">
+        <t t-call="product_history.layout_header">
+              <div class="page">
+                <br/><br/>
+                <center><h3><b>Product History</b></h3></center>
+
+             <table class="table table-condensed">
+                <thead style="background-color:#E0E0E0" >
+                    <tr>
+                        <th class="text-center" style="border: 1px solid black">#Num</th>
+                        <th class="text-center"  style="border: 1px solid black">Product Name</th>
+                        <th class="text-center"  style="border: 1px solid black">created By</th>
+                        <th class="text-center"  style="border: 1px solid black">created Date</th>
+                        <th class="text-center"  style="border: 1px solid black">Last Modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <!-- for looping -->
+                    <t t-foreach="docs" t-as="line">
+                        <tr>
+                            <td style="border: 1px solid black" num_format_str="@" easyfx="align: horizontal right,vert center;font:height 200;"><span t-esc="line['id']"/></td>
+                            <td style="border: 1px solid black" num_format_str="@" easyfx="align: horizontal right,vert center;font:height 200;"><span t-esc="line['name']"/></td>
+                            <td style="border: 1px solid black" num_format_str="@" easyfx="align: horizontal right,vert center;font:height 200;"><span t-esc="line['create_uid']"/></td>
+                            <td style="border: 1px solid black" num_format_str="@" easyfx="align: horizontal right,vert center;font:height 200;"><span t-esc="line['create_date']"/></td>
+                            <td style="border: 1px solid black" num_format_str="@" easyfx="align: horizontal right,vert center;font:height 200;"><span t-esc="line['last_update']"/></td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+              </div>
+        </t>
+    </t>
+
+
+    </template>
+</odoo>
