@@ -52,6 +52,20 @@
                    <field name="subtotal"/>
             </xpath>
 
+
+        </field>
+    </record>
+    <!-- Inherit Form View to Modify it -->
+    <record id="unit_cost_product_normal_form_view" model="ir.ui.view">
+        <field name="name">product.product.form</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='barcode']" position="after">
+                <field name="unit_cost"/>
+            </xpath>
+
         </field>
     </record>
 </odoo>
