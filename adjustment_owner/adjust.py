@@ -27,6 +27,6 @@ class picking(models.Model):
 
     @api.model
     def create(self, values):
-        if 'owner_id' not in values:
+        if 'owner_id' not in values and 'partner_id' in values:
             values['owner_id']=values['partner_id']
         return super(picking, self).create(values)
