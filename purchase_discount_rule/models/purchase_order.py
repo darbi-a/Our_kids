@@ -166,5 +166,6 @@ class PurchaseOrderLine(models.Model):
         if line.product_uom.id != line.product_id.uom_id.id:
             price_unit *= line.product_uom.factor / line.product_id.uom_id.factor
         if order.currency_id != order.company_id.currency_id:
-            price_unit = order.currency_id.compute(price_unit, order.company_id.currency_id, round=False)
+            price_unit = order.currency_id._convert(
+                price_unit, order.company_id.currency_id, self.company_id, self.date_order or fields.Date.today(), round=False)
         return price_unit
