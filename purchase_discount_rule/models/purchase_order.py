@@ -13,7 +13,7 @@ class PurchaseOrder(models.Model):
     """
     _inherit = 'purchase.order'
 
-    rule_ids = new_field_ids = fields.Many2many(
+    rule_ids = fields.Many2many(
         comodel_name="purchase.discount.rule.line",
         string="Applied Rules",
     )
