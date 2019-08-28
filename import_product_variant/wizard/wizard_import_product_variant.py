@@ -92,9 +92,9 @@ class ImportProductVariant(models.TransientModel):
                         if col_idx == product_idx :
                             product_name = values[field_name]
                         elif fields_dict[col_idx] == 'barcode':
-                            values[field_name] = str(int(cell_obj.value))
+                            values[field_name] = str(cell_obj.value)
                         elif fields_dict[col_idx] == 'default_code':
-                            values[field_name] = str(int(cell_obj.value))
+                            values[field_name] = str(cell_obj.value)
                         elif fields_dict[col_idx] == 'season_id':
                             season_id=self.env['product.season'].search([('name','=',cell_obj.value)])
                             if not season_id:
