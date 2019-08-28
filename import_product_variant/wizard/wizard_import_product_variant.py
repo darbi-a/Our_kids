@@ -43,6 +43,10 @@ class ImportProductVariant(models.TransientModel):
         attribute_obj = self.env['product.attribute']
         tag_obj = self.env['product.tag']
         x=0
+        last_id = self.env['product.product'].search([], order='id desc', limit=1).id
+        new_id = last_id + 1
+        create=0
+        ndx=new_id
         attribute_value_obj = self.env['product.attribute.value']
         i = 0
         product_idx = None
@@ -108,6 +112,7 @@ class ImportProductVariant(models.TransientModel):
                                 values[field_name] = category.id
                         elif fields_dict[col_idx] == 'tag_ids':
                             tags = cell_obj.value.split(',')
+                            print('tags == >> ',tags)
                             tag_ids = []
                             for t in tags:
                                 tag_opj = tag_obj.search([('name', '=', t)], limit=1)
@@ -116,13 +121,21 @@ class ImportProductVariant(models.TransientModel):
                                 else:
                                     tag_opj = self.env['product.tag'].create({'name': t})
                                     tag_ids.append(tag_opj.id)
+                                print("tag_ids == >",tag_ids)
 
                             product = self.env['product.product'].search([('name', '=',product_name)]).ids
+                            print('product === >> ',product)
                             if x >= len(product):
                                 x=0
                             if product:
+                                print('product exist**  ')
                                 tag_att[product[x]] = tag_ids
+                                print('tag_att == >> ',tag_att)
+                                print('field_name == >> ',field_name)
                                 x +=1
+                            else:
+                                tag_att[new_id] = tag_ids
+                                new_id +=1
 
                             values[field_name]=tag_ids
                     elif col_idx in attributes_dict:
@@ -148,9 +161,11 @@ class ImportProductVariant(models.TransientModel):
                     attribute_values = list(set(attribute_values.copy()))
 
                     import_data[product_name][tuple(attribute_values)] = values.copy()
+                product2 = self.env['product.product'].search([('name', '=', product_name)]).ids
         x = 0
 
         for prod_name in import_data:
+            print('prod_name1 == >',prod_name)
             product_templ = self.env['product.template'].search([('name','=',prod_name)])
             if not product_templ:
                 vals = {}
@@ -193,10 +208,21 @@ class ImportProductVariant(models.TransientModel):
                                 break
 
                 product_templ.create_variant_ids()
+            product = self.env['product.product'].search([('name', '=', prod_name)]).ids
+            print('product88 === >> ', product)
+
+
 
             for prod in product_templ.product_variant_ids:
+                print('prod == ',prod)
+                print('tag_att == ',tag_att)
                 if tag_att:
-                    prod.write({'tag_ids' :[(6, 0,tag_att[prod.id])] })
+                    if new_id == ndx and create== 0:
+                        prod.write({'tag_ids' :[(6, 0,tag_att[prod.id])] })
+                    else:
+                        prod.write({'tag_ids': [(6, 0, tag_att[ndx])]})
+                        create=1
+                        ndx= ndx +1
                 prod_att_values = set(prod.attribute_value_ids.ids or [])
                 for att_value_ids in import_data[prod_name].keys():
                     if set(prod_att_values) == set(att_value_ids):
