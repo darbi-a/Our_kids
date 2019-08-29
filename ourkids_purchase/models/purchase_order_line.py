@@ -9,11 +9,14 @@ class PurchaseOrderLine(models.Model):
     sale_price = fields.Float(related='product_id.lst_price' )
     percentage = fields.Float(string="Column 1",compute='compute_percentage')
 
-    @api.depends('sale_price','price_unit')
+    @api.depends('sale_price','price_unit','product_id','product_id.standard_price')
     def compute_percentage(self):
         for rec in self:
-            if rec.sale_price:
-                rec.percentage = 100.0 * ( rec.sale_price / rec.price_unit)
+            if rec.price_unit:
+                rec.percentage = 100.0 * ( rec.sale_price / rec.price_unit) - 100.0
+
+            # elif rec.product_id.standard_price:
+            #     rec.percentage = 100.0 * (rec.sale_price / rec.product_id.standard_price)
 
 
 
