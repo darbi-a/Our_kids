@@ -43,7 +43,7 @@
 
            </xpath>
 
-            <xpath expr="//div[hasclass('col-4')" position="replace">
+            <xpath expr="//div[@class='col-4']" position="replace">
                     <div class="col-12">
                         <table class="table table-sm">
                             <tr class="border-black">
