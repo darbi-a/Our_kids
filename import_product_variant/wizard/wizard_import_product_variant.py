@@ -88,13 +88,12 @@ class ImportProductVariant(models.TransientModel):
                     if col_idx in fields_dict:
                         field_name = fields_dict[col_idx]
                         values[field_name] = cell_obj.value
-                        print("cell_obj.value == >> ", fields_dict[col_idx])
                         if col_idx == product_idx :
                             product_name = values[field_name]
                         elif fields_dict[col_idx] == 'barcode':
-                            values[field_name] = str(int(cell_obj.value))
+                            values[field_name] = str(cell_obj.value)
                         elif fields_dict[col_idx] == 'default_code':
-                            values[field_name] = str(int(cell_obj.value))
+                            values[field_name] = str(cell_obj.value)
                         elif fields_dict[col_idx] == 'season_id':
                             season_id=self.env['product.season'].search([('name','=',cell_obj.value)])
                             if not season_id:
@@ -102,17 +101,13 @@ class ImportProductVariant(models.TransientModel):
                             values[field_name] = season_id.id
 
                         elif fields_dict[col_idx] == 'categ_id':
-                            print("*************")
-                            print("categ_id == ",cell_obj.value)
                             category=self.env['product.category'].search([('name','=',cell_obj.value)])
-                            print('category == ',category)
                             if not category:
                                 raise UserError(_('Product category %s not exist!' %cell_obj.value))
                             else:    # season_id = self.env['product.season'].create({'name':cell_obj.value})
                                 values[field_name] = category.id
                         elif fields_dict[col_idx] == 'tag_ids':
                             tags = cell_obj.value.split(',')
-                            print('tags == >> ',tags)
                             tag_ids = []
                             for t in tags:
                                 tag_opj = tag_obj.search([('name', '=', t)], limit=1)
@@ -121,17 +116,12 @@ class ImportProductVariant(models.TransientModel):
                                 else:
                                     tag_opj = self.env['product.tag'].create({'name': t})
                                     tag_ids.append(tag_opj.id)
-                                print("tag_ids == >",tag_ids)
 
                             product = self.env['product.product'].search([('name', '=',product_name)]).ids
-                            print('product === >> ',product)
                             if x >= len(product):
                                 x=0
                             if product:
-                                print('product exist**  ')
                                 tag_att[product[x]] = tag_ids
-                                print('tag_att == >> ',tag_att)
-                                print('field_name == >> ',field_name)
                                 x +=1
                             else:
                                 tag_att[new_id] = tag_ids
@@ -165,7 +155,6 @@ class ImportProductVariant(models.TransientModel):
         x = 0
 
         for prod_name in import_data:
-            print('prod_name1 == >',prod_name)
             product_templ = self.env['product.template'].search([('name','=',prod_name)])
             if not product_templ:
                 vals = {}
@@ -209,13 +198,10 @@ class ImportProductVariant(models.TransientModel):
 
                 product_templ.create_variant_ids()
             product = self.env['product.product'].search([('name', '=', prod_name)]).ids
-            print('product88 === >> ', product)
 
 
 
             for prod in product_templ.product_variant_ids:
-                print('prod == ',prod)
-                print('tag_att == ',tag_att)
                 if tag_att:
                     if new_id == ndx and create== 0:
                         prod.write({'tag_ids' :[(6, 0,tag_att[prod.id])] })
