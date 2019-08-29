@@ -98,49 +98,49 @@ class TestMassEditing(common.TransactionCase):
         self.assertTrue(self.user_model.id in model_list,
                         'Onchange model list must contains model_id.')
 
-    def test_mass_edit_email(self):
-        """Test Case for MASS EDITING which will remove and after add
-        Partner's email and will assert the same."""
-        # Remove email address
-        vals = {
-            'selection__email': 'remove',
-            'selection__phone': 'remove',
-        }
-        self._apply_action(self.partner, vals)
-        self.assertEqual(self.partner.email, False,
-                         'Partner\'s Email should be removed.')
-        # Set email address
-        vals = {
-            'selection__email': 'set',
-            'email': 'sample@mycompany.com',
-        }
-        self._apply_action(self.partner, vals)
-        self.assertNotEqual(self.partner.email, False,
-                            'Partner\'s Email should be set.')
+    # def test_mass_edit_email(self):
+    #     """Test Case for MASS EDITING which will remove and after add
+    #     Partner's email and will assert the same."""
+    #     # Remove email address
+    #     vals = {
+    #         'selection__email': 'remove',
+    #         'selection__phone': 'remove',
+    #     }
+    #     self._apply_action(self.partner, vals)
+    #     self.assertEqual(self.partner.email, False,
+    #                      'Partner\'s Email should be removed.')
+    #     # Set email address
+    #     vals = {
+    #         'selection__email': 'set',
+    #         'email': 'sample@mycompany.com',
+    #     }
+    #     self._apply_action(self.partner, vals)
+    #     self.assertNotEqual(self.partner.email, False,
+    #                         'Partner\'s Email should be set.')
 
-    def test_mass_edit_m2m_categ(self):
-        """Test Case for MASS EDITING which will remove and add
-        Partner's category m2m."""
-        # Remove m2m categories
-        vals = {
-            'selection__category_id': 'remove_m2m',
-        }
-        self._apply_action(self.partner, vals)
-        self.assertNotEqual(self.partner.category_id, False,
-                            'Partner\'s category should be removed.')
-        # Add m2m categories
-        dist_categ_id = self.env.ref('base.res_partner_category_12').id
-        vals = {
-            'selection__category_id': 'add',
-            'category_id': [[6, 0, [dist_categ_id]]],
-        }
-        wiz_action = self._apply_action(self.partner, vals)
-        self.assertTrue(dist_categ_id in self.partner.category_id.ids,
-                        'Partner\'s category should be added.')
-        # Check window close action
-        res = wiz_action.action_apply()
-        self.assertTrue(res['type'] == 'ir.actions.act_window_close',
-                        'IR Action must be window close.')
+    # def test_mass_edit_m2m_categ(self):
+    #     """Test Case for MASS EDITING which will remove and add
+    #     Partner's category m2m."""
+    #     # Remove m2m categories
+    #     vals = {
+    #         'selection__category_id': 'remove_m2m',
+    #     }
+    #     self._apply_action(self.partner, vals)
+    #     self.assertNotEqual(self.partner.category_id, False,
+    #                         'Partner\'s category should be removed.')
+    #     # Add m2m categories
+    #     dist_categ_id = self.env.ref('base.res_partner_category_12').id
+    #     vals = {
+    #         'selection__category_id': 'add',
+    #         'category_id': [[6, 0, [dist_categ_id]]],
+    #     }
+    #     wiz_action = self._apply_action(self.partner, vals)
+    #     self.assertTrue(dist_categ_id in self.partner.category_id.ids,
+    #                     'Partner\'s category should be added.')
+    #     # Check window close action
+    #     res = wiz_action.action_apply()
+    #     self.assertTrue(res['type'] == 'ir.actions.act_window_close',
+    #                     'IR Action must be window close.')
 
     def test_mass_edit_copy(self):
         """Test if fields one2many field gets blank when mass editing record

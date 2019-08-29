@@ -7,6 +7,7 @@ from odoo.exceptions import UserError
 
 class PurchaseDiscountTargetReport(models.AbstractModel):
     _name = 'report.purchase_discount_rule.report_vendor_discount_target'
+    _description = 'Vendor Discount Target'
 
     def _get_vendor_targets(self, vendor, data):
         product_targets = []

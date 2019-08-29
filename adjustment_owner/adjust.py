@@ -20,13 +20,13 @@ class picking(models.Model):
 
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
-        required=True,
+        required=False,
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         help="Default Owner")
 
 
     @api.model
     def create(self, values):
-        if 'owner_id' not in values:
+        if 'owner_id' not in values and 'partner_id' in values:
             values['owner_id']=values['partner_id']
         return super(picking, self).create(values)
