@@ -11,6 +11,7 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     vendor_num = fields.Char(string="Vendor Number", required=False, )
+    vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
 
 
@@ -18,4 +19,5 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     vendor_num = fields.Char(string="Vendor Number", required=False, )
+    vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )

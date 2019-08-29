@@ -9,6 +9,7 @@
             
             <xpath expr="//field[@name='barcode']" position="after">
                  <field name="vendor_num" />
+                 <field name="vendor_color" />
                  <field name="categ_num" />
             </xpath>
             
@@ -23,6 +24,7 @@
 
             <xpath expr="//field[@name='default_code']" position="after">
                  <field name="vendor_num" />
+                 <field name="vendor_color" />
                  <field name="categ_num" />
             </xpath>
 
@@ -37,6 +39,7 @@
             <xpath expr="//filter[@name='inactive']" position="after">
                 <field name="categ_num" string="Category Number" filter_domain="[('categ_num', 'ilike', self)]"/>
                 <field name="categ_num" string="Vendor Number" filter_domain="[('vendor_num', 'ilike', self)]"/>
+                <field name="vendor_color" string="Vendor Color" filter_domain="[('vendor_num', 'ilike', self)]"/>
 
 <!--                 <field name="vendor_num" />-->
 <!--                 <field name="categ_num" />-->
