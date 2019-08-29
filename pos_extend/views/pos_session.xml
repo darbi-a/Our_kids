@@ -47,7 +47,7 @@
                     <field name="returned_amount"/>
                 </xpath>
 
-                <xpath expr="//div[hasclass('container o_kanban_card_content')]" position="inside">
+                <xpath expr="//div[hasclass('o_kanban_card_content')]" position="inside">
                     <div class="oe_kanban_global_click">
                         <table style="height: 16px;margin-top: 10px;" width="100%">
                             <tbody>
