@@ -15,7 +15,7 @@ class product(models.Model):
     def _compute_last_cost(self):
         for rec in self:
             if rec.categ_id:
-                if rec.categ_id.cost_method != 'fifo':
+                if rec.categ_id.property_cost_method != 'fifo':
                     rec.unit_cost = rec.standard_price
                 else:
                     moves=self.env['stock.move'].search([('product_id','=',rec.id)],order='date desc',limit=1 )
