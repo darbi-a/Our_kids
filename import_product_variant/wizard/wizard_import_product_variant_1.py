@@ -12,6 +12,7 @@ import xlrd, mmap, xlwt
 
 class ImportProductVariant(models.TransientModel):
     _name = "wizard.import.product.variant"
+    _description = "Import Product Variant"
 
     file_data = fields.Binary('Archive', required=True,)
     file_name = fields.Char('File Name')

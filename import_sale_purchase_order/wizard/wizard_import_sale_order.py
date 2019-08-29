@@ -13,6 +13,7 @@ _logger = logging.getLogger(__name__)
 
 class ImportSaleOrder(models.TransientModel):
     _name = "wizard.import.sale.order"
+    _description = "Import Sale Order"
 
     file_data = fields.Binary('Archive', required=True,)
     file_name = fields.Char('File Name')
