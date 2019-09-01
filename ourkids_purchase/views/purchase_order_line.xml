@@ -12,7 +12,13 @@
                      <field name="vendor_account_id" readonly="True"/>
                      <field name="percentage" readonly="True"/>
                      <field name="sale_price" readonly="True"/>
+                     <field name="from_other_vendor" invisible="True"/>
                 </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree" position="attributes">
+                    <attribute name="decoration-danger">from_other_vendor</attribute>
+                </xpath>
+
                 
             </field>
         </record>
