@@ -10,7 +10,6 @@ import xlrd
 
 class ImportProductVariant(models.TransientModel):
     _name = "wizard.import.product.variant"
-    _description = "Import Product Variant"
 
     file_data = fields.Binary('Archive', required=True,)
     file_name = fields.Char('File Name')
@@ -161,14 +160,15 @@ class ImportProductVariant(models.TransientModel):
                 vals = {}
                 vals['name'] = prod_name
                 vals['attribute_line_ids'] = []
-                for tmp_attrib in template_attributes[prod_name]:
-                    vals['attribute_line_ids'].append(
-                        (0, 0, {'attribute_id': tmp_attrib,
-                                'value_ids': [], })
-                    )
+                if prod_name in template_attributes:
+                    for tmp_attrib in template_attributes[prod_name]:
+                        vals['attribute_line_ids'].append(
+                            (0, 0, {'attribute_id': tmp_attrib,
+                                    'value_ids': [], })
+                        )
 
-                    for att_val in set(template_attributes[prod_name][tmp_attrib]):
-                        vals['attribute_line_ids'][-1][2]['value_ids'].append((4, att_val))
+                        for att_val in set(template_attributes[prod_name][tmp_attrib]):
+                            vals['attribute_line_ids'][-1][2]['value_ids'].append((4, att_val))
 
                 product_templ = self.env['product.template'].create(vals)
             else:
