@@ -110,6 +110,7 @@ class PosConfig(models.Model):
 
 class PosStockChannel(models.TransientModel):
     _name = 'pos.stock.channel'
+    _description = 'Pos Stock Channel'
 
     def broadcast(self, stock_quant):
         data = stock_quant.read(['product_id', 'location_id', 'quantity'])

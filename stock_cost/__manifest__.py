@@ -7,7 +7,7 @@
     'sequence': 10,
     'summary': 'Display Cost Price in Inventory Report ',
     'description': "",
-    'depends': ['stock'],
+    'depends': ['stock','stock_account'],
     'data': [
         'views/stock.xml',
     ],

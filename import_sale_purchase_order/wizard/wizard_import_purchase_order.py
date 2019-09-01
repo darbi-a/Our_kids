@@ -13,6 +13,7 @@ import xlrd, mmap, xlwt
 
 class ImportPurchaseOrder(models.TransientModel):
     _name = "wizard.import.purchase.order"
+    _description = "Import Purchase Order"
 
     @api.model
     def _default_picking_type(self):
