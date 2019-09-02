@@ -13,6 +13,7 @@ import xlrd, mmap, xlwt
 
 class ImportStockPicking(models.TransientModel):
     _name = "wizard.import.stock.picking"
+    _description = "Import Stock Picking"
 
 
     file_data = fields.Binary('Archive', required=True,)

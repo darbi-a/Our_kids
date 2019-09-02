@@ -14,7 +14,6 @@ class PurchaseOrderLine(models.Model):
     def compute_percentage(self):
         for rec in self:
             if rec.price_unit:
-<<<<<<< HEAD
                 rec.percentage = 100.0 * ( rec.sale_price / rec.price_unit) - 100.0
 
             # elif rec.product_id.standard_price:
@@ -29,9 +28,6 @@ class PurchaseOrderLine(models.Model):
                 rec.from_other_vendor = True
             else:
                 rec.from_other_vendor = False
-=======
-                rec.percentage = 100.0 * ( rec.sale_price / rec.price_unit)
->>>>>>> 95d251579bd409fe125728e8ab0f3460ce317de7
 
             # elif rec.product_id.standard_price:
             #     rec.percentage = 100.0 * (rec.sale_price / rec.product_id.standard_price)
