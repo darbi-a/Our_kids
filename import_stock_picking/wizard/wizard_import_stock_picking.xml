@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
     <odoo>
-
-
-        <record id="form_wizard_import_product_variant" model="ir.ui.view">
-            <field name="name">form.wizard.import.product.variant.form</field>
-            <field name="model">wizard.import.product.variant</field>
+        
+        <record id="form_wizard_import_stock_picking" model="ir.ui.view">
+            <field name="name">form.wizard.import.stock.picking.form</field>
+            <field name="model">wizard.import.stock.picking</field>
             <field name="arch" type="xml">
-                <form string="Import product Variants">
+                <form string="Import Quotation (code, quantity, price) .CSV">
                     <group>
                         <group>
-                            
                             <field name="file_data" filename="file_name" widget="binary" required="1" class="oe_inline"/>
                         </group>
-
-
                         <field name="file_name" invisible="1"/>
                     </group>
+                    <field name="result" readonly="True"/>
                     <footer>
                         <button string="Import" name="import_button" type="object" class="btn-primary"/>
                         <button string="Cancel" class="oe_link" special="cancel"/>
@@ -24,15 +21,13 @@
             </field>
         </record>
 
-        <record id="action_wizard_import_product_variant" model="ir.actions.act_window">
-            <field name="name">Import product Variants</field>
-            <field name="res_model">wizard.import.product.variant</field>
+        <record id="action_wizard_import_stock_picking" model="ir.actions.act_window">
+            <field name="name">Import Stock Picking</field>
+            <field name="res_model">wizard.import.stock.picking</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
         </record>
     
-        <menuitem action="action_wizard_import_product_variant" id="product_variant_menu_import" 
-            parent="stock.menu_stock_inventory_control" sequence="5" name="Import product Variants"/>
 
     </odoo>

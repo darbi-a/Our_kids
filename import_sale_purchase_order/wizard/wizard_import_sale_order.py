@@ -51,12 +51,12 @@ class ImportSaleOrder(models.TransientModel):
         cont = 0
         for line in archive_lines:
             cont += 1
-            code = str(line.get('code',"")).strip()
-            product_id = product_obj.search([('default_code','=',code)])
+            code = str(line.get('barcode',"")).strip()
+            product_id = product_obj.search([('barcode','=',code)])
             
             quantity = line.get('quantity',0)
             price_unit = self.get_valid_price(line.get('price',""),cont)
-            product_uom = product_template_obj.search([('default_code','=',code)])
+            product_uom = product_template_obj.search([('barcode','=',code)])
             if sale_order_id and product_id:
                 vals = {
                     'order_id': sale_order_id.id,
@@ -100,20 +100,20 @@ class ImportSaleOrder(models.TransientModel):
         cont=0
         for line in archive_lines:
             cont += 1
-            code = str(line.get('code',"")).strip()
-            product_id = product_obj.search([('default_code','=',code)])
+            code = str(line.get('barcode',"")).strip()
+            product_id = product_obj.search([('barcode','=',code)])
             if len(product_id) > 1:
-                raise UserError("The product code of line %s, is duplicated in the system." % cont)
+                raise UserError("The product barcode of line %s, is duplicated in the system." % cont)
             if not product_id:
-                raise UserError("The product code of line %s is not found in the system" % cont)
+                raise UserError("The product barcode of line %s is not found in the system" % cont)
 
     @api.model
     def valid_columns_keys(self, archive_lines):
         columns = archive_lines[0].keys()
         #print "columns>>",columns
-        text = "El Archivo csv debe contener las siguientes columnas: code, quantity y price. \nNo se encuentran las siguientes columnas en el Archivo:"; text2 = text
-        if not 'code' in columns:
-            text +="\n[ code ]"
+        text = "El Archivo csv debe contener las siguientes columnas: barcode, quantity y price. \nNo se encuentran las siguientes columnas en el Archivo:"; text2 = text
+        if not 'barcode' in columns:
+            text +="\n[ barcode ]"
         if not 'quantity' in columns:
             text +="\n[ quantity ]"
         if not 'price' in columns:

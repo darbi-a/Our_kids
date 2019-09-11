@@ -18,6 +18,8 @@
     # always loaded
     'data': [
         'views/purchase_order_line.xml',
+        'views/purchase_order.xml',
+        'views/product_product.xml',
     ],
 
 

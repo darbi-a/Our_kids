@@ -14,8 +14,7 @@
 
     # any module necessary for this one to work correctly
     'depends': [
-        'point_of_sale',
-        'hr',
+        'point_of_sale'
     ],
 
     # always loaded
