@@ -13,15 +13,14 @@ import xlrd, mmap, xlwt
 
 class ImportPurchaseOrder(models.TransientModel):
     _name = "wizard.import.purchase.order"
-    _description = "Import Purchase Order"
 
     @api.model
     def _default_picking_type(self):
         type_obj = self.env['stock.picking.type']
         company_id = self.env.context.get('company_id') or self.env.user.company_id.id
-        types = type_obj.search([('code', '=', 'incoming'), ('warehouse_id.company_id', '=', company_id)])
+        types = type_obj.search([('barcode', '=', 'incoming'), ('warehouse_id.company_id', '=', company_id)])
         if not types:
-            types = type_obj.search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
+            types = type_obj.search([('barcode', '=', 'incoming'), ('warehouse_id', '=', False)])
         return types[:1]
 
     file_data = fields.Binary('Archive', required=True,)
@@ -86,11 +85,11 @@ class ImportPurchaseOrder(models.TransientModel):
         cont = 0
         for line in archive_lines:
             cont += 1
-            code = str(line.get('code',""))
-            product_id = product_obj.search([('default_code','=',code)])
+            code = str(line.get('barcode',""))
+            product_id = product_obj.search([('barcode','=',code)])
             quantity = line.get('quantity',0)
             price_unit = self.get_valid_price(line.get('price',""),cont)
-            product_uom = product_template_obj.search([('default_code','=',code)])
+            product_uom = product_template_obj.search([('barcode','=',code)])
             if purchase_order_id and product_id:
                 vals = {
                     'order_id': purchase_order_id.id,
@@ -137,24 +136,28 @@ class ImportPurchaseOrder(models.TransientModel):
         for line in archive_lines:
             cont += 1
             ref=''
-            code = line.get('code',"")
+            code = line.get('barcode',"")
+            print("code == >> ",code)
             if isinstance(code, float):
-                c =int(line.get('code', ""))
+                c =int(line.get('barcode', ""))
                 ref = str(c).strip()
+                print("c == >> ",c)
+                print("ref == >> ", ref)
             else:
                 ref=str(code).strip()
-            product_id = product_obj.search([('default_code','=',ref)])
+                print("ref2 == >> ", ref)
+            product_id = product_obj.search([('barcode','=',ref)])
             if len(product_id)>1:
-                raise UserError("The product code of line %s, is duplicated in the system."%cont)
+                raise UserError("The product barcode of line %s, is duplicated in the system."%cont)
             if not product_id:
-                raise UserError("The product code of line %s is not found in the system"%cont)
+                raise UserError("The product barcode of line %s is not found in the system"%cont)
             
     @api.model
     def valid_columns_keys(self, archive_lines):
         columns = archive_lines[0].keys()
-        text = "El Archivo csv debe contener las siguientes columnas: code, quantity y price. \nNo se encuentran las siguientes columnas en el Archivo:"; text2 = text
-        if not 'code' in columns:
-            text +="\n[ code ]"
+        text = "El Archivo csv debe contener las siguientes columnas: barcode, quantity y price. \nNo se encuentran las siguientes columnas en el Archivo:"; text2 = text
+        if not 'barcode' in columns:
+            text +="\n[ barcode ]"
         if not 'quantity' in columns:
             text +="\n[ quantity ]"
         if not 'price' in columns:
