@@ -41,6 +41,7 @@ class ImportStockPicking(models.TransientModel):
             first_row.append(worksheet.cell_value(0, col))
         # transform the workbook to a list of dictionaries
         archive_lines = []
+        vals_list = []
         for row in range(1, worksheet.nrows):
             elm = {}
             for col in range(worksheet.ncols):
@@ -72,17 +73,16 @@ class ImportStockPicking(models.TransientModel):
                     products = products.filtered(lambda p: p.display_name == product_name)
 
                 if products:
-                    vals = {
+                    vals_list.append({
                         'name': products[0].display_name ,
                         'picking_id': stock_picking.id,
                         'product_id': products[0].id,
                         'product_uom_qty': float(quantity),
-                        'date_planned': datetime.now(),
                         'product_uom': products[0].product_tmpl_id.uom_po_id.id,
                         'location_id': stock_picking.location_id.id,
                         'location_dest_id': stock_picking.location_dest_id.id,
-                    }
-                    stock_move_obj.create(vals)
+                    })
+                    # stock_move_obj.create(vals)
 
                 else:
                     not_exist.append({
@@ -92,7 +92,7 @@ class ImportStockPicking(models.TransientModel):
                     })
 
         if not_exist:
-            self.env.cr.rollback()
+            # self.env.cr.rollback()
             self.result= """
             
             <h2>Some Rows Could not be imported</h2>
@@ -120,7 +120,10 @@ class ImportStockPicking(models.TransientModel):
             }
 
             return view_action
+
         else:
+            for vals in vals_list:
+                stock_move_obj.create(vals)
             return {'type': 'ir.actions.act_window_close'}
         
     @api.model
