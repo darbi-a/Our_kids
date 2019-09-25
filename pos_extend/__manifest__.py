@@ -13,6 +13,7 @@
     'license': 'AGPL-3',
     'data': [
         'views/pos_session.xml',
+        'security/security.xml',
     ],
     'images' : ['static/description/banner.png'],
     'installable': True,
