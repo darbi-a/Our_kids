@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Form View to Modify it -->
+    <record id="stock_move_account_invoice_form" model="ir.ui.view">
+        <field name="name">account.invoice.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="arch" type="xml">
+
+           <xpath expr="//div[@name='button_box']"  position="inside">
+                <button class="oe_stat_button"
+                     name="action_open_order" type="object" icon="fa-bars" >
+                    <field string="Journal Entries" name="journal_entries_count" widget="statinfo"/>
+                </button>
+            </xpath>
+
+        </field>
+    </record>
+    <record id="stock_move_invoice_supplier_form" model="ir.ui.view">
+        <field name="name">account.invoice.form</field>
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_supplier_form"/>
+        <field name="arch" type="xml">
+
+           <xpath expr="//sheet[1]/div[1]"  position="before">
+               <div class="oe_button_box" name="button_box">
+
+                <button class="oe_stat_button"
+                     name="action_open_order" type="object" icon="fa-bars" >
+                    <field string="Journal Entries" name="journal_entries_count" widget="statinfo"/>
+                </button>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

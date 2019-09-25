@@ -16,6 +16,7 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
+
 class PoLineWizard(models.TransientModel):
     _name = 'vendor.po.line.wizard'
     _description = 'vendor.po.line.wizard'

@@ -86,7 +86,6 @@
             string="Purchase Order Products Labels"
             name="product_barcode_printout.temp_purchase_order_product_label_report"
             file="product_barcode_printout.temp_purchase_order_product_label_report"
-
     />
 
 

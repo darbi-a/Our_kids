@@ -37,7 +37,7 @@ odoo.define('pos_promotions.promotions', function (require) {
 
         },
 
-            export_as_JSON: function(){
+        export_as_JSON: function(){
             var json = _super_order.export_as_JSON.apply(this,arguments);
             if (this.pos_promotion_ids) {
                 json.pos_promotion_ids = this.pos_promotion_ids;

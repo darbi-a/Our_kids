@@ -8,7 +8,7 @@ class PurchaseOrderLine(models.Model):
     vendor_account_id = fields.Many2one(comodel_name="account.account", related='partner_id.property_account_payable_id',string='Vendor Account' )
     sale_price = fields.Float(related='product_id.lst_price' )
     profit_percentage = fields.Float(related='product_id.profit_percentage' )
-    percentage = fields.Float(string="Column 1",compute='compute_percentage')
+    percentage = fields.Float(string="Profit Percentage",compute='compute_percentage')
     from_other_vendor = fields.Boolean(compute='compute_from_other_vendor',defualt=False)
 
 

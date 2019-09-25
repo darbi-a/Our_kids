@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="SalePersonButtonWidget">
+         <div class="control-button coupon_button sale_person_button">
+<!--             <i class="fa fa-users"></i><t t-esc="widget.pos.get_order().sale_person_code || ' Sale Person'" />-->
+             <i class="fa fa-users"></i><t t-esc="' Sale Person'" />
+          </div>
+    </t>
+
+</templates>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <record id="view_pos_cashier_sales_form" model="ir.ui.view">
+            <field name="name">pos.cashier.sales.form</field>
+            <field name="model">pos.cashier.sales</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="date_from" />
+                            <field name="date_to"/>
+                            <field name="branches_ids" />
+                            <field name="type" widget="radio"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="action_print"   string="Print" type="object" class="oe_highlight"/>
+                        <button string="Cancel" special="cancel" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+        <record id="view_pos_cashier_sales_action" model="ir.actions.act_window">
+            <field name="name">Pos Cashier Sales</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pos.cashier.sales</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <menuitem id="menuitem_pos_cashier_sales" name="Pos Cashier Sales" parent="point_of_sale.menu_point_rep" action="view_pos_cashier_sales_action" sequence="10"/>
+    
+    </data>
+</odoo>

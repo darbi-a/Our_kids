@@ -20,6 +20,7 @@
         'views/purchase_order_line.xml',
         'views/purchase_order.xml',
         'views/product_product.xml',
+        'views/account_invoice.xml',
     ],
 
 

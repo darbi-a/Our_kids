@@ -40,6 +40,7 @@
                 <field name="categ_num" string="Category Number" filter_domain="[('categ_num', 'ilike', self)]"/>
                 <field name="categ_num" string="Vendor Number" filter_domain="[('vendor_num', 'ilike', self)]"/>
                 <field name="vendor_color" string="Vendor Color" filter_domain="[('vendor_num', 'ilike', self)]"/>
+                <field name="barcode" string="Barcode" filter_domain="[('barcode', 'ilike', self)]"/>
 
 <!--                 <field name="vendor_num" />-->
 <!--                 <field name="categ_num" />-->
@@ -48,6 +49,17 @@
         </field>
     </record>
 
+    <record id="product_template_barcode_search_inherit" model="ir.ui.view">
+            <field name="name">product.template.barcode.view.search</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_search_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="barcode" string="Barcode" filter_domain="[('barcode', 'ilike', self)]"/>
+
+                </field>
+            </field>
+        </record>
 
 
     

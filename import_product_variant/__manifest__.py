@@ -6,7 +6,7 @@
 
 {
     'name': 'Import product Variants',
-    'version': '12.0.6',
+    'version': '12.0.9',
     'author': 'Ahmed Amin ,Mahmoud Naguib',
     'maintainer': 'ITSS',
     'license': 'AGPL-3',
@@ -21,6 +21,7 @@
     'data': [
 
         'wizard/wizard_import_product_variant.xml',
+        'wizard/wizard_resalt_variant.xml',
         'views/product_product.xml',
     ],
     'installable': True,
