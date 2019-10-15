@@ -84,8 +84,8 @@
             model="purchase.order"
             report_type="qweb-pdf"
             string="Purchase Order Products Labels"
-            name="product_barcode_printout.purchase_order_product_label_report"
-            file="product_barcode_printout.purchase_order_product_label_report"
+            name="product_barcode_printout.temp_purchase_order_product_label_report"
+            file="product_barcode_printout.temp_purchase_order_product_label_report"
     />
 
 
@@ -94,7 +94,7 @@
     </record>
 
 
-    <template id="purchase_order_product_label_report">
+    <template id="temp_purchase_order_product_label_report">
         <t t-call="web.basic_layout">
             <div class="page">
                 <t t-foreach="docs" t-as="o">

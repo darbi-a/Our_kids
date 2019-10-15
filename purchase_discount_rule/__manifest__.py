@@ -5,7 +5,7 @@
     'author': "Omnia Sameh, ITSS <https://www.itss-c.com>",
     "version": "11.0.1.0.0",
     "category": "Purchase Management",
-    "depends": ["purchase"],
+    "depends": ["purchase","purchase_stock"],
     "data": [
         "security/ir.model.access.csv",
         "views/res_partner_reports.xml",

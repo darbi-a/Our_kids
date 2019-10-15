@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Form View to Modify it -->
+    <record id="money_log_view_account_journal_form" model="ir.ui.view">
+        <field name="name">form</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='outbound_payment_method_ids']" position="after">
+                <field name="pos_money_log" attrs="{'invisible': ['|',('type', '!=', 'cash'),('journal_user', '=', False)]}"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

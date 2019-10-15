@@ -1,0 +1,23 @@
+<odoo>
+
+    <record model="ir.module.category" id="category_sales_team_views">
+            <field name="name">Sales Team Views</field>
+            <field name="sequence">0</field>
+        </record>
+
+    <record id="sadara_lead_view1" model="res.groups">
+        <field name="name">Sales Team View1</field>
+         <field name="category_id" ref="sadara_crm.category_sales_team_views"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+
+    </record>
+    <record id="sadara_lead_view2" model="res.groups">
+        <field name="name">Sales Team View2</field>
+        <field name="category_id" ref="sadara_crm.category_sales_team_views"/>
+
+
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+
+</odoo>

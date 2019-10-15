@@ -89,8 +89,10 @@ class ImportProductVariant(models.TransientModel):
         if not barcode_field:
             raise UserError(_('No Barcode field found!'))
         import_data = {}
-
+        ddd = 1
         for row_idx in range(1, worksheet.nrows):
+            ddd +=1
+
             # Iterate through rows
             row_dict = {}
             product_name = None
@@ -197,17 +199,21 @@ class ImportProductVariant(models.TransientModel):
 
         temp_barcode=''
         for code in import_data:
+            x +=1
             if not template_attributes:
                 prod_name = import_data[code]['name']
                 product_templ = self.env['product.template'].search([('barcode', '=', code)])
             else:
                 value = next(iter(import_data[code]))
                 prod_name = import_data[code][value]['name']
-                product_templ = self.env['product.template'].search([('name', '=', prod_name)])
+
+                product_templ = self.env['product.template'].search([('name', '=', prod_name)],limit=1)
+
 
 
 
             if not product_templ:
+                print("xx == ", x, "product_templ = ", product_templ)
                 vals = {}
                 vals['name'] = prod_name
                 vals['barcode'] = code
@@ -243,6 +249,7 @@ class ImportProductVariant(models.TransientModel):
                                 'attribute_id': tmp_attrib,
                                 'value_ids': tmp_att_vals,
                             }
+
                             # self.env['product.template.attribute.line'].create({
                             #     'product_tmpl_id': product_templ.id,
                             #     'attribute_id': tmp_attrib,
@@ -250,12 +257,15 @@ class ImportProductVariant(models.TransientModel):
                             # })
 
                             product_templ.write({'attribute_line_ids':[(0,0,vals)]})
-                            product_templ.write({'attribute_line_ids':[(0,0,vals)]})
+                            # product_templ.write({'attribute_line_ids':[(0,0,vals)]})
+
                         else:
                             for att_tmpl_line in product_templ.attribute_line_ids:
+
                                 if att_tmpl_line.attribute_id.id == tmp_attrib:
                                     att_tmpl_line.write({'value_ids': tmp_att_vals})
                                     break
+
 
                 product_templ.create_variant_ids()
                 if product_templ.id not in item_edit and product_templ.barcode == code:

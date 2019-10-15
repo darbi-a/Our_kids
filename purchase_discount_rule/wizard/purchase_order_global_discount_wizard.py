@@ -10,6 +10,7 @@ class POGlobalDiscountWizard(models.TransientModel):
     Assign discount as a fixed value or a percentage value on the total of PO.
     """
     _name = "purchase.order.global.discount.wizard"
+    _description = 'Purchase Order Global Discount Wizard'
 
     discount_type = fields.Selection(
         [('percentage', 'Percentage'),
