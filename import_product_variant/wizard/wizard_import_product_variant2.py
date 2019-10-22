@@ -200,26 +200,24 @@ class ImportProductVariant(models.TransientModel):
         temp_barcode=''
         for code in import_data:
             x +=1
+            print("xx == ",x,code)
             if not template_attributes:
                 prod_name = import_data[code]['name']
-                default_code = import_data[code]['default_code']
                 product_templ = self.env['product.template'].search([('barcode', '=', code)])
             else:
                 value = next(iter(import_data[code]))
                 prod_name = import_data[code][value]['name']
-                default_code = import_data[code][value]['default_code']
 
-                product_templ = self.env['product.template'].search([('default_code', '=', default_code)],limit=1)
-                if not product_templ:
-                    product = self.env['product.product'].search([('default_code', '=', default_code)], limit=1)
-                    product_templ =product.product_tmpl_id
+                product_templ = self.env['product.template'].search([('name', '=', prod_name)],limit=1)
+
+
+
 
             if not product_templ:
                 print("xx == ", x, "product_templ = ", product_templ)
                 vals = {}
                 vals['name'] = prod_name
                 vals['barcode'] = code
-                vals['default_code'] = default_code
                 vals['attribute_line_ids'] = []
                 temp_barcode=code
                 if prod_name in template_attributes:
@@ -241,7 +239,6 @@ class ImportProductVariant(models.TransientModel):
 
             else:
                 temp_atts  = product_templ.attribute_line_ids.mapped('attribute_id')
-                product_templ.default_code = default_code
                 if template_attributes:
                     for tmp_attrib in template_attributes[prod_name]:
                         tmp_att_vals = []
@@ -260,12 +257,10 @@ class ImportProductVariant(models.TransientModel):
                             #     'value_ids': tmp_att_vals,
                             # })
 
-                            product_templ.write({'attribute_line_ids':[(0,0,vals)],'default_code':default_code})
+                            product_templ.write({'attribute_line_ids':[(0,0,vals)]})
                             # product_templ.write({'attribute_line_ids':[(0,0,vals)]})
 
                         else:
-                            product_templ.write({'default_code':default_code})
-
                             for att_tmpl_line in product_templ.attribute_line_ids:
 
                                 if att_tmpl_line.attribute_id.id == tmp_attrib:
