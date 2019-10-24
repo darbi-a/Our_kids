@@ -19,19 +19,18 @@ class stock_quant(models.Model):
             rec.cost=rec.unit_cost * rec.quantity
 
 
-
 class stock_move(models.Model):
     _inherit = 'stock.move'
 
-
-    subtotal = fields.Float(string="Subtotal",  required=False, compute='_compute_suptotal' )
-    unit_cost = fields.Float(string="Unit Cost",  required=False,related='product_id.unit_cost' )
+    subtotal = fields.Float(string="Total Sales Price",  required=False, compute='_compute_suptotal' )
+    # unit_cost = fields.Float(string="Unit Cost",  required=False,related='product_id.unit_cost' )
+    sale_price = fields.Float(string="Sale Price",  required=False,related='product_id.list_price' )
 
     @api.one
     @api.depends('product_id','quantity_done')
     def _compute_suptotal(self):
         for rec in self:
-            rec.subtotal=rec.unit_cost * rec.quantity_done
+            rec.subtotal=rec.sale_price * rec.quantity_done
 
 
 class stock_picking(models.Model):

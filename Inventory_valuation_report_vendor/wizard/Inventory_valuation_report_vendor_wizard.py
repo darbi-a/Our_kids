@@ -23,72 +23,19 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 
-class VendorAgedPayableCashWizard(models.TransientModel):
-    _name = 'vendor.aged.payable.cash.report.wizard'
-    _description = 'vendor.aged.payable.cash.report.wizard'
+class InventoryValuationReportVendor(models.TransientModel):
+    _name = 'inventory.valuation.report.vendor.wizard'
+    _description = 'inventory.valuation.report.vendor.wizard'
 
     date_to = fields.Date(required=True)
     date_from = fields.Date(required=True)
     type = fields.Selection(string="Report Type",default="xls", selection=[('xls', 'XLS'), ('pdf', 'PDF'), ], required=True, )
-    partner_ids = fields.Many2many(comodel_name="res.partner", string="Vendors", domain=[('supplier','=',True)] )
+    partner_ids = fields.Many2many(comodel_name="res.partner", string="Vendors")
     tag_ids = fields.Many2many(comodel_name="res.partner.category", string="Tags", )
+    warehouse_ids = fields.Many2many(comodel_name="stock.warehouse")
+    season_ids = fields.Many2many(comodel_name="product.season", )
 
-    @api.model
-    def get_partner_balance(self,partner,end_date):
-        partner_accounts = [partner.property_account_payable_id.id, partner.property_account_receivable_id.id]
-        journal_items = self.env['account.move.line'].search([
-            ('partner_id','=',partner.id),
-            ('date','<',end_date),
-            ('account_id','in',partner_accounts),
-        ])
-        balance = sum([(item.debit - item.credit) for item in journal_items])
-        return balance,journal_items
-
-    @api.model
-    def get_partner_purchases(self,partner,inv_type):
-        partner_accounts = [partner.property_account_payable_id.id, partner.property_account_receivable_id.id]
-        bills = self.env['account.invoice'].search([
-            ('partner_id','=',partner.id),
-            ('date_invoice','>=',self.date_from),
-            ('date_invoice','<=',self.date_to),
-            ('state','in',['open','in_payment','paid']),
-            # ('type','in',['in_invoice']),
-            ('type','in',inv_type),
-        ])
-
-        bills_total = sum([b.amount_total for b in bills])
-        tax_lines = bills.mapped('tax_line_ids')
-        with_holding_tax = sum([l for l in tax_lines if l.amount_total < 0])
-        journal_items = bills.mapped('move_id.line_ids').filtered(lambda l:l.partner_id.id == partner.id and l.account_id.id in partner_accounts)
-
-        return bills_total,with_holding_tax,journal_items
-
-    @api.model
-    def get_partner_total_due(self,partner):
-        partner_accounts = [partner.property_account_payable_id.id, partner.property_account_receivable_id.id]
-        journal_items = self.env['account.move.line'].search([
-            ('partner_id','=',partner.id),
-            ('date_maturity','>',self.date_to),
-            ('account_id','in',partner_accounts),
-        ])
-        balance = sum([(item.debit - item.credit) for item in journal_items])
-        return balance
-
-
-    @api.model
-    def get_partner_payments(self,partner):
-        partner_accounts = [partner.property_account_payable_id.id, partner.property_account_receivable_id.id]
-        payments = self.env['account.payment'].search([
-            ('partner_id', '=', partner.id),
-            ('payment_date', '>=', self.date_from),
-            ('payment_date', '<=', self.date_to),
-            ('state', 'in', ['posted', 'reconciled']),
-            ('payment_type', 'in', ['inbound', 'outbound']),
-        ])
-
-        journal_items = payments.mapped('move_line_ids').filtered(lambda l:l.partner_id.id == partner.id and l.account_id.id in partner_accounts)
-        total_payments = sum([(item.debit - item.credit) for item in journal_items])
-        return total_payments,journal_items
+    # def get_available_quantity_product(self,product,partner):
 
     def get_report_data(self):
         data = []
@@ -104,7 +51,17 @@ class VendorAgedPayableCashWizard(models.TransientModel):
         elif self.tag_ids:
             partners = partners.search([('category_id','in',self.tag_ids.ids)])
         else:
-            partners = partners.search([('supplier','=',True)])
+            partners = partners.search([])
+
+        if self.warehouse_ids:
+            warehouses = self.warehouse_ids
+        else:
+            warehouses = self.env['stock.warehouse'].search([])
+
+        if self.season_ids:
+            products = self.env['product.product'].search([('season_id','in',self.season_ids.ids)])
+        else:
+            products = self.env['product.product'].search([])
 
         for partner in partners:
             starting_balance,starting_items = self.get_partner_balance(partner,self.date_from) if self.date_from else 0

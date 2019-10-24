@@ -28,9 +28,9 @@
                     <field name="total_line_discount" groups="sale.group_discount_per_so_line" />
                 </xpath>
                 <xpath expr="//field[@name='reference']" position="after">
-                   <label for="line_discount"/>
-                       <div>
-                           <field name="line_discount" class="oe_inline"/>
+                   <label for="line_discount" attrs="{'invisible':[('type','!=','in_invoice')]}"/>
+                       <div attrs="{'invisible':[('type','!=','in_invoice')]}">
+                           <field name="line_discount"  attrs="{'invisible':[('type','!=','in_invoice')]}" class="oe_inline"/>
                            <spain>%</spain>
                        </div>
                 </xpath>

@@ -56,8 +56,8 @@
             <xpath expr="//field[@name='team_id']" position="after">
                <label for="line_discount" groups="sale.group_discount_per_so_line"/>
                    <div groups="sale.group_discount_per_so_line">
-                       <field name="line_discount" class="oe_inline"/>
-                       <spain>%</spain>
+                       <field name="line_discount" class="oe_inline" attrs="{'invisible':[('type','!=','in_invoice')]}"/>
+                       <spain attrs="{'invisible':[('type','!=','in_invoice')]}">%</spain>
                    </div>
             </xpath>
 <!--            <xpath expr="//field[@name='discount']" position="attributes">-->
