@@ -58,22 +58,38 @@ class VendorAgedPayableCashWizard(models.TransientModel):
 
         bills_total = sum([b.amount_total for b in bills])
         tax_lines = bills.mapped('tax_line_ids')
-        with_holding_tax = sum([l for l in tax_lines if l.amount_total < 0])
+        with_holding_tax = sum([l.amount_total for l in tax_lines if l.amount_total < 0])
         journal_items = bills.mapped('move_id.line_ids').filtered(lambda l:l.partner_id.id == partner.id and l.account_id.id in partner_accounts)
 
         return bills_total,with_holding_tax,journal_items
 
     @api.model
     def get_partner_total_due(self,partner):
+        total_due = 0
         partner_accounts = [partner.property_account_payable_id.id, partner.property_account_receivable_id.id]
-        journal_items = self.env['account.move.line'].search([
+        # journal_items = self.env['account.move.line'].search([
+        #     ('partner_id','=',partner.id),
+        #     ('date_maturity','<=',self.date_to),
+        #     ('account_id','in',partner_accounts),
+        # ])
+        # balance = sum([(item.debit - item.credit) for item in journal_items])
+        bills = self.env['account.invoice'].search([
             ('partner_id','=',partner.id),
-            ('date_maturity','>',self.date_to),
-            ('account_id','in',partner_accounts),
+            # ('date_invoice','>=',self.date_from),
+            # ('date_invoice','<=',self.date_to),
+            ('date_due','<=',self.date_to),
+            ('state','in',['open','in_payment']),
+            ('type','in',['in_invoice']),
         ])
-        balance = sum([(item.debit - item.credit) for item in journal_items])
-        return balance
-
+        total_due = sum([b.residual for b in bills])
+        # for b in bills:
+        #     bill_move = b.move_id
+        #     move_lines = bill_move.line_ids.filtered(lambda l:l.account_id.id in partner_accounts and l.partner_id == partner and l.date_maturity > self.date_to)
+        #     total_not_due = sum((m.debit - m.credit) for m in move_lines)
+        #     # bill_due = max( b.residual - total_not_due , 0)
+        #     bill_due = b.residual + total_not_due
+        #     total_due += bill_due
+        return -1*total_due
 
     @api.model
     def get_partner_payments(self,partner):
@@ -123,15 +139,15 @@ class VendorAgedPayableCashWizard(models.TransientModel):
             data.append({
                 'name': partner.name,
                 'payment_term': payment_term,
-                'starting_balance': starting_balance,
-                'purchases_total': purchases_total,
-                'refund_total': refund_total,
-                'total_manual_amount': total_manual_amount,
-                'total_payments': total_payments,
-                'total_due': total_due,
-                'with_holding_tax': with_holding_tax,
+                'starting_balance': round(starting_balance,2),
+                'purchases_total': round(purchases_total,2),
+                'refund_total': round(refund_total,2),
+                'total_manual_amount': round(total_manual_amount,2),
+                'total_payments': round(total_payments,2),
+                'total_due': round(total_due,2),
+                'with_holding_tax': round(with_holding_tax,2),
                 'tags': tags,
-                'end_balance': end_balance,
+                'end_balance': round(end_balance,2),
             })
 
         return data
@@ -248,6 +264,8 @@ class VendorAgedPayableCashWizard(models.TransientModel):
         col += 1
         worksheet.write(row,col,_('رصيد اخر المدة'),header_format)
         col += 1
+        worksheet.write(row,col,_('يستحق'),header_format)
+        col += 1
         worksheet.write(row,col,_('نوع المورد'),header_format)
         col += 1
 
@@ -274,6 +292,8 @@ class VendorAgedPayableCashWizard(models.TransientModel):
             worksheet.write(row, col, record['total_payments'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, record['end_balance'], STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, record['total_due'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, record['tags'], STYLE_LINE_Data)
 

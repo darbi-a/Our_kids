@@ -47,6 +47,7 @@
                                 <th>اشعارات خصم وضريبة</th>
                                 <th>دفعات</th>
                                 <th>رصيد اخر المدة</th>
+                                <th>يستحق</th>
                                 <th>النوع</th>
                             </tr>
                             <t t-set="i" t-value="0" />
@@ -82,6 +83,9 @@
                                     </td>
                                     <td>
                                         <t t-esc="d['end_balance']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d['total_due']"/>
                                     </td>
                                     <td>
                                         <t t-esc="d['tags']"/>
