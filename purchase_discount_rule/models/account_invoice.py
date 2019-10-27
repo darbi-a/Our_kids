@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Purchase Order Discount"""
 
-from odoo import api, models
+from odoo import api, models , fields
 
 
 class AccountInvoice(models.Model):
@@ -15,9 +15,10 @@ class AccountInvoice(models.Model):
     def _onchange_currency_id(self):
         if self.currency_id:
             for line in self.invoice_line_ids.filtered(lambda r: r.purchase_line_id):
-                line.price_unit = line.purchase_id.currency_id.with_context(
-                    date=self.date_invoice).compute(line.purchase_line_id.discounted_unit_price,
-                                                    self.currency_id, round=False)
+                date = self.date or self.date_invoice or fields.Date.today()
+                company = self.company_id
+                line.price_unit = line.purchase_id.currency_id._convert(
+                    line.purchase_line_id.discounted_unit_price, self.currency_id, company, date, round=False)
 
     def _prepare_invoice_line_from_po_line(self, line):
         price = line.discounted_unit_price

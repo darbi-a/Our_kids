@@ -13,12 +13,14 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['purchase','purchase_discount_rule'],
+    'depends': ['purchase'],
 
     # always loaded
     'data': [
         'views/purchase_order_line.xml',
         'views/purchase_order.xml',
+        'views/product_product.xml',
+        'views/account_invoice.xml',
     ],
 
 

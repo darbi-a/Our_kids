@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+
+        <report
+                id="pos_cashier_return_report"
+                model="pos.cashier.return"
+                report_type="qweb-html"
+                string="Pos Cashier Return"
+                name="pos_reports.report_pos_cashier_return"
+                file="pos_reports.report_pos_cashier_return"
+        />
+
+
+        <template id="report_pos_cashier_return">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page" dir="rtl">
+                        <h2 class="text-center">تقرير مرتجعات الكاشير</h2>
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>التاريخ من:</strong>
+                                <p t-esc="date_from"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>التاريخ الى:</strong>
+                                <p t-esc="date_to"/>
+                            </div>
+                        </div>
+
+                        <table style="text-align:right;" class="table table-bordered">
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>رقم البون</th>
+                                <th>رقم التسلسل</th>
+                                <th>اسم الكاشير</th>
+                                <th>الفرع</th>
+                                <th>قيمة المرتجع</th>
+                            </tr>
+                            <t t-foreach="data" t-as="d">
+                                <tr>
+                                    <td>
+                                        <t t-raw="d[0]"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d[2]"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d[1]"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d[3]"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d[4]"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d[6]"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </table>
+
+                    </div>
+
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>

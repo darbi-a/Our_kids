@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <record id="view_vendor_payments_report_wizard_form" model="ir.ui.view">
+            <field name="name">vendor.payments.report.wizard.form</field>
+            <field name="model">vendor.payments.report.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="date_from" />
+                            <field name="date_to"/>
+                            <field name="type" widget="radio"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="action_print"   string="Print" type="object" class="oe_highlight"/>
+                        <button string="Cancel" special="cancel" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+        <record id="view_vendor_payments_report_wizard_action" model="ir.actions.act_window">
+            <field name="name">Vendor Payments Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">vendor.payments.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <menuitem id="menuitem_vendor_payments_report_wizard" name="Vendor Payments Report" parent="account_reports.account_reports_partners_reports_menu" action="view_vendor_payments_report_wizard_action" sequence="10"/>
+    
+    </data>
+</odoo>

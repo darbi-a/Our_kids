@@ -1,27 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        
+
         <record id="view_purchase_order_form_inherit" model="ir.ui.view">
             <field name="name">purchase.order.form.inherit</field>
             <field name="model">purchase.order</field>
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
-                
+
                 <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
-                     <field name="vendor_account_id" readonly="True"/>
-                     <field name="percentage" readonly="True"/>
-                     <field name="sale_price" readonly="True"/>
-                     <field name="from_other_vendor" invisible="True"/>
+                    <field name="vendor_account_id" readonly="True"/>
+                    <field name="percentage" readonly="True"/>
+                    <field name="profit_percentage" readonly="True" invisible="True"/>
+                    <field name="sale_price" readonly="True"/>
+                    <field name="from_other_vendor" invisible="True"/>
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree" position="inside">
+                    <button name="action_open_other_lines" string="View From Other Vendors" type="object" class="oe_highlight"
+                            attrs="{'invisible':[('from_other_vendor','!=',True)]}"/>
                 </xpath>
 
                 <xpath expr="//field[@name='order_line']/tree" position="attributes">
-                    <attribute name="decoration-danger">from_other_vendor</attribute>
+                    <attribute name="decoration-danger">profit_percentage &gt; percentage</attribute>
+                    <attribute name="decoration-success">profit_percentage &lt; percentage</attribute>
                 </xpath>
 
-                
+
             </field>
         </record>
-    
+
     </data>
 </odoo>

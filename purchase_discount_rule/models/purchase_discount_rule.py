@@ -11,7 +11,7 @@ class PORule(models.Model):
     Create discount rules to apply on vendor's purchase orders within specific period.
     """
     _name = 'purchase.discount.rule'
-    _description = "Purchase Discount Rule"
+    _description = 'Purchase Discount Rule'
 
     name = fields.Char(required=True)
 
@@ -76,7 +76,7 @@ class PORuleLine(models.Model):
     """
 
     _name = 'purchase.discount.rule.line'
-    _description = "Purchase Discount Rule Line"
+    _description = 'Purchase Discount Rule Line'
 
     product_id = fields.Many2one(
         comodel_name="product.product",

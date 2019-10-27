@@ -10,7 +10,6 @@ from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT, DEFAULT_SERVER
 class Reportquittance_report(models.AbstractModel):
 
     _name = 'report.product_history.report_product_history_view'
-    _description = "Report Product History View"
 
 
     def _get_report_data(self, ids):

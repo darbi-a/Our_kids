@@ -41,6 +41,7 @@
             </button>
             <field name="order_line" position="before">
                 <group>
+
                       <button name="%(purchase_global_discount_wizard_action)d" class="oe_highlight"
                             string="Set Global Discount"
                             type="action" attrs="{'invisible':[('state','not in',['draft','sent'])]}"/>

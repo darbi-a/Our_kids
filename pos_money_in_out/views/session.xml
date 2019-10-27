@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+         <record id="money_log_view_pos_session_form" model="ir.ui.view">
+            <field name="name">pos.session.form</field>
+            <field name="model">pos.session</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_session_form"/>
+            <field name="arch" type="xml">
+
+               <xpath expr="//div[@name='button_box']"  position="inside">
+                    <button class="oe_stat_button"
+                         name="open_money_log" type="object" icon="fa-bars" >
+                        <field string="Money Box IN/OUT" name="log_count" widget="statinfo"/>
+                    </button>
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

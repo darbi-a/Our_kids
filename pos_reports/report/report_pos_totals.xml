@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+
+        <report
+                id="pos_totals_report"
+                model="totals.report.wizard"
+                report_type="qweb-html"
+                string="Pos Totals Report"
+                name="pos_reports.report_pos_totals"
+                file="pos_reports.report_pos_totals"
+        />
+
+
+        <template id="report_pos_totals">
+            <t t-call="web.html_container">
+                <t t-foreach="branches" t-as="b">
+                    <t t-set="total_cash" t-value="0"/>
+                    <t t-set="total_amount" t-value="0"/>
+                    <t t-set="total_bank" t-value="0"/>
+                    <t t-call="web.external_layout">
+                        <div class="page" dir="rtl">
+                            <h2 class="text-center">تقرير مبيعات عام بالاجماليات</h2>
+                            <div class="row mt32 mb32">
+                                <div class="col-4">
+                                    <strong>الفرع:</strong>
+                                    <p t-esc="b"/>
+                                </div>
+                                <div class="col-4">
+                                    <strong>التاريخ من:</strong>
+                                    <p t-esc="date_from"/>
+                                </div>
+                                <div class="col-4">
+                                    <strong>التاريخ الى:</strong>
+                                    <p t-esc="date_to"/>
+                                </div>
+                            </div>
+
+                            <table style="text-align:right;" class="table table-bordered">
+                                <tr>
+                                    <th>الشهر</th>
+                                    <th>النقدي</th>
+                                    <th>الفيزا</th>
+                                    <th>الاجمالي</th>
+                                </tr>
+                                <t t-set="l" t-value="len(monthes)"/>
+                                <t t-set="k" t-value="0"/>
+                                <t t-foreach="range(0,l)" t-as="i">
+                                    <tr>
+                                        <t t-set="month_name" t-value="monthes[k]"/>
+                                        <t t-set="month_data" t-value="branches[b][month_name]"/>
+                                        <t t-set="total_cash" t-value="total_cash + month_data['cash']"/>
+                                        <t t-set="total_amount" t-value="total_amount + month_data['total_amount']"/>
+                                        <t t-set="total_bank" t-value="total_bank + month_data['bank']"/>
+                                        <t t-set="k" t-value="k+1"/>
+                                        <td>
+                                            <t t-raw="month_name"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="month_data['cash']"/>
+                                            <!--                                            <t t-esc="l"/>-->
+                                        </td>
+                                        <td>
+                                            <t t-esc="month_data['bank']"/>
+                                            <!--                                            <t t-esc="monthes[1]"/>-->
+                                        </td>
+                                        <td>
+                                            <t t-esc="month_data['total_amount']"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <tr>
+                                    <td>
+                                        <span>الاجمالي</span>
+                                    </td>
+                                    <td>
+                                        <t t-esc="total_cash"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="total_bank"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="total_amount"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br/>
+                            <div>
+                                <span style="margin-left:100px;font-size:16px;">اعتمد بواسطة:</span>
+                            </div>
+                            <div>
+                                <span style="margin-left:100px;font-size:16px;">...................</span>
+                            </div>
+
+                        </div>
+
+                    </t>
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>
