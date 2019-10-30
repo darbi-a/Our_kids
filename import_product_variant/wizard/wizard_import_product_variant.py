@@ -210,10 +210,10 @@ class ImportProductVariant(models.TransientModel):
                 default_code = import_data[code][value]['default_code']
 
                 product_templ = self.env['product.template'].search([('default_code', '=', default_code)],limit=1)
+
                 if not product_templ:
                     product = self.env['product.product'].search([('default_code', '=', default_code)], limit=1)
                     product_templ =product.product_tmpl_id
-
             if not product_templ:
                 print("xx == ", x, "product_templ = ", product_templ)
                 vals = {}
@@ -277,33 +277,38 @@ class ImportProductVariant(models.TransientModel):
                 if product_templ.id not in item_edit and product_templ.barcode == code:
                     item_edit.append(product_templ.id)
 
-
-
             prod_obj = self.env['product.product'].search([('barcode','=',code)])
             if not prod_obj:
                 prod_obj= self.env['product.product'].search([('barcode','=',False),('name','=',prod_name)],limit=1,order='id')
+            if not prod_obj:
+                prod_obj = self.env['product.product'].search(
+                    [('barcode', '=', False), ('product_tmpl_id', '=', product_templ.id)],limit=1,order='id')
             lst_vrnt=prod_obj.ids
+
             if lst_vrnt not in count_variant and count_items:
                 count_variant = list(set(count_variant + lst_vrnt))
             # for prod in product_templ.product_variant_ids:
-            if not prod_obj.barcode or prod_obj.barcode != code :
-                prod_obj.write({'barcode':code})
-            if not template_attributes:
-                tags=import_data[prod_obj.barcode]['tag_ids']
-            else:
-                value = next(iter(import_data[prod_obj.barcode]))
-                tags = import_data[prod_obj.barcode][value]['tag_ids']
-            if tag_att:
-                prod_obj.write({'tag_ids': [(6, 0, tags)]})
-
-            prod_att_values = set(prod_obj.attribute_value_ids.ids or [])
-
-            for att_value_ids in import_data[prod_obj.barcode].keys():
+            if prod_obj:
+                if not prod_obj.barcode or prod_obj.barcode != code :
+                    prod_obj.write({'barcode':code})
+                    if not prod_obj.barcode:
+                        prod_obj.barcode = code
                 if not template_attributes:
-                    product_values = import_data[prod_obj.barcode]
+                    tags=import_data[prod_obj.barcode]['tag_ids']
                 else:
-                    product_values = import_data[prod_obj.barcode][att_value_ids]
-                prod_obj.write(product_values.copy())
+                    value = next(iter(import_data[prod_obj.barcode]))
+                    tags = import_data[prod_obj.barcode][value]['tag_ids']
+                if tag_att:
+                    prod_obj.write({'tag_ids': [(6, 0, tags)]})
+
+                prod_att_values = set(prod_obj.attribute_value_ids.ids or [])
+
+                for att_value_ids in import_data[prod_obj.barcode].keys():
+                    if not template_attributes:
+                        product_values = import_data[prod_obj.barcode]
+                    else:
+                        product_values = import_data[prod_obj.barcode][att_value_ids]
+                    prod_obj.write(product_values.copy())
 
         context = dict(self._context) or {}
         context['default_count_variant'] = len(count_variant)
