@@ -8,4 +8,4 @@ class PosBranch(models.Model):
     _description = 'Pos Branch'
     _rec_name = 'name'
 
-    name = fields.Char(string="Name", required=False, )
+    name = fields.Char(string="Name", required=True, )

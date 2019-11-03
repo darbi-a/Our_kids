@@ -37,6 +37,7 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
             rpc.query({
                 model: 'product.index',
                 method: 'synchronize',
+                context: {location: pos.config && pos.config.stock_location_id && [pos.config.stock_location_id[0]] || [] },
                 args: [client_version]
             }).then(function (res) {
                 // update version
@@ -103,12 +104,14 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
         },
         p_update_version: function () {
             var old_version = localStorage.getItem('product_index_version');
+            var self = this;
             if (!/^\d+$/.test(old_version)) {
                 old_version = 0;
             }
             rpc.query({
                 model: 'product.index',
                 method: 'get_latest_version',
+                context: {location:self.config && self.config.stock_location_id && self.config.stock_location_id[0] || []},
                 args: [old_version]
             }).then(function (res) {
                 localStorage.setItem('product_index_version', res);

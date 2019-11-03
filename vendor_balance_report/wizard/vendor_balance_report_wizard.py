@@ -29,8 +29,9 @@ class VendorBalanceWizard(models.TransientModel):
 
     date = fields.Date(required=True)
     type = fields.Selection(string="Report Type",default="xls", selection=[('xls', 'XLS'), ('pdf', 'PDF'), ], required=True, )
-    partner_ids = fields.Many2many(comodel_name="res.partner", string="Vendors", )
+    partner_ids = fields.Many2many(comodel_name="res.partner", string="Vendors",domian=[('vendor_type','=','consignment')] )
     tag_ids = fields.Many2many(comodel_name="res.partner.category", string="Tags", )
+    season_ids = fields.Many2many(comodel_name="product.season" )
 
     @api.model
     def get_cost_from_entries(self,account_moves):
@@ -57,6 +58,8 @@ class VendorBalanceWizard(models.TransientModel):
         max_date = datetime.combine(self.date , datetime.max.time())
         move_lines = stock_pickings.mapped('move_line_ids').filtered(lambda l:l.date <= max_date)
         products = move_lines.mapped('product_id')
+        if self.season_ids:
+            products = products.filtered(lambda p:p.season_id in self.season_ids)
         for product in products:
             # moves_other_vendors = self.env['stock.move'].search([
             #     ('picking_id.partner_id','!=',partner.id),
@@ -122,23 +125,37 @@ class VendorBalanceWizard(models.TransientModel):
         if self.partner_ids:
             partners = self.partner_ids
         elif self.tag_ids:
-            partners = partners.search([('category_id','in',self.tag_ids.ids)])
+            partners = partners.search([('category_id','in',self.tag_ids.ids),('vendor_type','=','consignment')])
         else:
-            partners = partners.search([])
+            partners = partners.search([('vendor_type','=','consignment')])
 
         flds = ['debit', 'partner_id', 'credit']
         for partner in partners:
             accounts = [partner.property_account_payable_id.id,partner.property_account_receivable_id.id]
             domain = [('partner_id', '=', partner.id),('account_id', 'in', accounts), ('date', '<=', start)]
-
-            entries_by_partner = self.env['account.move.line'].read_group(domain, fields=flds, groupby=['partner_id'])
             stock_valuation_partner = self.get_stock_valuation_partner(partner)
-            balance = entries_by_partner[0]['debit'] - entries_by_partner[0]['credit'] if entries_by_partner else 0
+            if not self.season_ids:
+                entries_by_partner = self.env['account.move.line'].read_group(domain, fields=flds, groupby=['partner_id'])
+
+                balance = entries_by_partner[0]['debit'] - entries_by_partner[0]['credit'] if entries_by_partner else 0
+            else:
+                payments = self.env['account.payment'].search([
+                    ('partner_id','=',partner.id),
+                    ('season_id','in',self.season_ids.ids),
+                    ('state','in',['posted','reconciled']),
+                ])
+                balance = 0
+                for pay in payments:
+                    if pay.payment_type == 'inbound':
+                        balance += pay.amount
+                    elif pay.payment_type == 'outbound':
+                        balance -= pay.amount
+
             due = balance - stock_valuation_partner if balance >= 0 else (balance + stock_valuation_partner)
             tags = partner.category_id.mapped('name')
             data.append({
                 'partner_name': partner.name,
-                'vendor_num': partner.vendor_num,
+                'vendor_num': partner.ref,
                 'balance': balance,
                 'stock_evaluation':stock_valuation_partner,
                 'due': due,
@@ -244,7 +261,10 @@ class VendorBalanceWizard(models.TransientModel):
         col += 1
         worksheet.write(row,col,_('رقم المورد'),header_format)
         col += 1
-        worksheet.write(row,col,_('الرصيد'),header_format)
+        if self.season_ids:
+            worksheet.write(row, col, _('مدفوعات السيزون'), header_format)
+        else:
+            worksheet.write(row,col,_('الرصيد'),header_format)
         col += 1
         worksheet.write(row,col,_('الجرد'),header_format)
         col += 1
@@ -318,6 +338,7 @@ class VendorBalanceWizard(models.TransientModel):
         data,total_deserved = self.get_report_data()
         result={
             'data':data,
+            'season':True if self.season_ids else False,
             'total_deserved':total_deserved,
             'date':datetime.strftime(self.date, '%d/%m/%Y'),
             'tags': ' - '.join(self.tag_ids.mapped('name')),

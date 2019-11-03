@@ -11,4 +11,4 @@ LOGGER = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    vendor_num = fields.Char(string="Vendor Number")
+    # vendor_num = fields.Char(string="Vendor Number")

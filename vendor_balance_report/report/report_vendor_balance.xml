@@ -17,7 +17,7 @@
             <t t-call="web.html_container">
                 <t t-call="web.external_layout">
                     <div class="page" dir="rtl">
-                        <h2 class="text-center">تقرير دفعات الموردين</h2>
+                        <h2 class="text-center">تقرير مديونية موردي الامانات</h2>
                         <div class="row mt32 mb32">
                             <div class="col-6">
                                 <strong>التاريخ :</strong>
@@ -36,7 +36,13 @@
                                 <th>تسلسل</th>
                                 <th>اسم المورد</th>
                                 <th>رقم المورد</th>
-                                <th>الرصيد</th>
+                                <t t-if="season">
+                                    <th>مدفوعات السيزون</th>
+                                </t>
+                                <t t-else="">
+                                    <th>الرصيد</th>
+                                </t>
+
                                 <th>الجرد</th>
                                 <th>المستحق</th>
                                 <th>النوع</th>
@@ -55,13 +61,13 @@
                                         <t t-esc="d['vendor_num']"/>
                                     </td>
                                     <td>
-                                        <t t-esc="d['balance']"/>
+                                        <t t-esc="round(d['balance'],0)"/>
                                     </td>
                                     <td>
-                                        <t t-esc="d['stock_evaluation']"/>
+                                        <t t-esc="round(d['stock_evaluation'],0)"/>
                                     </td>
                                     <td>
-                                        <t t-esc="d['due']"/>
+                                        <t t-esc="round(d['due'],0)"/>
                                     </td>
                                     <td>
                                         <t t-esc="d['tags']"/>
@@ -70,7 +76,7 @@
                             </t>
                             <tr>
                                 <td colspan="5">الاجمالي</td>
-                                <td><t t-esc="total_deserved" /></td>
+                                <td><t t-esc="round(total_deserved,0)" /></td>
                                 <td></td>
                             </tr>
                         </table>

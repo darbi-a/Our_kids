@@ -9,7 +9,6 @@
             
             <xpath expr="//field[@name='barcode']" position="after">
                  <field name="vendor_num" />
-                <field name="vendor_id" invisible="1"/>
                  <field name="vendor_color" />
                  <field name="categ_num" />
             </xpath>

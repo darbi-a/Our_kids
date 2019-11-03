@@ -13,11 +13,12 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['account','stock'],
+    'depends': ['account','stock','vendor_payments_report'],
 
     # always loaded
     'data': [
-        'views/res_partner.xml',
+        # 'views/res_partner.xml',
+        'views/account_payment.xml',
         'wizard/vendor_balance_report_wizard.xml',
         'report/report_vendor_balance.xml',
     ],

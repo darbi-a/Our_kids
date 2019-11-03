@@ -30,7 +30,7 @@ class VendorAgedPayableCashWizard(models.TransientModel):
     date_to = fields.Date(required=True)
     date_from = fields.Date(required=True)
     type = fields.Selection(string="Report Type",default="xls", selection=[('xls', 'XLS'), ('pdf', 'PDF'), ], required=True, )
-    partner_ids = fields.Many2many(comodel_name="res.partner", string="Vendors", domain=[('supplier','=',True)] )
+    partner_ids = fields.Many2many(comodel_name="res.partner", string="Vendors", domain=[('supplier','=',True),('vendor_type','=','cash')] )
     tag_ids = fields.Many2many(comodel_name="res.partner.category", string="Tags", )
 
     @api.model
@@ -118,9 +118,9 @@ class VendorAgedPayableCashWizard(models.TransientModel):
         if self.partner_ids:
             partners = self.partner_ids
         elif self.tag_ids:
-            partners = partners.search([('category_id','in',self.tag_ids.ids)])
+            partners = partners.search([('category_id','in',self.tag_ids.ids),('vendor_type','=','cash')])
         else:
-            partners = partners.search([('supplier','=',True)])
+            partners = partners.search([('supplier','=',True),('vendor_type','=','cash')])
 
         for partner in partners:
             starting_balance,starting_items = self.get_partner_balance(partner,self.date_from) if self.date_from else 0
