@@ -32,27 +32,14 @@ class PosCashierReturn(models.TransientModel):
     branches_ids = fields.Many2many(comodel_name="pos.branch")
     type = fields.Selection(string="Report Type",default="xls", selection=[('xls', 'XLS'), ('pdf', 'PDF'), ], required=True, )
 
-    def get_dates(self):
-        start = self.date_from
-        end = self.date_to
-        dates = []
-        current_start = start
-        current_end = start + relativedelta(days=1)
-        current_end = current_end if current_end < end else end
-
-        while current_end <= end and current_start <= current_end:
-            dates.append(current_start)
-            current_start = current_end + relativedelta(days=1)
-            current_end = start + relativedelta(days=1)
-            current_end = current_end if current_end < end else end
-
-        return dates
 
     def get_report_data(self):
         data = []
+        total_returns = 0
         if self.date_from and self.date_to and self.date_from > self.date_to:
             raise ValidationError(_('Date from must be before date to!'))
-        branch_ids = self.branches_ids.ids or self.env['pos.branch'].search([]).ids
+        branches = self.branches_ids or self.env['pos.branch'].search([])
+        branch_ids = branches.ids
         end_date = self.date_to
         end_time = datetime.max.time()
         end_date = datetime.combine(end_date, end_time)
@@ -82,23 +69,26 @@ class PosCashierReturn(models.TransientModel):
             user = self.env['res.users'].browse(user_id)
             branch_name = branch.name
             data.append((day_str,name,pos_reference,user.name, branch_name, returned,returned_incl ))
-
-        return data
+            total_returns += returned_incl
+        branch_names = ' - '.join( branches.mapped('name'))
+        return data,total_returns,branch_names
 
     @api.multi
     def action_print_pdf(self):
-        data = self.get_report_data()
+        data,total_returns,branch_names = self.get_report_data()
         result={
             'data':data,
+            'total_returns':total_returns,
             'date_from':self.date_from,
             'date_to':self.date_to,
+            'branch_names':branch_names,
         }
         return self.env.ref('pos_reports.pos_cashier_return_report').report_action([], data=result)
 
     @api.multi
     def action_print_excel_file(self):
         self.ensure_one()
-        data = self.get_report_data()
+        data,total_returns,branch_names = self.get_report_data()
         workbook = xlwt.Workbook()
         TABLE_HEADER = xlwt.easyxf(
             'font: bold 1, name Tahoma, color-index black,height 160;'
@@ -184,6 +174,11 @@ class PosCashierReturn(models.TransientModel):
         worksheet.write(row,col,str(self.date_to),STYLE_LINE_Data)
         col += 1
 
+        worksheet.write(row,col,_('الفروع'),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,branch_names,STYLE_LINE_Data)
+        col += 1
+
 
         row += 2
         col = 0
@@ -217,6 +212,12 @@ class PosCashierReturn(models.TransientModel):
             col += 1
             worksheet.write(row, col, d[6], STYLE_LINE_Data)
             col += 1
+
+        row += 1
+        col = 0
+        worksheet.write_merge(row, row,col, col+4, _('الاجمالي'), STYLE_LINE_Data)
+        col += 5
+        worksheet.write(row,col,total_returns,STYLE_LINE_Data)
 
         output = BytesIO()
         if data:

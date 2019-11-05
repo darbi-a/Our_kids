@@ -30,28 +30,29 @@
                         </div>
                         <t t-set="visa_len" t-value="len(visas)"/>
                         <t t-foreach="dates" t-as="day">
-                            <t t-foreach="data[day]" t-as="branch">
-                                <table style="text-align:right;" class="table table-bordered">
-                                    <tr>
-                                        <th rowspan="2">التاريخ</th>
-                                        <th rowspan="2">الفرع</th>
-                                        <th rowspan="2">اسم الكاشير</th>
-                                        <th rowspan="2">المقبوضات</th>
-                                        <t t-if="visa_len and visas">
-                                            <th rowspan="1" colspan="visa_len">الفيزا</th>
-                                        </t>
-                                        <th rowspan="2">اجمالى الفيزا</th>
-                                        <th rowspan="2">العجز</th>
-                                        <th rowspan="2">الزيادة</th>
-                                        <th rowspan="2">اجمالى المبيعات</th>
-                                    </tr>
-                                    <tr>
-                                        <t t-foreach="visas" t-as="v">
-                                            <th rowspan="1" colspan="1">
-                                                <t t-esc="v"/>
-                                            </th>
-                                        </t>
-                                    </tr>
+
+                            <table style="text-align:right;" class="table table-bordered">
+                                <tr>
+                                    <th rowspan="2">التاريخ</th>
+                                    <th rowspan="2">الفرع</th>
+                                    <th rowspan="2">اسم الكاشير</th>
+                                    <th rowspan="2">المقبوضات</th>
+                                    <t t-if="visa_len and visas">
+                                        <th rowspan="1" colspan="visa_len">الفيزا</th>
+                                    </t>
+                                    <th rowspan="2">اجمالى الفيزا</th>
+                                    <th rowspan="2">العجز</th>
+                                    <th rowspan="2">الزيادة</th>
+                                    <th rowspan="2">اجمالى المبيعات</th>
+                                </tr>
+                                <tr>
+                                    <t t-foreach="visas" t-as="v">
+                                        <th rowspan="1" colspan="1">
+                                            <t t-esc="v"/>
+                                        </th>
+                                    </t>
+                                </tr>
+                                <t t-foreach="data[day]" t-as="branch">
                                     <t t-foreach="data[day][branch]" t-as="user">
                                         <t t-set="user_data" t-value="data[day][branch][user]"/>
                                         <t t-set="total_visa" t-value="user_data.get('total_cash',0.0)"/>
@@ -89,54 +90,55 @@
                                             </td>
                                         </tr>
                                     </t>
-                                    <tr style="font-size:20px;">
+                                </t>
+                                <tr style="font-size:20px;">
+                                    <td colspan="3">
+                                        <span>الاجمالي</span>
+                                    </td>
+<!--                                    <td colspan="2">-->
+<!--                                        <t t-esc="branch"/>-->
+<!--                                    </td>-->
+                                    <td>
+                                        <t t-esc="totals[day].get('cash',0.0)"/>
+                                    </td>
+                                    <t t-foreach="visas" t-as="v">
                                         <td>
-                                            <span>الاجمالي</span>
+                                            <t t-esc="totals[day].get(v,0.0)"/>
                                         </td>
-                                        <td colspan="2">
-                                            <t t-esc="branch"/>
-                                        </td>
-                                        <td>
-                                            <t t-esc="totals[day][branch].get('cash',0.0)"/>
-                                        </td>
-                                        <t t-foreach="visas" t-as="v">
-                                            <td>
-                                                <t t-esc="totals[day][branch].get(v,0.0)"/>
-                                            </td>
-                                        </t>
-                                        <td>
-                                            <t t-esc="totals[day][branch].get('total_visa',0.0)"/>
-                                        </td>
-                                        <td>
-                                            <t t-esc="totals[day][branch].get('loss',0.0)"/>
-                                        </td>
-                                        <td>
-                                            <t t-esc="totals[day][branch].get('gain',0.0)"/>
-                                        </td>
-                                        <td>
-                                            <t t-esc="totals[day][branch].get('total_visa',0.0) + totals[day][branch].get('cash',0.0)"/>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td t-att-colspan="len(visas) + 7">
-                                            عدد اوردرات المبيعات
-                                        </td>
-                                        <td colspan="1">
-                                            <t t-esc="return_data.get(day,{}).get(branch,{}).get('normal',0)"/>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td t-att-colspan="len(visas) + 7">
-                                            عدد الاوردرات المرتجعة
-                                        </td>
-                                        <td colspan="1">
-                                            <t t-esc="return_data.get(day,{}).get(branch,{}).get('return',0)"/>
-                                        </td>
-                                    </tr>
-                                </table>
-                                <br/>
-                                <br/>
-                            </t>
+                                    </t>
+                                    <td>
+                                        <t t-esc="totals[day].get('total_visa',0.0)"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="totals[day].get('loss',0.0)"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="totals[day].get('gain',0.0)"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="totals[day].get('total_visa',0.0) + totals[day].get('cash',0.0)"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td t-att-colspan="len(visas) + 7">
+                                        عدد اوردرات المبيعات
+                                    </td>
+                                    <td colspan="1">
+                                        <t t-esc="return_data.get(day,{}).get('normal',0)"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td t-att-colspan="len(visas) + 7">
+                                        عدد الاوردرات المرتجعة
+                                    </td>
+                                    <td colspan="1">
+                                        <t t-esc="return_data.get(day,{}).get('return',0)"/>
+                                    </td>
+                                </tr>
+                            </table>
+                            <br/>
+                            <br/>
+                            <!--                            </t>-->
                         </t>
                     </div>
 

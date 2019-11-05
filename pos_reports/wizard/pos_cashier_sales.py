@@ -46,19 +46,19 @@ class PosCashierSales(models.TransientModel):
             end_date = datetime.combine(current_start, end_time)
             day_str = current_start.strftime('%Y/%m/%d')
 
-            for branch in branches:
-                orders = self.env['pos.order'].search(
-                    [('session_id.stop_at', '>=', current_start), ('session_id.stop_at', '<=', end_date),('config_id.pos_branch_id','=',branch.id)])
-                return_lines = orders.mapped('lines').filtered(lambda l:l.qty <= 0)
-                return_orders = return_lines.mapped('order_id')
-                non_return_orders = orders - return_orders
-                branch_name = branch.name
-                data.setdefault(day_str, {})
-                data[day_str].setdefault(branch_name, {})
-                data[day_str][branch_name].setdefault('return', 0)
-                data[day_str][branch_name].setdefault('normal', 0)
-                data[day_str][branch_name]['return'] += len(return_orders)
-                data[day_str][branch_name]['normal'] += len(non_return_orders)
+            # for branch in branches:
+            orders = self.env['pos.order'].search(
+                [('session_id.stop_at', '>=', current_start), ('session_id.stop_at', '<=', end_date),('config_id.pos_branch_id','in',branches.ids)])
+            return_lines = orders.mapped('lines').filtered(lambda l:l.qty <= 0)
+            return_orders = return_lines.mapped('order_id')
+            non_return_orders = orders - return_orders
+            # branch_name = branch.name
+            data.setdefault(day_str, {})
+            # data[day_str].setdefault(branch_name, {})
+            data[day_str].setdefault('return', 0)
+            data[day_str].setdefault('normal', 0)
+            data[day_str]['return'] += len(return_orders)
+            data[day_str]['normal'] += len(non_return_orders)
             current_start = current_start + relativedelta(days=1)
 
         return data
@@ -132,14 +132,14 @@ class PosCashierSales(models.TransientModel):
                 current_dic['total_visa'] += amount
                 current_dic['visas'][journal_name] = amount
 
-                totals[day_str][branch_name].setdefault(journal_name, 0)
-                totals[day_str][branch_name][journal_name] += amount
-                totals[day_str][branch_name]['total_visa'] += amount
+                totals[day_str].setdefault(journal_name, 0)
+                totals[day_str][journal_name] += amount
+                totals[day_str]['total_visa'] += amount
                 visas |= set([journal_name])
             elif journal.type == 'cash':
                 current_dic['total_cash'] += amount
 
-                totals[day_str][branch_name]['cash'] += amount
+                totals[day_str]['cash'] += amount
         dates = list(set(data.keys()))
         dates.sort(key=lambda d: d)
         los_gain_data = self.get_loss_gain()
@@ -158,8 +158,8 @@ class PosCashierSales(models.TransientModel):
             self.set_defaults(day_str, branch_name, user_name, data, totals)
             data[day_str][branch_name][user_name]['gain'] = gain
             data[day_str][branch_name][user_name]['loss'] = loss
-            totals[day_str][branch_name]['gain'] += gain
-            totals[day_str][branch_name]['loss'] += loss
+            totals[day_str]['gain'] += gain
+            totals[day_str]['loss'] += loss
 
         return data, list(visas), totals, dates , return_data
 
@@ -174,11 +174,11 @@ class PosCashierSales(models.TransientModel):
         current_dic.setdefault('visas', {})
 
         total_data.setdefault(day_str, {})
-        total_data[day_str].setdefault(branch_name, {})
-        total_data[day_str][branch_name].setdefault('cash', 0)
-        total_data[day_str][branch_name].setdefault('total_visa', 0)
-        total_data[day_str][branch_name].setdefault('loss', 0)
-        total_data[day_str][branch_name].setdefault('gain', 0)
+        # total_data[day_str].setdefault(branch_name, {})
+        total_data[day_str].setdefault('cash', 0)
+        total_data[day_str].setdefault('total_visa', 0)
+        total_data[day_str].setdefault('loss', 0)
+        total_data[day_str].setdefault('gain', 0)
 
     @api.multi
     def action_print_excel_file(self):
@@ -270,33 +270,34 @@ class PosCashierSales(models.TransientModel):
         visas_len = len(visas)
         row += 2
         for day in dates:
+            col = 0
+            row += 2
+            worksheet.write_merge(row, row + 1, col, col, _('التاريخ'), header_format)
+            col += 1
+            worksheet.write_merge(row, row + 1, col, col, _('الفرع'), header_format)
+            col += 1
+            worksheet.write_merge(row, row + 1, col, col, _('اسم الكاشير'), header_format)
+            col += 1
+            worksheet.write_merge(row, row + 1, col, col, _('المقبوضات'), header_format)
+            col += 1
+            if visas_len:
+                worksheet.write_merge(row, row, col, col + visas_len - 1, _('الفيزا'), header_format)
+                col += visas_len
+            worksheet.write_merge(row, row + 1, col, col, _('اجمالى الفيزا'), header_format)
+            col += 1
+            worksheet.write_merge(row, row + 1, col, col, _('العجز'), header_format)
+            col += 1
+            worksheet.write_merge(row, row + 1, col, col, _('الزيادة'), header_format)
+            col += 1
+            worksheet.write_merge(row, row + 1, col, col, _('اجمالى المبيعات'), header_format)
+            col += 1
+            row += 1
+            col = 3
+            for v in visas:
+                col += 1
+                worksheet.write(row, col, v, header_format)
 
             for branch in data[day]:
-                col = 0
-                worksheet.write_merge(row, row + 1, col, col, _('التاريخ'), header_format)
-                col += 1
-                worksheet.write_merge(row, row + 1, col, col, _('الفرع'), header_format)
-                col += 1
-                worksheet.write_merge(row, row + 1, col, col, _('اسم الكاشير'), header_format)
-                col += 1
-                worksheet.write_merge(row, row + 1, col, col, _('المقبوضات'), header_format)
-                col += 1
-                if visas_len:
-                    worksheet.write_merge(row, row, col, col + visas_len - 1, _('الفيزا'), header_format)
-                    col += visas_len
-                worksheet.write_merge(row, row + 1, col, col, _('اجمالى الفيزا'), header_format)
-                col += 1
-                worksheet.write_merge(row, row + 1, col, col, _('العجز'), header_format)
-                col += 1
-                worksheet.write_merge(row, row + 1, col, col, _('الزيادة'), header_format)
-                col += 1
-                worksheet.write_merge(row, row + 1, col, col, _('اجمالى المبيعات'), header_format)
-                col += 1
-                row += 1
-                col = 3
-                for v in visas:
-                    col += 1
-                    worksheet.write(row, col, v, header_format)
 
                 for user in data[day][branch]:
                     user_data = data[day][branch][user]
@@ -328,43 +329,43 @@ class PosCashierSales(models.TransientModel):
                     col += 1
                     worksheet.write(row, col, total, STYLE_LINE_Data)
 
-                row += 1
-                col = 0
-                total_visa = totals[day][branch].get('total_visa', 0.0)
-                total_cash = totals[day][branch].get('cash', 0.0)
-                total_loss = totals[day][branch].get('loss', 0.0)
-                total_gain = totals[day][branch].get('gain', 0.0)
-                total_amount = total_visa + total_cash
-                worksheet.write(row, col, _('الاجمالي'), STYLE_LINE_Data)
+            row += 1
+            col = 0
+            total_visa = totals[day].get('total_visa', 0.0)
+            total_cash = totals[day].get('cash', 0.0)
+            total_loss = totals[day].get('loss', 0.0)
+            total_gain = totals[day].get('gain', 0.0)
+            total_amount = total_visa + total_cash
+            # worksheet.write(row, col, _('الاجمالي'), STYLE_LINE_Data)
+            # col += 1
+            worksheet.write_merge(row, row, col, col + 2,  'الاجمالي ', STYLE_LINE_Data)
+            col += 3
+            worksheet.write(row, col, totals[day].get('cash', 0.0), STYLE_LINE_Data)
+            for v in visas:
                 col += 1
-                worksheet.write_merge(row, row, col, col + 1, branch + 'فرع ', STYLE_LINE_Data)
-                col += 2
-                worksheet.write(row, col, totals[day][branch].get('cash', 0.0), STYLE_LINE_Data)
-                for v in visas:
-                    col += 1
-                    worksheet.write(row, col, totals[day][branch].get(v, 0.0), STYLE_LINE_Data)
+                worksheet.write(row, col, totals[day].get(v, 0.0), STYLE_LINE_Data)
 
-                col += 1
-                worksheet.write(row, col, total_visa, STYLE_LINE_Data)
-                col += 1
-                worksheet.write(row, col, total_loss, STYLE_LINE_Data)
-                col += 1
-                worksheet.write(row, col, total_gain, STYLE_LINE_Data)
-                col += 1
-                worksheet.write(row, col, total_amount, STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, total_visa, STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, total_loss, STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, total_gain, STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, total_amount, STYLE_LINE_Data)
 
-                width = col - 1
-                col = 0
-                row += 1
-                worksheet.write_merge(row,row, col,col + width, _('عدد اوردرات المبيعات'), STYLE_LINE_Data)
-                col += width + 1
-                worksheet.write(row, col, return_data.get(day,{}).get(branch,{}).get('normal',0), STYLE_LINE_Data)
-                col = 0
-                row += 1
-                worksheet.write_merge(row,row, col,col + width, _('عدد الاوردرات المرتجعة'), STYLE_LINE_Data)
-                col += width + 1
-                worksheet.write(row, col, return_data.get(day,{}).get(branch,{}).get('return',0), STYLE_LINE_Data)
-                row += 2
+            width = col - 1
+            col = 0
+            row += 1
+            worksheet.write_merge(row,row, col,col + width, _('عدد اوردرات المبيعات'), STYLE_LINE_Data)
+            col += width + 1
+            worksheet.write(row, col, return_data.get(day,{}).get('normal',0), STYLE_LINE_Data)
+            col = 0
+            row += 1
+            worksheet.write_merge(row,row, col,col + width, _('عدد الاوردرات المرتجعة'), STYLE_LINE_Data)
+            col += width + 1
+            worksheet.write(row, col, return_data.get(day,{}).get('return',0), STYLE_LINE_Data)
+            row += 2
 
         output = BytesIO()
         if data:

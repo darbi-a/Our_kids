@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <record id="view_report_vendor_aged_payable_cash_report_wizard_form" model="ir.ui.view">
+            <field name="name">vendor.aged.payable.cash.report.wizard.form</field>
+            <field name="model">vendor.aged.payable.cash.report.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="date_from" />
+                            <field name="date_to" />
+                            <field name="partner_ids" widget="many2many_tags"/>
+                            <field name="tag_ids" widget="many2many_tags"/>
+                            <field name="type" widget="radio"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="action_print"   string="Print" type="object" class="oe_highlight"/>
+                        <button string="Cancel" special="cancel" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+        <record id="view_report_vendor_aged_payable_cash_report_wizard_action" model="ir.actions.act_window">
+            <field name="name">Aged Payable Cash</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">vendor.aged.payable.cash.report.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <menuitem id="menuitem_report_vendor_aged_payable_cash_report_wizard" name="Aged Payable Cash" parent="account_reports.account_reports_partners_reports_menu" action="view_report_vendor_aged_payable_cash_report_wizard_action" sequence="10"/>
+    
+    </data>
+</odoo>

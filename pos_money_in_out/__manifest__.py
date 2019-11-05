@@ -14,8 +14,8 @@
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
     # for the full list
-    'category': 'POS',
-    'version': '12.1',
+    'category': 'Point Of Sale',
+    'version': '12.2',
 
     # any module necessary for this one to work correctly
     'depends': ['base','point_of_sale','account'],

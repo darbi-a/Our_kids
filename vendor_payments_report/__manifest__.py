@@ -18,6 +18,7 @@
     # always loaded
     'data': [
         'views/account_journal.xml',
+        'views/res_partner.xml',
         'wizard/vendor_payments.xml',
         'report/report_vendor_payments.xml',
     ],

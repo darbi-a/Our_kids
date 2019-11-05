@@ -65,3 +65,12 @@ class PosConfig(models.Model):
                     int(item)
                 except Exception as e:
                     raise ValidationError(_("The unlock global discount password should be a number"))
+
+    @api.constrains('inactive_orders_pwd')
+    def check_inactive_orders_pwd(self):
+        if self.lock_inactive_orders is True:
+            for item in str(self.inactive_orders_pwd):
+                try:
+                    int(item)
+                except Exception as e:
+                    raise ValidationError(_("The inactive orders password should be a number"))

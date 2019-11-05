@@ -16,10 +16,10 @@
                     <field name="from_other_vendor" invisible="True"/>
                 </xpath>
 
-                <xpath expr="//field[@name='order_line']/tree" position="inside">
-                    <button name="action_open_other_lines" string="View From Other Vendors" type="object" class="oe_highlight"
-                            attrs="{'invisible':[('from_other_vendor','!=',True)]}"/>
-                </xpath>
+<!--                <xpath expr="//field[@name='order_line']/tree" position="inside">-->
+<!--                    <button name="action_open_other_lines" string="View From Other Vendors" type="object" class="oe_highlight"-->
+<!--                            attrs="{'invisible':[('from_other_vendor','!=',True)]}"/>-->
+<!--                </xpath>-->
 
                 <xpath expr="//field[@name='order_line']/tree" position="attributes">
                     <attribute name="decoration-danger">profit_percentage &gt; percentage</attribute>

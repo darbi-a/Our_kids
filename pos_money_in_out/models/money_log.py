@@ -17,6 +17,8 @@ class box_log(models.Model):
     journal_id = fields.Many2one(comodel_name="account.journal", domain=[('pos_money_log', '=', True)],
                                  string="Journal", required=True, )
     session_id = fields.Many2one(comodel_name="pos.session", string="Session", required=False, )
+    config_id = fields.Many2one(comodel_name="pos.config", string="Point Of Sale", required=False, )
+
 class box_in_type(models.Model):
     _name = 'box.in.type'
     _rec_name = 'name'

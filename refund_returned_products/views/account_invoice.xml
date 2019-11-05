@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="invoice_supplier_form" model="ir.ui.view">
+            <field name="name">account.invoice.supplier.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="priority">20</field>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='invoice_line_ids']//tree//field[@name='account_id']" position="after">
+                    <field name="return_picking_id" invisible="True"/>
+                </xpath>
+
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name="available_pickings" invisible="True"/>
+                    <field name="return_picking_ids" widget="many2many_tags"
+                           attrs="{'invisible': ['|',('type' ,'!=', 'in_refund'),('partner_id' ,'=', False)],'readonly': [('state' ,'!=', 'draft')]}"
+                           options="{'no_open':True,'no_create':True}" domain="[('id','in',available_pickings)]"/>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="view_invoice_line_form" model="ir.ui.view">
+            <field name="name">account.invoice.line.form</field>
+            <field name="model">account.invoice.line</field>
+            <field name="inherit_id" ref="account.view_invoice_line_form"/>
+
+            <field name="arch" type="xml">
+                <field name="discount" position="after">
+                    <field name="return_picking_id" invisible="True"/>
+                </field>
+            </field>
+        </record>
+
+    </data>
+</odoo>

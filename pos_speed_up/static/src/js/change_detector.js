@@ -184,6 +184,7 @@ odoo.define('pos_speed_up.change_detector', function (require) {
             rpc.query({
                 model: 'product.index',
                 method: 'sync_not_reload',
+                context: {location:self.pos.config.stock_location_id[0]},
                 args: [client_version, model.fields]
             }).then(function (res) {
                 localStorage.setItem('product_index_version', res['latest_version']);

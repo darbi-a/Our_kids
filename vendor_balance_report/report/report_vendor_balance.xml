@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+
+        <report
+                id="report_vendor_balance"
+                model="vendor.balance.report.wizard"
+                report_type="qweb-html"
+                string="Vendor Balance Report"
+                name="vendor_balance_report.report_vendor_balance"
+                file="vendor_balance_report.report_vendor_balance"
+        />
+
+
+        <template id="report_vendor_balance">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page" dir="rtl">
+                        <h2 class="text-center">تقرير مديونية موردي الامانات</h2>
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>التاريخ :</strong>
+                                <p t-esc="date"/>
+                            </div>
+                            <div class="col-6">
+                                <t t-if="tags">
+                                    <strong>نوع الموردين:</strong>
+                                    <p t-esc="tags"/>
+                                </t>
+                            </div>
+                        </div>
+
+                        <table style="text-align:right;" class="table table-bordered">
+                            <tr>
+                                <th>تسلسل</th>
+                                <th>اسم المورد</th>
+                                <th>رقم المورد</th>
+                                <t t-if="season">
+                                    <th>مدفوعات السيزون</th>
+                                </t>
+                                <t t-else="">
+                                    <th>الرصيد</th>
+                                </t>
+
+                                <th>الجرد</th>
+                                <th>المستحق</th>
+                                <th>النوع</th>
+                            </tr>
+                            <t t-set="i" t-value="0" />
+                            <t t-foreach="data" t-as="d">
+                                <t t-set="i" t-value="i+1" />
+                                <tr>
+                                    <td>
+                                        <t t-esc="i"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d['partner_name']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d['vendor_num']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="round(d['balance'],0)"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="round(d['stock_evaluation'],0)"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="round(d['due'],0)"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d['tags']"/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td colspan="5">الاجمالي</td>
+                                <td><t t-esc="round(total_deserved,0)" /></td>
+                                <td></td>
+                            </tr>
+                        </table>
+
+                    </div>
+
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>

@@ -15,7 +15,7 @@
 
         <template id="report_pos_totals">
             <t t-call="web.html_container">
-                <t t-foreach="branches" t-as="b">
+<!--                <t t-foreach="branches" t-as="b">-->
                     <t t-set="total_cash" t-value="0"/>
                     <t t-set="total_amount" t-value="0"/>
                     <t t-set="total_bank" t-value="0"/>
@@ -25,7 +25,7 @@
                             <div class="row mt32 mb32">
                                 <div class="col-4">
                                     <strong>الفرع:</strong>
-                                    <p t-esc="b"/>
+                                    <p t-esc="branch_names"/>
                                 </div>
                                 <div class="col-4">
                                     <strong>التاريخ من:</strong>
@@ -49,7 +49,7 @@
                                 <t t-foreach="range(0,l)" t-as="i">
                                     <tr>
                                         <t t-set="month_name" t-value="monthes[k]"/>
-                                        <t t-set="month_data" t-value="branches[b][month_name]"/>
+                                        <t t-set="month_data" t-value="branches[month_name]"/>
                                         <t t-set="total_cash" t-value="total_cash + month_data['cash']"/>
                                         <t t-set="total_amount" t-value="total_amount + month_data['total_amount']"/>
                                         <t t-set="total_bank" t-value="total_bank + month_data['bank']"/>
@@ -96,7 +96,7 @@
                         </div>
 
                     </t>
-                </t>
+<!--                </t>-->
             </t>
         </template>
 

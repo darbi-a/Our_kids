@@ -12,6 +12,7 @@
                  <field name="vendor_color" />
                  <field name="categ_num" />
             </xpath>
+
             
         </field>
     </record>

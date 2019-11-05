@@ -27,6 +27,7 @@ class ImportPurchaseOrder(models.TransientModel):
     file_name = fields.Char('File Name')
     partner_ref = fields.Char('Vendor Reference')
     partner_id = fields.Many2one('res.partner', string='Vendor', required=True,domain=[('supplier', '=', True)])
+    tax_lines = fields.Many2many(comodel_name="account.tax", string="Line Tax",domain=[('type_tax_use', '=', 'purchase')],  )
 
     picking_type_id = fields.Many2one('stock.picking.type', 'Deliver To', required=True,default=_default_picking_type, help="This will determine operation type of incoming shipment")
 
@@ -79,6 +80,7 @@ class ImportPurchaseOrder(models.TransientModel):
             'partner_id': self.partner_id.id,
             'partner_ref': self.partner_ref,
             'picking_type_id': self.picking_type_id.id,
+            'tax_lines': [(6, 0, self.tax_lines.ids)],
             'date_planned': datetime.now(),
         }
         purchase_order_id = purchase_order_obj.create(vals)
@@ -90,10 +92,13 @@ class ImportPurchaseOrder(models.TransientModel):
             quantity = line.get('quantity',0)
             price_unit = self.get_valid_price(line.get('price',""),cont)
             product_uom = product_template_obj.search([('barcode','=',code)])
+            # ids = self.order_id.tax_lines.ids
+            # self.taxes_id = [(6, 0, ids)]
             if purchase_order_id and product_id:
                 vals = {
                     'order_id': purchase_order_id.id,
                     'product_id': product_id.id,
+                    'taxes_id': [(6, 0, purchase_order_id.tax_lines.ids)],
                     'product_qty': float(quantity),
                     'price_unit': price_unit,
                     'date_planned': datetime.now(),

@@ -34,15 +34,21 @@ class PosLosGain(models.TransientModel):
 
 
     def get_report_data(self):
-        data = {}
+        data = []
+        totals = {
+            'loss': 0,
+            'gain': 0,
+            'total': 0,
+        }
         if self.date_from and self.date_to and self.date_from > self.date_to:
             raise ValidationError(_('Date from must be before date to!'))
-        branch_ids = self.branches_ids.ids or self.env['pos.branch'].search([]).ids
+        branches = self.branches_ids or self.env['pos.branch'].search([])
+        branch_ids = branches.ids
         end_date = self.date_to
         end_time = datetime.max.time()
         end_date = datetime.combine(end_date, end_time)
         _sql_query = """
-        select c.pos_branch_id as branch_id,s.user_id,date_trunc('day',stop_at) as stop,
+        select s.user_id,date_trunc('day',stop_at) as stop,
          sum(CASE when stl.amount < 0 THEN -1*stl.amount END) as loss,
          sum(CASE when stl.amount > 0 THEN stl.amount END) as gain
             from pos_session s
@@ -51,41 +57,46 @@ class PosLosGain(models.TransientModel):
             join pos_config c on s.config_id = c.id
         where s.state = 'closed' and s.stop_at >= %s and  s.stop_at <= %s 
         and stl.pos_statement_id is NULL and stl.ref is NULL and c.pos_branch_id in %s
-        group by stop,s.user_id,branch_id
-        order by branch_id,stop,s.user_id
+        group by stop,s.user_id
+        order by stop,s.user_id
         """
         self._cr.execute(_sql_query,(self.date_from,end_date,tuple(branch_ids)))
         for r in self._cr.fetchall():
-            branch_id = r[0]
-            user_id = r[1]
-            day = r[2]
-            loss = r[3] or 0.0
-            gain = r[4] or 0.0
+            # branch_id = r[0]
+            user_id = r[0]
+            day = r[1]
+            loss = r[2] or 0.0
+            gain = r[3] or 0.0
             day_str = day.strftime('%Y/%m/%d')
-            branch = self.env['pos.branch'].browse(branch_id)
+            # branch = self.env['pos.branch'].browse(branch_id)
             user = self.env['res.users'].browse(user_id)
-            branch_name = branch.name
-            data.setdefault(branch_name,[])
+            # branch_name = branch.name
+            # data.setdefault(branch_name,[])
             # gain = difference if difference > 0 else 0
             # loss = difference if difference < 0 else 0
-            data[branch_name].append((day_str,user.name, gain, loss ))
-
-        return data
+            data.append((day_str,user.name, gain, loss ))
+            totals['loss'] += loss
+            totals['gain'] += gain
+            totals['total'] += gain - loss
+        branch_names = ' - '.join(branches.mapped('name'))
+        return data,totals,branch_names
 
     @api.multi
     def action_print_pdf(self):
-        data = self.get_report_data()
+        data,totals,branch_names = self.get_report_data()
         result={
             'branches':data,
+            'totals':totals,
             'date_from':self.date_from,
             'date_to':self.date_to,
+            'branch_names':branch_names
         }
         return self.env.ref('pos_reports.pos_los_gain_report').report_action([], data=result)
 
     @api.multi
     def action_print_excel_file(self):
         self.ensure_one()
-        data = self.get_report_data()
+        data,totals,branch_names = self.get_report_data()
         workbook = xlwt.Workbook()
         TABLE_HEADER = xlwt.easyxf(
             'font: bold 1, name Tahoma, color-index black,height 160;'
@@ -151,57 +162,73 @@ class PosLosGain(models.TransientModel):
         STYLE_LINE_Data = STYLE_LINE
         STYLE_LINE_Data.num_format_str = '#,##0.00_);(#,##0.00)'
 
-        for branch in data:
-            worksheet = workbook.add_sheet(_(branch))
-            lang = self.env.user.lang
-            if lang == "ar_SY":
-                worksheet.cols_right_to_left = 1
+        # for branch in data:
+        worksheet = workbook.add_sheet(_('تقرير ارباح وخسائر بالكاشير'))
+        lang = self.env.user.lang
+        if lang == "ar_SY":
+            worksheet.cols_right_to_left = 1
 
-            worksheet.col(0).width = 256 * 10
-            worksheet.col(1).width = 256 * 50
-            worksheet.col(2).width = 256 * 30
-            row = 0
-            col = 0
-            worksheet.write_merge(row,row,col,col+3,_('تقرير ارباح وخسائر بالكاشير'),STYLE_LINE_Data)
+        worksheet.col(0).width = 256 * 10
+        worksheet.col(1).width = 256 * 50
+        worksheet.col(2).width = 256 * 30
+        row = 0
+        col = 0
+        worksheet.write_merge(row,row,col,col+3,_('تقرير ارباح وخسائر بالكاشير'),STYLE_LINE_Data)
+        row += 1
+        worksheet.write(row,col,_('التاريخ من'),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,str(self.date_from),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,_('التاريخ الى'),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,str(self.date_to),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,_('الفرع'),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,branch_names,STYLE_LINE_Data)
+        col += 1
+
+        row += 2
+        col = 0
+        worksheet.write(row, col, _('التاريخ'), header_format)
+        col += 1
+        worksheet.write(row, col, _('اسم الكاشير'), header_format)
+        col += 1
+        worksheet.write(row, col, _('العجز'), header_format)
+        col += 1
+        worksheet.write(row, col, _('الزيادة'), header_format)
+        col += 1
+        worksheet.write(row, col, _('الاجمالي'), header_format)
+        col += 1
+        # branch_data = data[branch]
+        branch_data = data
+        for d in branch_data:
+            # month_sart = month[0]
+            # # month_name = month_sart.strftime('%Y-%B')
+            # month_name = format_date(date=month_sart, format='MMMM-y',locale='ar')
             row += 1
-            worksheet.write(row,col,_('التاريخ من'),STYLE_LINE_Data)
+            col = 0
+            worksheet.write(row, col, d[0], STYLE_LINE_Data)
             col += 1
-            worksheet.write(row,col,str(self.date_from),STYLE_LINE_Data)
+            worksheet.write(row, col, d[1], STYLE_LINE_Data)
             col += 1
-            worksheet.write(row,col,_('التاريخ الى'),STYLE_LINE_Data)
+            worksheet.write(row, col, abs(d[3]), STYLE_LINE_Data)
             col += 1
-            worksheet.write(row,col,str(self.date_to),STYLE_LINE_Data)
+            worksheet.write(row, col, abs(d[2]), STYLE_LINE_Data)
             col += 1
-            worksheet.write(row,col,_('الفرع'),STYLE_LINE_Data)
-            col += 1
-            worksheet.write(row,col,branch,STYLE_LINE_Data)
+            worksheet.write(row, col, d[2] - d[3], STYLE_LINE_Data)
             col += 1
 
-            row += 2
-            col = 0
-            worksheet.write(row, col, _('التاريخ'), header_format)
-            col += 1
-            worksheet.write(row, col, _('اسم الكاشير'), header_format)
-            col += 1
-            worksheet.write(row, col, _('العجز'), header_format)
-            col += 1
-            worksheet.write(row, col, _('الزيادة'), header_format)
-            col += 1
-            branch_data = data[branch]
-            for d in branch_data:
-                # month_sart = month[0]
-                # # month_name = month_sart.strftime('%Y-%B')
-                # month_name = format_date(date=month_sart, format='MMMM-y',locale='ar')
-                row += 1
-                col = 0
-                worksheet.write(row, col, d[0], STYLE_LINE_Data)
-                col += 1
-                worksheet.write(row, col, d[1], STYLE_LINE_Data)
-                col += 1
-                worksheet.write(row, col, abs(d[3]), STYLE_LINE_Data)
-                col += 1
-                worksheet.write(row, col, abs(d[2]), STYLE_LINE_Data)
-                col += 1
+        col = 0
+        row += 1
+        worksheet.write_merge(row, row, col,  col+1, _('الاجمالي'), STYLE_LINE_Data)
+        col += 2
+        worksheet.write(row, col, totals['loss'], STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row, col, totals['gain'], STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row, col, totals['total'], STYLE_LINE_Data)
+
 
         output = BytesIO()
         if data:

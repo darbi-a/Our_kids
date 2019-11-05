@@ -15,14 +15,14 @@
 
         <template id="report_pos_los_gain">
             <t t-call="web.html_container">
-                <t t-foreach="branches" t-as="b">
+<!--                <t t-foreach="branches" t-as="b">-->
                     <t t-call="web.external_layout">
                         <div class="page" dir="rtl">
                             <h2 class="text-center">تقرير ارباح وخسائر بالكاشير</h2>
                             <div class="row mt32 mb32">
                                 <div class="col-4">
                                     <strong>الفرع:</strong>
-                                    <p t-esc="b"/>
+                                    <p t-esc="branch_names"/>
                                 </div>
                                 <div class="col-4">
                                     <strong>التاريخ من:</strong>
@@ -40,8 +40,10 @@
                                     <th>اسم الكاشير</th>
                                     <th>العجز</th>
                                     <th>الزيادة</th>
+                                    <th>الاجمالي</th>
                                 </tr>
-                                <t t-foreach="branches[b]" t-as="d">
+<!--                                <t t-foreach="branches[b]" t-as="d">-->
+                                <t t-foreach="branches" t-as="d">
                                     <tr>
                                         <td>
                                             <t t-raw="d[0]"/>
@@ -55,22 +57,25 @@
                                         <td>
                                             <t t-esc="abs(d[2])"/>
                                         </td>
+                                        <td>
+                                            <t t-esc="d[2]  - d[3]"/>
+                                        </td>
                                     </tr>
                                 </t>
-<!--                                <tr>-->
-<!--                                    <td>-->
-<!--                                        <span>الاجمالي</span>-->
-<!--                                    </td>-->
-<!--                                    <td>-->
-<!--                                        <t t-esc="total_cash"/>-->
-<!--                                    </td>-->
-<!--                                    <td>-->
-<!--                                        <t t-esc="total_bank"/>-->
-<!--                                    </td>-->
-<!--                                    <td>-->
-<!--                                        <t t-esc="total_amount"/>-->
-<!--                                    </td>-->
-<!--                                </tr>-->
+                                <tr>
+                                    <td colspan="2">
+                                        <span>الاجمالي</span>
+                                    </td>
+                                    <td>
+                                        <t t-esc="totals['loss']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="totals['gain']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="totals['total']"/>
+                                    </td>
+                                </tr>
                             </table>
 <!--                            <br/>-->
 <!--                            <div>-->
@@ -83,7 +88,7 @@
                         </div>
 
                     </t>
-                </t>
+<!--                </t>-->
             </t>
         </template>
 

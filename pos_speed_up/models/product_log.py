@@ -65,8 +65,9 @@ class ProductLog(models.Model):
 
     @api.multi
     def write(self, values):
-        if self.ids:
-            self.env['product.index'].create({'updated': ','.join([str(x) for x in self.ids])})
+        if not(len(values) == 1 and ('unit_cost' in values or 'standard_price' in values)) :
+            if self.ids:
+                self.env['product.index'].create({'updated': ','.join([str(x) for x in self.ids])})
         return super(ProductLog, self).write(values)
 
     @api.multi

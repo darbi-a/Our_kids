@@ -11,6 +11,7 @@
                         <group>
                             <field name="date_from" />
                             <field name="date_to"/>
+                            <field name="vendor_type" required="True" widget="radio"/>
                             <field name="type" widget="radio"/>
                         </group>
                     </sheet>

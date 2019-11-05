@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+
+        <report
+                id="retail_sales_report"
+                model="retail.sales.report.wizard"
+                report_type="qweb-html"
+                string="Retail Sales Report"
+                name="retail_sales_report.report_retail_sales"
+                file="retail_sales_report.report_retail_sales"
+        />
+
+
+        <template id="report_retail_sales">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page" dir="rtl">
+                        <h2 class="text-center">تقرير مبيعات مورد</h2>
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>التاريخ من:</strong>
+                                <p t-esc="date_from"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>التاريخ الى:</strong>
+                                <p t-esc="date_to"/>
+                            </div>
+                        </div>
+
+                        <table style="text-align:right;" class="table table-bordered">
+                            <tr>
+                                <th>اسم الفرع</th>
+                                <th> تصنيف المنتج</th>
+                                <th>باركود المنتج</th>
+                                <th>اسم المنتج</th>
+                                <th>الموسم</th>
+                                <th>اجمالي كمية المبيعات</th>
+                                <th>سعر البيع</th>
+                                <th>اجمالي المبيعات</th>
+                                <th>التخفيضات</th>
+                                <th>صافي المبيعات</th>
+                                <th>قيمة التكلفة</th>
+                                <th>اجمالي التكلفة</th>
+                                <th> البائع</th>
+                            </tr>
+                            <t t-set="previous_branch" t-value="'0'" />
+                            <t t-if="data">
+                                <t t-foreach="keys" t-as="key">
+                                    <t t-set="branch_id" t-value="docs.get_branch_id(key)" />
+                                    <t t-if="previous_branch != branch_id">
+                                        <tr>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td><t t-esc="round(totals.get(branch_id)['qty'],2)" /></td>
+                                            <td></td>
+                                            <td><t t-esc="round(totals.get(branch_id)['total_sales'],2)" /></td>
+                                            <td></td>
+                                            <td><t t-esc="round(totals.get(branch_id)['net'],2)" /></td>
+                                            <td></td>
+                                            <td><t t-esc="round(totals.get(branch_id)['total_cost'],2)" /></td>
+                                            <td></td>
+                                        </tr>
+                                        <t t-set="previous_branch" t-value="branch_id" />
+                                    </t>
+                                    <tr>
+                                        <td>
+                                            <t t-esc="data.get(key)['branch']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['categ']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['barcode']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['product']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['season']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(data.get(key)['qty'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(data.get(key)['sales_price'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(data.get(key)['total_sales'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(data.get(key)['discount'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(data.get(key)['net'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(data.get(key)['cost'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(data.get(key)['total_cost'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['cashier']"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                        </table>
+
+                    </div>
+
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>

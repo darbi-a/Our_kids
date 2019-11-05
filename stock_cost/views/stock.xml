@@ -34,7 +34,7 @@
         <field name="arch" type="xml">
 
              <xpath expr="//field[@name='name']" position="before">
-                <field name="unit_cost"/>
+                <field name="sale_price"/>
                 <field name="subtotal"/>
             </xpath>
 
@@ -48,7 +48,7 @@
 
 
             <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity_done']" position="after">
-                   <field name="unit_cost"/>
+                   <field name="sale_price"/>
                    <field name="subtotal"/>
             </xpath>
 

@@ -22,7 +22,7 @@
 
 {
     'name': 'Import Sale and Purchase Order XLS',
-    'version': '12.2',
+    'version': '12.3',
     'author': 'Falcon Solutions SpA,Ahmed Amin',
     'maintainer': 'Falcon Solutions',
     'website': 'http://www.falconsolutions.cl',

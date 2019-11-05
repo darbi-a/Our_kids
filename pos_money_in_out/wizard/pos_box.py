@@ -61,6 +61,9 @@ class CashBoxIn(models.TransientModel):
         active_id = context.get('active_id', [])
         print("self.journal_id active_ids==", active_id)
         print("self.journal_id in context==", context)
+        session_id = self.env['pos.session'].browse(active_id)
+        print("session_id == ",session_id)
+        print("session_id == ",session_id.config_id)
 
 
         self.env['box.log'].create({ 'name':self.name,
@@ -68,6 +71,7 @@ class CashBoxIn(models.TransientModel):
                                      'type':'in',
                                      'reason': self.money_in_type.name,
                                      'session_id':active_id,
+                                     'config_id':session_id.config_id.id,
                                      'amount':self.amount})
         return {
             'date': record.date,
@@ -102,11 +106,13 @@ class CashBoxOut(models.TransientModel):
         amount = self.amount or 0.0
         context = dict(self._context or {})
         active_id = context.get('active_id', [])
+        session_id = self.env['pos.session'].browse(active_id)
         self.env['box.log'].create({'name': self.name,
                          'journal_id': self.journal_id.id,
                          'reason': self.money_out_type.name,
                          'type': 'out',
                          'session_id': active_id,
+                         'config_id': session_id.config_id.id,
                          'amount': self.amount})
 
         print("self.journal_id out==", self.journal_id)

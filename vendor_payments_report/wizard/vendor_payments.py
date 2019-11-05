@@ -30,6 +30,8 @@ class VendorPaymentsWizard(models.TransientModel):
     date_from = fields.Date(required=True)
     date_to = fields.Date(required=True)
     type = fields.Selection(string="Report Type",default="xls", selection=[('xls', 'XLS'), ('pdf', 'PDF'), ], required=True, )
+    vendor_type = fields.Selection(default="consignment",
+                                   selection=[('consignment', 'Consignment'), ('cash', 'Cash'), ], required=False, )
 
 
     def get_report_data(self):
@@ -49,13 +51,14 @@ class VendorPaymentsWizard(models.TransientModel):
          sum(CASE j.type WHEN 'bank' THEN p.amount ELSE 0 END) as bank
             FROM account_payment p
             JOIN account_journal j ON p.journal_id = j.id
+            JOIN res_partner v ON p.partner_id = v.id
             WHERE p.state in ('posted','reconciled') AND p.payment_type = 'outbound' AND p.partner_type = 'supplier' 
                 AND p.partner_id IS NOT NULL AND j.downpayment_report IS TRUE AND j.type in ('bank','cash')
-                AND p.payment_date >= %s AND p.payment_date <= %s
+                AND p.payment_date >= %s AND p.payment_date <= %s AND v.vendor_type = %s
         GROUP BY p.partner_id
         ORDER BY p.partner_id
         """
-        self._cr.execute(_sql_query, (self.date_from, end_date))
+        self._cr.execute(_sql_query, (self.date_from, end_date,self.vendor_type))
         for r in self._cr.fetchall():
             partner_id = r[0]
             cash = r[1]

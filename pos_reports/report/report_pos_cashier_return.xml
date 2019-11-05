@@ -19,13 +19,17 @@
                     <div class="page" dir="rtl">
                         <h2 class="text-center">تقرير مرتجعات الكاشير</h2>
                         <div class="row mt32 mb32">
-                            <div class="col-6">
+                            <div class="col-4">
                                 <strong>التاريخ من:</strong>
                                 <p t-esc="date_from"/>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
                                 <strong>التاريخ الى:</strong>
                                 <p t-esc="date_to"/>
+                            </div>
+                            <div class="col-4">
+                                <strong>الفروع:</strong>
+                                <p t-esc="branch_names"/>
                             </div>
                         </div>
 
@@ -60,6 +64,10 @@
                                     </td>
                                 </tr>
                             </t>
+                            <tr>
+                                <td colspan="5">الاجمالي</td>
+                                <td><t t-esc="total_returns" /></td>
+                            </tr>
                         </table>
 
                     </div>

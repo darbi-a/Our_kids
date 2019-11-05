@@ -74,37 +74,40 @@ class TotalsReportWizard(models.TransientModel):
         else:
             branches = self.env['pos.branch'].search([])
 
-        for branch in branches:
-            data.setdefault('branches',{})
-            data['branches'].setdefault(branch.name,{})
-            for month in monthes:
-                start_month = month[0]
-                end_month = month[1]
-                month_name = month[2]
-                # month_name = month_sart.strftime('%Y-%B')
-                pos_sessions = self.env['pos.session'].search([
-                    ('state', '=', 'closed'),
-                    ('config_id.pos_branch_id', '=', branch.id),
-                    ('stop_at', '<=', end_month),
-                    ('stop_at', '>=', start_month)])
+        # for branch in branches:
+        data.setdefault('branches',{})
+        # data['branches'].setdefault(branch.name,{})
+        for month in monthes:
+            start_month = month[0]
+            end_month = month[1]
+            month_name = month[2]
+            # month_name = month_sart.strftime('%Y-%B')
+            pos_sessions = self.env['pos.session'].search([
+                ('state', '=', 'closed'),
+                ('config_id.pos_branch_id', 'in', branches.ids),
+                ('stop_at', '<=', end_month),
+                ('stop_at', '>=', start_month)])
 
-                statements = pos_sessions.mapped('statement_ids')
-                cash_statements = statements.filtered(lambda x: x.journal_id.type == 'cash')
-                bank_statements = statements.filtered(lambda x: x.journal_id.type == 'bank')
-                cash = sum(cash_statements.mapped('line_ids').filtered(lambda l:l.pos_statement_id.id != False).mapped('amount'))
-                bank = sum(bank_statements.mapped('line_ids').filtered(lambda l:l.pos_statement_id.id != False).mapped('amount'))
-                total_amount = cash + bank
-                total_cash += cash
-                total_bank += bank
-                total += total_amount
-                data['branches'][branch.name][month_name] = {
-                    'cash': cash,
-                    'bank': bank,
-                    'total_amount': total_amount,
-                }
+            statements = pos_sessions.mapped('statement_ids')
+            cash_statements = statements.filtered(lambda x: x.journal_id.type == 'cash')
+            bank_statements = statements.filtered(lambda x: x.journal_id.type == 'bank')
+            cash = sum(cash_statements.mapped('line_ids').filtered(lambda l:l.pos_statement_id.id != False).mapped('amount'))
+            bank = sum(bank_statements.mapped('line_ids').filtered(lambda l:l.pos_statement_id.id != False).mapped('amount'))
+            total_amount = cash + bank
+            total_cash += cash
+            total_bank += bank
+            total += total_amount
+            # data['branches'][branch.name][month_name] = {
+            data['branches'][month_name] = {
+                'cash': cash,
+                'bank': bank,
+                'total_amount': total_amount,
+            }
         for month in monthes:
             month_names.append(month[2])
         data['monthes'] = month_names
+        branch_names = ' - '.join(branches.mapped('name'))
+        data['branch_names'] = branch_names
         return data
 
     @api.multi
@@ -181,72 +184,72 @@ class TotalsReportWizard(models.TransientModel):
         STYLE_LINE_Data = STYLE_LINE
         STYLE_LINE_Data.num_format_str = '#,##0.00_);(#,##0.00)'
 
-        for branch in data['branches']:
-            date_from = data['date_from']
-            date_to = data['date_to']
-            worksheet = workbook.add_sheet(_(branch))
-            lang = self.env.user.lang
-            if lang == "ar_SY":
-                worksheet.cols_right_to_left = 1
+        # for branch in data['branches']:
+        date_from = data['date_from']
+        date_to = data['date_to']
+        worksheet = workbook.add_sheet(_('تقرير المبيعات بالاجماليات'))
+        lang = self.env.user.lang
+        if lang == "ar_SY":
+            worksheet.cols_right_to_left = 1
 
-            worksheet.col(0).width = 256 * 10
-            worksheet.col(1).width = 256 * 50
-            worksheet.col(2).width = 256 * 30
-            row = 0
-            col = 0
-            worksheet.write_merge(row,row,col,col+3,_('تقرير مبيعات عام بالاجماليات'),STYLE_LINE_Data)
-            row += 1
-            worksheet.write(row,col,_('التاريخ من'),STYLE_LINE_Data)
-            col += 1
-            worksheet.write(row,col,str(data['date_from']),STYLE_LINE_Data)
-            col += 1
-            worksheet.write(row,col,_('التاريخ الى'),STYLE_LINE_Data)
-            col += 1
-            worksheet.write(row,col,str(data['date_to']),STYLE_LINE_Data)
-            col += 1
-            worksheet.write(row,col,_('الفرع'),STYLE_LINE_Data)
-            col += 1
-            worksheet.write(row,col,branch,STYLE_LINE_Data)
-            col += 1
+        worksheet.col(0).width = 256 * 10
+        worksheet.col(1).width = 256 * 50
+        worksheet.col(2).width = 256 * 30
+        row = 0
+        col = 0
+        worksheet.write_merge(row,row,col,col+3,_('تقرير مبيعات عام بالاجماليات'),STYLE_LINE_Data)
+        row += 1
+        worksheet.write(row,col,_('التاريخ من'),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,str(data['date_from']),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,_('التاريخ الى'),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,str(data['date_to']),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,_('الفرع'),STYLE_LINE_Data)
+        col += 1
+        worksheet.write(row,col,data['branch_names'],STYLE_LINE_Data)
+        col += 1
 
-            row += 2
-            col = 0
-            worksheet.write(row, col, _('الشهر'), header_format)
-            col += 1
-            worksheet.write(row, col, _('النقدى'), header_format)
-            col += 1
-            worksheet.write(row, col, _('الفيزا'), header_format)
-            col += 1
-            worksheet.write(row, col, _('الاجمالى'), header_format)
-            col += 1
-            branch_data = data['branches'][branch]
-            total_amount = 0
-            total_bank = 0
-            total_cash = 0
-            for month in data['monthes']:
-                # month_sart = month[0]
-                # # month_name = month_sart.strftime('%Y-%B')
-                # month_name = format_date(date=month_sart, format='MMMM-y',locale='ar')
-                row += 1
-                col = 0
-                worksheet.write(row, col, month, STYLE_LINE_Data)
-                col += 1
-                total_cash += branch_data[month]['cash']
-                worksheet.write(row, col, branch_data[month]['cash'], STYLE_LINE_Data)
-                col += 1
-                total_bank += branch_data[month]['bank']
-                worksheet.write(row, col, branch_data[month]['bank'], STYLE_LINE_Data)
-                col += 1
-                total_amount += branch_data[month]['total_amount']
-                worksheet.write(row, col, branch_data[month]['total_amount'], STYLE_LINE_Data)
-                col += 1
-
+        row += 2
+        col = 0
+        worksheet.write(row, col, _('الشهر'), header_format)
+        col += 1
+        worksheet.write(row, col, _('النقدى'), header_format)
+        col += 1
+        worksheet.write(row, col, _('الفيزا'), header_format)
+        col += 1
+        worksheet.write(row, col, _('الاجمالى'), header_format)
+        col += 1
+        branch_data = data['branches']
+        total_amount = 0
+        total_bank = 0
+        total_cash = 0
+        for month in data['monthes']:
+            # month_sart = month[0]
+            # # month_name = month_sart.strftime('%Y-%B')
+            # month_name = format_date(date=month_sart, format='MMMM-y',locale='ar')
             row += 1
             col = 0
-            worksheet.write(row,col,_('الاجمالي'),STYLE_LINE_Data)
-            worksheet.write(row,col+1,total_cash,STYLE_LINE_Data)
-            worksheet.write(row,col+2,total_bank,STYLE_LINE_Data)
-            worksheet.write(row,col+3,total_amount,STYLE_LINE_Data)
+            worksheet.write(row, col, month, STYLE_LINE_Data)
+            col += 1
+            total_cash += branch_data[month]['cash']
+            worksheet.write(row, col, branch_data[month]['cash'], STYLE_LINE_Data)
+            col += 1
+            total_bank += branch_data[month]['bank']
+            worksheet.write(row, col, branch_data[month]['bank'], STYLE_LINE_Data)
+            col += 1
+            total_amount += branch_data[month]['total_amount']
+            worksheet.write(row, col, branch_data[month]['total_amount'], STYLE_LINE_Data)
+            col += 1
+
+        row += 1
+        col = 0
+        worksheet.write(row,col,_('الاجمالي'),STYLE_LINE_Data)
+        worksheet.write(row,col+1,total_cash,STYLE_LINE_Data)
+        worksheet.write(row,col+2,total_bank,STYLE_LINE_Data)
+        worksheet.write(row,col+3,total_amount,STYLE_LINE_Data)
 
         output = BytesIO()
 
