@@ -17,7 +17,7 @@
             <t t-call="web.html_container">
                 <t t-call="web.external_layout">
                     <div class="page" dir="rtl">
-                        <h2 class="text-center">تقرير مديونية موردي الامانات</h2>
+                        <h2 class="text-center">تقرير مبيعات موردين بواقع الجرد</h2>
                         <div class="row mt32 mb32">
                             <div class="col-6">
                                 <strong>التاريخ :</strong>
@@ -37,7 +37,10 @@
                                 <th>اسم المورد</th>
                                 <th>رقم المورد</th>
                                 <t t-if="season">
+                                    <th>مشتريات السيزون</th>
+                                    <th>مرتجعات السيزون</th>
                                     <th>مدفوعات السيزون</th>
+                                    <th>صافي رصيد السيزون</th>
                                 </t>
                                 <t t-else="">
                                     <th>الرصيد</th>
@@ -47,9 +50,9 @@
                                 <th>المستحق</th>
                                 <th>النوع</th>
                             </tr>
-                            <t t-set="i" t-value="0" />
+                            <t t-set="i" t-value="0"/>
                             <t t-foreach="data" t-as="d">
-                                <t t-set="i" t-value="i+1" />
+                                <t t-set="i" t-value="i+1"/>
                                 <tr>
                                     <td>
                                         <t t-esc="i"/>
@@ -60,23 +63,54 @@
                                     <td>
                                         <t t-esc="d['vendor_num']"/>
                                     </td>
+                                    <t t-if="season">
+                                        <td>
+                                            <t t-esc="round(d['purchases'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(d['refunds'],2)"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(d['pay_amount'],2)"/>
+                                        </td>
+                                    </t>
                                     <td>
-                                        <t t-esc="round(d['balance'],0)"/>
+                                        <t t-esc="round(d['balance'],2)"/>
                                     </td>
                                     <td>
-                                        <t t-esc="round(d['stock_evaluation'],0)"/>
+                                        <t t-esc="round(d['stock_evaluation'],2)"/>
                                     </td>
                                     <td>
-                                        <t t-esc="round(d['due'],0)"/>
+                                        <t t-esc="round(d['due'],2)"/>
                                     </td>
                                     <td>
                                         <t t-esc="d['tags']"/>
                                     </td>
                                 </tr>
                             </t>
-                            <tr>
-                                <td colspan="5">الاجمالي</td>
-                                <td><t t-esc="round(total_deserved,0)" /></td>
+                            <tr style="background-color:#d4d4d4">
+                                <td  colspan="3">الاجمالي</td>
+                                <t t-if="season">
+                                    <td>
+                                        <t t-esc="round(totals['purchases'],2)"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="round(totals['refunds'],2)"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="round(totals['pay_amount'],2)"/>
+                                    </td>
+                                </t>
+                                <td>
+                                    <t t-esc="round(totals['balance'],2)"/>
+                                </td>
+                                <td>
+                                    <t t-esc="round(totals['stock_evaluation'],2)"/>
+                                </td>
+                                <td>
+                                    <t t-esc="round(totals['due'],2)"/>
+                                </td>
+
                                 <td></td>
                             </tr>
                         </table>

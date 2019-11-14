@@ -9,10 +9,13 @@
                 <form>
                     <sheet>
                         <group>
-                            <field name="date_from" />
-                            <field name="date_to" />
+<!--                            <field name="date_from" />-->
+                            <field name="date" />
                             <field name="company_id" />
+                            <field name="product_internal_ref" />
+                            <field name="product_category_ids" widget="many2many_tags"/>
                             <field name="partner_ids" widget="many2many_tags"/>
+                            <field name="vendor_type" />
                             <field name="tag_ids" widget="many2many_tags"/>
                             <field name="warehouse_ids" widget="many2many_tags" domain="[('company_id','=',company_id)]"/>
                             <field name="season_ids" widget="many2many_tags"/>

@@ -278,7 +278,7 @@ class PosCashierSales(models.TransientModel):
             col += 1
             worksheet.write_merge(row, row + 1, col, col, _('اسم الكاشير'), header_format)
             col += 1
-            worksheet.write_merge(row, row + 1, col, col, _('المقبوضات'), header_format)
+            worksheet.write_merge(row, row + 1, col, col, _('المقبوضات النقدية'), header_format)
             col += 1
             if visas_len:
                 worksheet.write_merge(row, row, col, col + visas_len - 1, _('الفيزا'), header_format)

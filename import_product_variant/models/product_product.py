@@ -30,6 +30,7 @@ class ProductProduct(models.Model):
                         print("not seller ")
                         seller = self.env['product.supplierinfo'].create({
                                                         'product_id':rec.id,
+                                                        'product_tmpl_id':rec.product_tmpl_id.id,
                                                         'name':vendor.id,
                     })
                     print("seler = ",seller)
@@ -53,3 +54,12 @@ class ProductTemplate(models.Model):
     vendor_num = fields.Char(string="Vendor Number", required=False, )
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
+
+
+class SupplierInfo(models.Model):
+    _inherit = "product.supplierinfo"
+
+    product_uom = fields.Many2one(
+        'uom.uom', 'Unit of Measure',
+        related='product_id.uom_po_id',
+        help="This comes from the product form.")

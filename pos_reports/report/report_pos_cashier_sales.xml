@@ -36,9 +36,9 @@
                                     <th rowspan="2">التاريخ</th>
                                     <th rowspan="2">الفرع</th>
                                     <th rowspan="2">اسم الكاشير</th>
-                                    <th rowspan="2">المقبوضات</th>
+                                    <th rowspan="2">المقبوضات النقدية</th>
                                     <t t-if="visa_len and visas">
-                                        <th rowspan="1" colspan="visa_len">الفيزا</th>
+                                        <th rowspan="1" t-att-colspan="visa_len">الفيزا</th>
                                     </t>
                                     <th rowspan="2">اجمالى الفيزا</th>
                                     <th rowspan="2">العجز</th>
