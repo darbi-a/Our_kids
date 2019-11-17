@@ -18,7 +18,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ReportInventoryValuation(models.AbstractModel):
-    _name = 'report.inventory_valuation_report_vendor.report_stock_valuation'
+    _name = 'report.inventory_valuation_report_vendor.report_valuation'
     _description = 'Inventory Valuation Report'
 
     @api.multi
