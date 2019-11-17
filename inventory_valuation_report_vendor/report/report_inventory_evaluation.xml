@@ -8,8 +8,8 @@
                 model="inventory.valuation.report.wizard"
                 report_type="qweb-html"
                 string="Inventory Evaluation By Partner"
-                name="inventory_valuation_report_vendor.report_valuation"
-                file="inventory_valuation_report_vendor.report_valuation"
+                name="stock_report_vendor.report_valuation"
+                file="stock_report_vendor.report_valuation"
         />
 
 

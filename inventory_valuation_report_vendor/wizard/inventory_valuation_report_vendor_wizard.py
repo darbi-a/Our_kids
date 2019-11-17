@@ -367,7 +367,7 @@ class InventoryValuationReportVendor(models.TransientModel):
             'tags': ' - '.join(self.tag_ids.mapped('name')),
             'totals': totals,
         }
-        return self.env.ref('inventory_valuation_report_vendor.inventory_evaluation_report').report_action(self, data=result)
+        return self.env.ref('stock_report_vendor.inventory_evaluation_report').report_action(self, data=result)
 
 
 
