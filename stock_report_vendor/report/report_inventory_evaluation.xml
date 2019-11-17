@@ -6,7 +6,7 @@
         <report
                 id="inventory_evaluation_report"
                 model="inventory.valuation.report.wizard"
-                report_type="qweb-html"
+                report_type="qweb-pdf"
                 string="Inventory Evaluation By Partner"
                 name="stock_report_vendor.report_valuation"
                 file="stock_report_vendor.report_valuation"
