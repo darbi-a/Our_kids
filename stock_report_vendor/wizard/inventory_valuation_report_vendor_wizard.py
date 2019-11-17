@@ -76,8 +76,8 @@ class InventoryValuationReportVendor(models.TransientModel):
         #     raise ValidationError(_('Date from must be before date to'))
         if self.partner_ids and self.tag_ids:
             raise ValidationError(_('You have to select either partners or tags!'))
-        # end_time = datetime.max.time()
-        # start_date = datetime.combine(start, end_time)
+        end_time = datetime.max.time()
+        start_date = datetime.combine(self.date, end_time)
         partners = self.env['res.partner']
         if self.partner_ids:
             partners = self.partner_ids
@@ -111,7 +111,7 @@ class InventoryValuationReportVendor(models.TransientModel):
 
             for product in partner_products:
                 # data[partner].setdefault(product,{})
-                qty = product.with_context(to_date=self.date,company_owned=True).qty_available
+                qty = product.with_context(to_date=start_date,company_owned=True).qty_available
                 data[partner.name][product.display_name] = {
                     'vendor_type': partner.vendor_type,
                     'product_ref': product.default_code,
@@ -129,7 +129,7 @@ class InventoryValuationReportVendor(models.TransientModel):
                 totals['all_total']['all_products'] += qty * product.standard_price
                 for warehouse in warehouses:
                     totals.setdefault(warehouse.name,0)
-                    qty = product.with_context(warehouse=warehouse.id,to_date=self.date).qty_available
+                    qty = product.with_context(warehouse=warehouse.id,to_date=start_date).qty_available
                     # evaluation = self.get_valuation(product,warehouse)
                     data[partner.name][product.display_name][warehouse.name] = {
                         'qty':qty,
