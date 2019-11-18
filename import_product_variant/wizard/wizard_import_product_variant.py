@@ -129,13 +129,13 @@ class ImportProductVariant(models.TransientModel):
                         elif fields_dict[col_idx] == 'default_code':
                             values[field_name] = str(cell_obj.value)
                         elif fields_dict[col_idx] == 'season_id':
-                            season_id=self.env['product.season'].search([('name','=',cell_obj.value)])
+                            season_id=self.env['product.season'].search([('name','=',cell_obj.value)],limit=1)
                             if not season_id:
                                 season_id = self.env['product.season'].create({'name':cell_obj.value})
                             values[field_name] = season_id.id
 
                         elif fields_dict[col_idx] == 'categ_id':
-                            category=self.env['product.category'].search([('name','=',cell_obj.value)])
+                            category=self.env['product.category'].search([('name','=',cell_obj.value)],limit=1)
                             if not category:
                                 raise UserError(_('Product category %s not exist!' %cell_obj.value))
                             else:    # season_id = self.env['product.season'].create({'name':cell_obj.value})
