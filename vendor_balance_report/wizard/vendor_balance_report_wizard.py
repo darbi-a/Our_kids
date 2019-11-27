@@ -162,9 +162,9 @@ class VendorBalanceWizard(models.TransientModel):
                 pay_amount = 0
                 for pay in payments:
                     if pay.payment_type == 'inbound':
-                        pay_amount += pay.amount
-                    elif pay.payment_type == 'outbound':
                         pay_amount -= pay.amount
+                    elif pay.payment_type == 'outbound':
+                        pay_amount += pay.amount
 
                 in_inv = self.env['account.invoice'].search([
                     ('date_invoice','<=',end_date),

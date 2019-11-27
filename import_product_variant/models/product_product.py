@@ -13,9 +13,23 @@ class ProductProduct(models.Model):
     vendor_num = fields.Char(string="Vendor Number", required=False, )
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
-    # vendor_id = fields.Many2one(comodel_name="res.partner", string="Vendor",compute = '_compute_get_seller', required=False, )
-    # compute = '_compute_get_seller',
+    sale_price =fields.Float("Sales Price2")
     seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', string='Vendors',compute = '_compute_get_seller', help="Define vendor pricelists.")
+
+    @api.depends('list_price', 'price_extra', 'sale_price')
+    def _compute_product_lst_price(self):
+        to_uom = None
+        if 'uom' in self._context:
+            to_uom = self.env['uom.uom'].browse([self._context['uom']])
+        for product in self:
+            if product.sale_price:
+                product.list_price = product.sale_price
+            if to_uom:
+                list_price = product.uom_id._compute_price(product.list_price, to_uom)
+            else:
+                list_price = product.list_price
+            product.lst_price = list_price + product.price_extra
+
     @api.one
     @api.depends('vendor_num')
     def _compute_get_seller(self):

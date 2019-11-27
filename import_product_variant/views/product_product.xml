@@ -11,6 +11,7 @@
                  <field name="vendor_num" />
                  <field name="vendor_color" />
                  <field name="categ_num" />
+                 <field name="sale_price" />
             </xpath>
 
             
