@@ -17,6 +17,7 @@
     # always loaded
     'data': [
         'views/templates.xml',
+        'views/templates_first_label.xml',
 
     ],
 
