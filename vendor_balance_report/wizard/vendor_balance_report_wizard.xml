@@ -11,6 +11,7 @@
                         <group>
                             <field name="date" />
                             <field name="partner_ids" widget="many2many_tags"/>
+                            <field name="vendor_type" />
                             <field name="season_ids" widget="many2many_tags"/>
                             <field name="tag_ids" widget="many2many_tags"/>
                             <field name="type" widget="radio"/>
@@ -25,7 +26,7 @@
         </record>
         
         <record id="view_report_vendor_balance_wizard_action" model="ir.actions.act_window">
-            <field name="name">Aged Payable Consignment</field>
+            <field name="name">Vendor Sales To Stock</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">vendor.balance.report.wizard</field>
             <field name="view_mode">form</field>
@@ -33,7 +34,7 @@
             <field name="target">new</field>
         </record>
         
-        <menuitem id="menuitem_report_vendor_balance_wizard" name="Aged Payable Consignment" parent="account_reports.account_reports_partners_reports_menu" action="view_report_vendor_balance_wizard_action" sequence="10"/>
+        <menuitem id="menuitem_report_vendor_balance_wizard" name="Vendor Sales To Stock" parent="account_reports.account_reports_partners_reports_menu" action="view_report_vendor_balance_wizard_action" sequence="10"/>
     
     </data>
 </odoo>
