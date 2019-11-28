@@ -14,7 +14,7 @@
         <field name="margin_right">1</field>
         <field name="header_line" eval="False"/>
         <field name="header_spacing">1</field>
-        <field name="dpi">90</field>
+        <field name="dpi">95</field>
     </record>
 
     <template id="report_producttemplatelabel">
