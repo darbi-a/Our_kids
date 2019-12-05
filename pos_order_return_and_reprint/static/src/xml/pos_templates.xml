@@ -982,6 +982,14 @@
                     </div>
                     <br/>
                 </t>
+                <script>
+                    var barcode = <t t-esc="order.barcode" />;
+                    JsBarcode("#barcode", barcode, {
+                        format: "EAN13",
+                        displayValue: true,
+                        fontSize: 25
+                    })
+                </script>
             </div>
         </t>
     </t>
