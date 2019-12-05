@@ -43,6 +43,7 @@ class InventoryValuationReportVendor(models.TransientModel):
     product_internal_ref = fields.Char()
     vendor_type = fields.Selection(selection=[('consignment', 'Consignment'), ('cash', 'Cash'), ])
     product_category_ids = fields.Many2many(comodel_name="product.category")
+    vendor_color = fields.Char()
 
     @api.model
     def get_location(self, warehouse):
@@ -103,6 +104,9 @@ class InventoryValuationReportVendor(models.TransientModel):
         if self.product_category_ids:
             products = products.filtered(lambda p:p.categ_id in self.product_category_ids)
 
+        if self.vendor_color:
+            products = products.filtered(lambda p: p.vendor_color == self.vendor_color)
+
         for partner in partners:
             # partner_products = products.filtered(lambda p:p.vendor_num == partner.vendor_num)
             supplier_info = self.env['product.supplierinfo'].search([('name','=',partner.id)])
@@ -114,6 +118,7 @@ class InventoryValuationReportVendor(models.TransientModel):
                 qty = product.with_context(to_date=start_date,company_owned=True).qty_available
                 data[partner.name][product.display_name] = {
                     'vendor_type': partner.vendor_type,
+                    'vendor_color': product.vendor_color,
                     'product_ref': product.default_code,
                     'unit_cost': product.standard_price,
                     'barcode': product.barcode,
@@ -239,6 +244,8 @@ class InventoryValuationReportVendor(models.TransientModel):
         col += 1
         worksheet.write_merge(row,row+1,col,col,_('نوع المورد'),header_format)
         col += 1
+        worksheet.write_merge(row,row+1,col,col,_('لون المورد'),header_format)
+        col += 1
         worksheet.write_merge(row,row+1,col,col,_('تصنيف المنتج'),header_format)
         col += 1
         worksheet.write_merge(row,row+1,col,col,_('الموديل (internal reference)'),header_format)
@@ -279,6 +286,8 @@ class InventoryValuationReportVendor(models.TransientModel):
                 col += 1
                 worksheet.write(row,col,product_data['vendor_type'],STYLE_LINE_Data)
                 col += 1
+                worksheet.write(row,col,product_data['vendor_color'],STYLE_LINE_Data)
+                col += 1
                 worksheet.write(row,col,product_data['categ'],STYLE_LINE_Data)
                 col += 1
                 worksheet.write(row,col,product_data['product_ref'],STYLE_LINE_Data)
@@ -311,7 +320,7 @@ class InventoryValuationReportVendor(models.TransientModel):
 
                 row += 1
 
-        col = 9
+        col = 10
         worksheet.write_merge(row,row,0,col,_('الاجمالي') ,STYLE_LINE_Data )
         col += 1
         worksheet.write(row, col, totals['all_total']['all_products'], STYLE_LINE_Data)

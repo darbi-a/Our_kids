@@ -10,7 +10,7 @@
 
                 <xpath expr="//field[@name='amount_tax']" position="after">
                     <field name="total_quantity"/>
-<!--                    <field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
+                    <!--                    <field name="total_discount" widget="monetary" options="{'currency_field': 'currency_id'}"/>-->
                 </xpath>
 
             </field>
@@ -24,7 +24,12 @@
 
                 <xpath expr="//field[@name='amount_untaxed']" position="before">
                     <field name="total_quantity" sum="Total Quantity"/>
-<!--                    <field name="total_discount" widget="monetary" sum="Total Discount"/>-->
+                    <!--                    <field name="total_discount" widget="monetary" sum="Total Discount"/>-->
+                </xpath>
+
+                <xpath expr="//field[@name='currency_id']" position="after">
+                     <field name="picking_type_id" />
+                    <field name="receipt_note"/>
                 </xpath>
 
             </field>

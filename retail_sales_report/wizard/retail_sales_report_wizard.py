@@ -38,6 +38,7 @@ class RetailSalesWizard(models.TransientModel):
     user_ids = fields.Many2many(comodel_name="res.users", string="Sales Person", )
     vendor_ids = fields.Many2many(comodel_name="res.partner", string="Vendors", )
     vendor_type = fields.Selection(selection=[('consignment', 'Consignment'), ('cash', 'Cash'), ], required=False, )
+    vendor_color = fields.Char()
 
     def get_branch_id(self,key):
         return str(eval(key)[0])
@@ -80,6 +81,9 @@ class RetailSalesWizard(models.TransientModel):
         if self.season_ids:
             products = products.filtered(lambda p: p.season_id in self.season_ids)
 
+        if self.vendor_color:
+            products = products.filtered(lambda p: p.vendor_color == self.vendor_color)
+
         branch_ids = self.env['pos.branch'].search([]).ids
         if self.branch_ids:
             branch_ids = self.branch_ids.ids
@@ -105,14 +109,16 @@ class RetailSalesWizard(models.TransientModel):
             partner = variant_seller_id.name
             user = ol.order_id.user_id
             # key = (branch.id,user.id,product.id)
-            key = (branch.id,product.id,user.id)
+            key = (branch.id,ol.id,user.id)
             product_data = {
                 'partner':partner.name or '',
                 'vendor_type':partner.vendor_type or '',
                 'branch':branch.name,
+                'vendor_color':product.vendor_color,
                 'categ':product.categ_id.name,
                 'barcode':product.barcode,
                 'product':product.name,
+                'order_name':ol.order_id.name,
                 'season':product.season_id.name,
                 'qty':0,
                 'sales_price': product.list_price,
@@ -241,6 +247,8 @@ class RetailSalesWizard(models.TransientModel):
         col += 1
         worksheet.write(row, col, _('نوع المورد'), header_format)
         col += 1
+        worksheet.write(row, col, _('لون المورد'), header_format)
+        col += 1
         worksheet.write(row, col, _('اسم الفرع'), header_format)
         col += 1
         worksheet.write(row, col, _('تصنيف المنتج'), header_format)
@@ -250,6 +258,8 @@ class RetailSalesWizard(models.TransientModel):
         worksheet.write(row, col, _('اسم المنتج'), header_format)
         col += 1
         worksheet.write(row, col, _('الموسم'), header_format)
+        col += 1
+        worksheet.write(row, col, _('رقم ايصال البيع'), header_format)
         col += 1
         worksheet.write(row, col, _('اجمالي كمية المبيعات'), header_format)
         col += 1
@@ -272,10 +282,10 @@ class RetailSalesWizard(models.TransientModel):
             row += 1
             branch_id = key[0]
             if branch_id != previous_branch:
-                worksheet.write(row, 7, totals[previous_branch]['qty'], TABLE_data_tolal_line)
-                worksheet.write(row, 9, totals[previous_branch]['total_sales'], TABLE_data_tolal_line)
-                worksheet.write(row, 11, totals[previous_branch]['net'], TABLE_data_tolal_line)
-                worksheet.write(row, 13, totals[previous_branch]['total_cost'], TABLE_data_tolal_line)
+                worksheet.write(row, 9, totals[previous_branch]['qty'], TABLE_data_tolal_line)
+                worksheet.write(row, 11, totals[previous_branch]['total_sales'], TABLE_data_tolal_line)
+                worksheet.write(row, 13, totals[previous_branch]['net'], TABLE_data_tolal_line)
+                worksheet.write(row, 15, totals[previous_branch]['total_cost'], TABLE_data_tolal_line)
                 row += 1
                 previous_branch = branch_id
 
@@ -283,6 +293,8 @@ class RetailSalesWizard(models.TransientModel):
             worksheet.write(row, col, data[key]['partner'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, data[key]['vendor_type'], STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, data[key]['vendor_color'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, data[key]['branch'], STYLE_LINE_Data)
             col += 1
@@ -293,6 +305,8 @@ class RetailSalesWizard(models.TransientModel):
             worksheet.write(row, col, data[key]['product'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, data[key]['season'], STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, data[key]['order_name'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, data[key]['qty'], STYLE_LINE_Data)
             col += 1
@@ -312,17 +326,17 @@ class RetailSalesWizard(models.TransientModel):
 
             if i == len(sorted_keys) -1:
                 row += 1
-                worksheet.write(row, 7, totals[branch_id]['qty'], TABLE_data_tolal_line)
-                worksheet.write(row, 9, totals[branch_id]['total_sales'], TABLE_data_tolal_line)
-                worksheet.write(row, 11, totals[branch_id]['net'], TABLE_data_tolal_line)
-                worksheet.write(row, 13, totals[branch_id]['total_cost'], TABLE_data_tolal_line)
+                worksheet.write(row, 9, totals[branch_id]['qty'], TABLE_data_tolal_line)
+                worksheet.write(row, 11, totals[branch_id]['total_sales'], TABLE_data_tolal_line)
+                worksheet.write(row, 13, totals[branch_id]['net'], TABLE_data_tolal_line)
+                worksheet.write(row, 15, totals[branch_id]['total_cost'], TABLE_data_tolal_line)
 
         row += 1
-        worksheet.write_merge(row,row,0, 6, _('الاجمالي'), TABLE_data_tolal_line)
-        worksheet.write(row, 7, totals['all_total']['qty'], TABLE_data_tolal_line)
-        worksheet.write(row, 9, totals['all_total']['total_sales'], TABLE_data_tolal_line)
-        worksheet.write(row, 11, totals['all_total']['net'], TABLE_data_tolal_line)
-        worksheet.write(row, 13, totals['all_total']['total_cost'], TABLE_data_tolal_line)
+        worksheet.write_merge(row,row,0, 8, _('الاجمالي'), TABLE_data_tolal_line)
+        worksheet.write(row,9, totals['all_total']['qty'], TABLE_data_tolal_line)
+        worksheet.write(row, 11, totals['all_total']['total_sales'], TABLE_data_tolal_line)
+        worksheet.write(row, 13, totals['all_total']['net'], TABLE_data_tolal_line)
+        worksheet.write(row, 15, totals['all_total']['total_cost'], TABLE_data_tolal_line)
 
         output = BytesIO()
         if data:

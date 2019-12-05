@@ -13,6 +13,7 @@
                             <field name="date_to"/>
                             <field name="vendor_ids" widget="many2many_tags"/>
                             <field name="vendor_type" />
+                            <field name="vendor_color" />
                             <field name="product_tag_ids" widget="many2many_tags"/>
                             <field name="categ_ids" widget="many2many_tags"/>
                             <field name="branch_ids" widget="many2many_tags"/>

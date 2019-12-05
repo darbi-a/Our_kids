@@ -33,11 +33,13 @@
                             <tr>
                                 <th>اسم المورد</th>
                                 <th>نوع المورد</th>
+                                <th>لون المورد</th>
                                 <th>اسم الفرع</th>
                                 <th>تصنيف المنتج</th>
                                 <th>باركود المنتج</th>
                                 <th>اسم المنتج</th>
                                 <th>الموسم</th>
+                                <th>رقم ايصال البيع</th>
                                 <th>اجمالي كمية المبيعات</th>
                                 <th>سعر البيع</th>
                                 <th>اجمالي المبيعات</th>
@@ -57,6 +59,8 @@
                                     <t t-set="i" t-value="i+1"/>
                                     <t t-if="previous_branch != branch_id">
                                         <tr style="background-color:yellow">
+                                            <td></td>
+                                            <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
@@ -91,6 +95,9 @@
                                             <t t-esc="data.get(key)['vendor_type']"/>
                                         </td>
                                         <td>
+                                            <t t-esc="data.get(key)['vendor_color']"/>
+                                        </td>
+                                        <td>
                                             <t t-esc="data.get(key)['branch']"/>
                                         </td>
                                         <td>
@@ -104,6 +111,9 @@
                                         </td>
                                         <td>
                                             <t t-esc="data.get(key)['season']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['order_name']" />
                                         </td>
                                         <td>
                                             <t t-esc="round(data.get(key)['qty'],2)"/>
@@ -139,6 +149,8 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
+                                            <td></td>
+                                            <td></td>
                                             <td>
                                                 <t t-esc="round(totals.get(previous_branch)['qty'],2)"/>
                                             </td>
@@ -159,7 +171,7 @@
                                     </t>
                                 </t>
                                 <tr style="background-color:yellow">
-                                    <td colspan="7">الاجمالي</td>
+                                    <td colspan="9">الاجمالي</td>
 <!--                                    <td></td>-->
 <!--                                    <td></td>-->
 <!--                                    <td></td>-->
