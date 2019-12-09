@@ -91,7 +91,6 @@ class ImportProductVariant(models.TransientModel):
         import_data = {}
         ddd = 1
         for row_idx in range(1, worksheet.nrows):
-            print("##row_idx =>",row_idx)
             ddd +=1
 
             # Iterate through rows
@@ -101,7 +100,6 @@ class ImportProductVariant(models.TransientModel):
             values = {}
             attribute_values = []
             for col_idx in range(0, num_cols):  # Iterate through columns
-                print('## col =',col_idx,' ##num_cols==> ',num_cols)
                 cell_obj = worksheet.cell(row_idx, col_idx)  # Get cell object by row, col
 
                 if not cell_obj.value:
@@ -174,22 +172,15 @@ class ImportProductVariant(models.TransientModel):
                         if not attribute_value:
                             attribute_value = attribute_value_obj.create({'name':str(attribute_value_name),'attribute_id':attribute_id})
                         attribute_values.append(attribute_value.id)
-                        print('**** product_name = ', product_name)
-                        print('**** product_code = ', product_name)
                         if product_code:
 
-                            print('**** template_attributes1 = ',template_attributes)
                             if not product_code in template_attributes:
                                 template_attributes[product_code] = {}
-                                print('**** template_attributes2 = ', template_attributes)
                             if attribute_id and not attribute_id in template_attributes[product_code]:
                                 template_attributes[product_code][attribute_id] = []
-                                print('**** template_attributes3 = ', template_attributes)
                             template_attributes[product_code][attribute_id].append(attribute_value.id)
-                            print('**** template_attributes = ', template_attributes)
 
                 if col_idx == (num_cols -1):
-                    print("## end **")
                     if not product_name:
                         raise UserError(_('Empty Product Name!'))
                     if not product_code:
@@ -208,9 +199,7 @@ class ImportProductVariant(models.TransientModel):
         x = 0
 
         temp_barcode=''
-        print("import_data == > ",import_data)
         for code in import_data:
-            print("code == > ",code)
             x +=1
             if not template_attributes:
                 prod_name = import_data[code]['name']
@@ -227,17 +216,13 @@ class ImportProductVariant(models.TransientModel):
                 #     product = self.env['product.product'].search([('default_code', '=', default_code)], limit=1)
                 #     product_templ =product.product_tmpl_id
             if not product_templ:
-                print("xx ==has tmpl ", x, "product_templ = ", product_templ)
                 vals = {}
                 vals['name'] = prod_name
                 vals['barcode'] = code
                 vals['default_code'] = default_code
                 vals['attribute_line_ids'] = []
                 temp_barcode=code
-                print('template_attributes == > ',template_attributes)
-                print('prod_name == > ',prod_name)
                 if code in template_attributes:
-                    print('template_attributes == > ', template_attributes[code])
 
                     for tmp_attrib in template_attributes[code]:
                         vals['attribute_line_ids'].append(
@@ -256,19 +241,14 @@ class ImportProductVariant(models.TransientModel):
 
 
             else:
-                print('no templ',product_templ.attribute_line_ids)
                 temp_atts  = product_templ.attribute_line_ids.mapped('attribute_id')
-                print('temp_atts == ',temp_atts)
-                print('temp_atts template_attributes == ',template_attributes)
                 product_templ.default_code = default_code
                 if template_attributes:
                     for tmp_attrib in template_attributes[code]:
                         tmp_att_vals = []
                         for att_val in set(template_attributes[code][tmp_attrib]):
                             tmp_att_vals.append((4, att_val))
-                        print("tmp_att_vals 1== ",tmp_att_vals)
                         if tmp_attrib not in temp_atts.ids:
-                            print("## creat v")
                             vals = {
                                 'product_tmpl_id': product_templ.id,
                                 'attribute_id': tmp_attrib,
@@ -290,7 +270,6 @@ class ImportProductVariant(models.TransientModel):
                             for att_tmpl_line in product_templ.attribute_line_ids:
 
                                 if att_tmpl_line.attribute_id.id == tmp_attrib:
-                                    print("tmp_att_vals 2== ", tmp_att_vals)
                                     att_tmpl_line.write({'value_ids': tmp_att_vals})
                                     break
 

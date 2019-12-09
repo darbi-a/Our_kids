@@ -172,12 +172,10 @@ class ImportProductVariant(models.TransientModel):
 
 
         x = 0
-        print("import_data == ",import_data)
 
         for prod_name in import_data:
             product_templ = self.env['product.template'].search([('name','=',prod_name)])
             if not product_templ:
-                print('0000 prod_name',prod_name)
                 vals = {}
                 vals['name'] = prod_name
                 vals['attribute_line_ids'] = []
@@ -199,10 +197,7 @@ class ImportProductVariant(models.TransientModel):
 
 
             else:
-                print('1111 prod_name', prod_name)
                 temp_atts  = product_templ.attribute_line_ids.mapped('attribute_id')
-                print("temp_atts == ",temp_atts)
-                print("template_attributes == ",template_attributes)
                 for tmp_attrib in template_attributes[prod_name]:
                     tmp_att_vals = []
                     for att_val in set(template_attributes[prod_name][tmp_attrib]):
@@ -236,8 +231,6 @@ class ImportProductVariant(models.TransientModel):
             if lst_vrnt not in count_variant and count_items:
                 count_variant = list(set(count_variant + lst_vrnt))
             for prod in product_templ.product_variant_ids:
-                print("prod == ",prod)
-                print("prod Barcode== ",prod.barcode)
                 if tag_att:
                     if new_id == ndx and create== 0:
                         prod.write({'tag_ids' :[(6, 0,tag_att[prod.id])] })
@@ -247,14 +240,10 @@ class ImportProductVariant(models.TransientModel):
                         create=1
 
                 prod_att_values = set(prod.attribute_value_ids.ids or [])
-                print('prod_att_values == ', prod_att_values)
-                print('import_data[code].keys()  == ', import_data[prod_name].keys)
                 for att_value_ids in import_data[prod_name].keys():
-                    print("att_value_ids == ",att_value_ids)
                     if set(prod_att_values) == set(att_value_ids):
                         product_values = import_data[prod_name][att_value_ids]
                         prod.write(product_values.copy())
-        print("  => ", row_idx)
         context = dict(self._context) or {}
         context['default_count_variant'] = len(count_variant)
         context['default_count_items'] = len(count_items)

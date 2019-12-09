@@ -6,7 +6,7 @@
 
 {
     'name': 'Import product Variants',
-    'version': '12.0.11',
+    'version': '12.2.3',
     'author': 'Ahmed Amin ,Mahmoud Naguib',
     'maintainer': 'ITSS',
     'license': 'AGPL-3',
