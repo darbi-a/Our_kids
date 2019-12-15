@@ -36,25 +36,18 @@ class ProductProduct(models.Model):
         for rec in self:
             if rec.vendor_num:
                 vendor = self.env['res.partner'].search([('ref','=',rec.vendor_num)],limit=1)
-                print("** vendor= ", vendor)
                 if vendor:
                     seller_obj = self.env['product.supplierinfo']
                     seller = seller_obj.search([('product_id','=',rec.id),('name','=',vendor.id)],limit=1)
                     if not seller:
-                        print("not seller ")
                         seller = self.env['product.supplierinfo'].create({
                                                         'product_id':rec.id,
                                                         'product_tmpl_id':rec.product_tmpl_id.id,
                                                         'name':vendor.id,
                     })
-                    print("seler = ",seller)
-                    print("vendor 2= ",vendor)
                     rec.seller_ids = [(6,0,seller.ids)]
-                    print("## rec.seller_ids  1= ",  rec.seller_ids )
 
                     if not rec.seller_ids:
-                        print("** rec.seller_ids  2= ", rec.seller_ids)
-
                         rec.write({'seller_ids':[(6,0,seller.ids)]})
                 else: rec.seller_ids = False
 

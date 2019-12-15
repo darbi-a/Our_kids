@@ -51,6 +51,8 @@ class PosPromotion(models.Model):
     pos_orders_ids = fields.Many2many(comodel_name="pos.order", relation="pos_order_promotion_rel", column1="promo_id", column2="order_id")
     
     order_count = fields.Integer(compute='compute_order_count')
+
+    pos_config_ids = fields.Many2many(comodel_name="pos.config", relation="pos_config_promotion_rel", column1="config_id", column2="promotion_id", string="Applied In Pos", )
     
     @api.model
     def create(self,vals):

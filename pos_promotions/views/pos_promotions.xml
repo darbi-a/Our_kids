@@ -36,6 +36,7 @@
                             <group>
                                 <field name="date_from" required="1"/>
                                 <field name="date_to" required="1"/>
+                                <field name="pos_config_ids" widget="many2many_tags" />
 <!--                                <field name="applied_on_customers" required="1" />-->
 <!--                                <field name="partner_ids" widget="many2many_tags" attrs="{'invisible':[('applied_on_customers','=','all')],'required':[('applied_on_customers','=','specific')]}"/>-->
 <!--                                <field name="applied_on_pos" required="1"/>-->

@@ -17,6 +17,7 @@
 
     # always loaded
     'data': [
+        'wizard/po_product_select.xml',
         'views/purchase_order_line.xml',
         'views/purchase_order.xml',
         'views/product_product.xml',

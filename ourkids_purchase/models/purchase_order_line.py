@@ -47,10 +47,11 @@ class PurchaseOrderLine(models.Model):
 
     @api.constrains('partner_id')
     def check_partner(self):
-        if self.partner_id and self.product_id.seller_ids:
-            vendors = self.product_id.seller_ids.mapped('name')
-            if self.partner_id not in vendors:
-                raise ValidationError(_('This vendor is not the supplier of this product %s')  %(self.product_id.name))
+        for rec in self:
+            if rec.partner_id and rec.product_id.seller_ids:
+                vendors = rec.product_id.seller_ids.mapped('name')
+                if rec.partner_id not in vendors:
+                    raise ValidationError(_('This vendor is not the supplier of this product %s')  %(rec.product_id.name))
 
 
 

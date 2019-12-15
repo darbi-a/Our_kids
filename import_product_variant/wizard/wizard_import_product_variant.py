@@ -92,6 +92,7 @@ class ImportProductVariant(models.TransientModel):
         ddd = 1
         xl_values = {}
         lst_field={}
+        lstxx=[]
         for row_idx in range(1, worksheet.nrows):
             ddd +=1
 
@@ -184,27 +185,27 @@ class ImportProductVariant(models.TransientModel):
                             xl_values[product_code] = list(set(xl_values[product_code] + attribute_values))
 
 
-                            if not product_code in template_attributes:
-                                template_attributes[product_code] = {}
-                            if attribute_id and not attribute_id in template_attributes[product_code]:
-                                template_attributes[product_code][attribute_id] = []
-                            template_attributes[product_code][attribute_id].append(attribute_value.id)
+                            if not prod_ref in template_attributes:
+                                template_attributes[prod_ref] = {}
+                            if attribute_id and not attribute_id in template_attributes[prod_ref]:
+                                template_attributes[prod_ref][attribute_id] = []
+                            template_attributes[prod_ref][attribute_id].append(attribute_value.id)
 
                 if col_idx == (num_cols -1):
                     if not prod_ref:
                         raise UserError(_('Empty Product Name!'))
-                    if not prod_ref:
-                        raise UserError(_('Empty Product Barcode!'))
+
                     if prod_ref not in import_data:
                         import_data[prod_ref] = {}
                     if not attribute_values:
                         import_data[prod_ref] = values.copy()
-
                     else:
                         attribute_values = list(set(attribute_values.copy()))
-                        import_data[prod_ref][tuple(attribute_values)] = values.copy()
-            if values['barcode'] not in lst_field:
-                lst_field[values['barcode']]=values
+                        lstxx.append(attribute_values)
+                        values['attribute'] = attribute_values
+                        import_data[prod_ref][product_code] = values.copy()
+                    if values['barcode'] not in lst_field:
+                        lst_field[values['barcode']]= values
 
 
 
@@ -238,8 +239,12 @@ class ImportProductVariant(models.TransientModel):
                     #     count_variant.append(product.id)
         else:
             for line in import_data:
+                # print('x= ',x,' line == >',len(import_data[line]))
+                # print('x= ',x,' line 4== >',import_data[line])
                 for code in import_data[line]:
                     x += 1
+                    # print('code == > ','x==',x,code)
+
                     default_code =import_data[line][code]['default_code']
                     barcode = import_data[line][code]['barcode']
                     field_vals = lst_field[barcode]
@@ -278,7 +283,6 @@ class ImportProductVariant(models.TransientModel):
                         if product.id not in count_variant:
                             count_variant.append(product.id)
                         continue
-
 
         context = dict(self._context) or {}
         context['default_count_variant'] = len(count_variant)

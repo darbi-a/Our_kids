@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <record id="view_stock_picking_form_inherit" model="ir.ui.view">
+            <field name="name">stock.picking.form.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                
+<!--                <xpath expr="//field[@name='move_line_ids_without_package']/tree" position="attributes">-->
+<!--                    <attribute name=""></attribute>-->
+<!--                </xpath>-->
+
+                <xpath expr="//field[@name='move_ids_without_package']/tree" position="attributes">
+                    <attribute name="decoration-warning">state in ['confirmed','partially_available'] and product_uom_qty > reserved_availability</attribute>
+                </xpath>
+
+            </field>
+        </record>
+    
+    </data>
+</odoo>
