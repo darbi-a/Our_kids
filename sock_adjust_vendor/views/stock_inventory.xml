@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+
+        <record id="view_stock_inventory_form_inherit" model="ir.ui.view">
+            <field name="name">stock.inventory.form.inherit</field>
+            <field name="model">stock.inventory</field>
+            <field name="inherit_id" ref="stock.view_inventory_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='exhausted']" position="after">
+                    <field name="vendor_ids"
+                           attrs="{'invisible': [('filter', '!=', 'vendors')],'required': [('filter', '=', 'vendors')],'readonly': [('state', '!=', 'draft')]}" widget="many2many_tags"/>
+
+                </xpath>
+
+                <xpath expr="//field[@name='line_ids']/tree/field[@name='theoretical_qty']" position="attributes">
+                    <attribute name="sum">Total Theoretical Quantity</attribute>
+                </xpath>
+                <xpath expr="//field[@name='line_ids']/tree/field[@name='product_qty']" position="attributes">
+                    <attribute name="sum">Total Real Quantity</attribute>
+                </xpath>
+
+            </field>
+        </record>
+        
+        <record id="view_stock_inventory_form_inherit_difference" model="ir.ui.view">
+            <field name="name">stock.inventory.form.difference.inherit</field>
+            <field name="model">stock.inventory</field>
+            <field name="inherit_id" ref="adjustment_difference_qty.add_dif_qty_view_inventory_form"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//field[@name='line_ids']/tree/field[@name='difference_qty']" position="attributes">
+                    <attribute name="sum">Total Difference Quantity</attribute>
+                </xpath>
+                
+            </field>
+        </record>
+
+<!--        <template id="report_inventory" inherit_id="stock.report_inventory">-->
+<!--            <xpath expr="//t[@t-if='o.filter == 'product' and o.product_id']" position="replace">-->
+
+<!--            </xpath>-->
+<!--            <xpath expr="//tr[@t-foreach='locations']" position="after">-->
+<!--                <tr>-->
+
+<!--                </tr>-->
+<!--            </xpath>-->
+<!--        </template>-->
+
+    </data>
+</odoo>

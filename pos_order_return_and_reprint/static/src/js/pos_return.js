@@ -328,33 +328,34 @@ myDate.setSeconds(0);
 
 
     // exports.Orderline = Backbone.Model.extend ...
-    var OrderlineSuper = models.Orderline;
+    var OrderlineSuper = models.Orderline.prototype;
     models.Orderline = models.Orderline.extend({
 
-
     export_as_JSON: function() {
-        var pack_lot_ids = [];
-        if (this.has_product_lot){
-            this.pack_lot_lines.each(_.bind( function(item) {
-                return pack_lot_ids.push([0, 0, item.export_as_JSON()]);
-            }, this));
-        }
+        var json = OrderlineSuper.export_as_JSON.apply(this,arguments);
+//        var pack_lot_ids = [];
+//        if (this.has_product_lot){
+//            this.pack_lot_lines.each(_.bind( function(item) {
+//                return pack_lot_ids.push([0, 0, item.export_as_JSON()]);
+//            }, this));
+//        }
         var return_line_id = null;
         if (this.original_line_id){
             return_line_id = this.original_line_id;
         }
-        return {
-            qty: this.get_quantity(),
-            price_unit: this.get_unit_price(),
-            price_subtotal: this.get_price_without_tax(),
-            price_subtotal_incl: this.get_price_with_tax(),
-            discount: this.get_discount(),
-            product_id: this.get_product().id,
-            tax_ids: [[6, false, _.map(this.get_applicable_taxes(), function(tax){ return tax.id; })]],
-            id: this.id,
-            order_line_id: return_line_id,
-            pack_lot_ids: pack_lot_ids
-        };
+//        return {
+//            qty: this.get_quantity(),
+//            price_unit: this.get_unit_price(),
+//            price_subtotal: this.get_price_without_tax(),
+//            price_subtotal_incl: this.get_price_with_tax(),
+//            discount: this.get_discount(),
+//            product_id: this.get_product().id,
+//            tax_ids: [[6, false, _.map(this.get_applicable_taxes(), function(tax){ return tax.id; })]],
+//            id: this.id,
+        json.order_line_id = return_line_id;
+//            pack_lot_ids: pack_lot_ids
+//        };
+        return json;
     },
 
 

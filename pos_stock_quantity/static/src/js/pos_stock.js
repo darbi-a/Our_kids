@@ -227,8 +227,8 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
         refresh_qty: function () {
             var self = this;
             $('.product-list').find('.qty_tag').each(function () {
-//                var $product = $(this).parents('.product');
-//                var id = parseInt($product.attr('data-product-id'));
+                var $product = $(this).parents('.product');
+                var id = parseInt($product.attr('data-product-id'));
                 var id = parseInt($(this).parent().attr('data-product-id'));
 
                 var qty = self.db.qty_by_product_id[id];
