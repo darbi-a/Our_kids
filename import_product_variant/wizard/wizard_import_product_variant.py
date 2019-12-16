@@ -90,6 +90,9 @@ class ImportProductVariant(models.TransientModel):
             raise UserError(_('No Barcode field found!'))
         import_data = {}
         ddd = 1
+        xl_values = {}
+        lst_field={}
+        lstxx=[]
         for row_idx in range(1, worksheet.nrows):
             ddd +=1
 
@@ -97,8 +100,10 @@ class ImportProductVariant(models.TransientModel):
             row_dict = {}
             product_name = None
             product_code = None
+            prod_ref = None
             values = {}
             attribute_values = []
+
             for col_idx in range(0, num_cols):  # Iterate through columns
                 cell_obj = worksheet.cell(row_idx, col_idx)  # Get cell object by row, col
 
@@ -121,21 +126,23 @@ class ImportProductVariant(models.TransientModel):
                             if isinstance(prod_code, list):
                                 prod_code =prod_code[0]
                             product_code = prod_code
+
                             product2 = self.env['product.product'].search([('barcode', '=', product_code)])
-                            if product2:
-                                count_edit = list(set(count_edit + product2.ids))
+                            # if product2:
+                            #     count_edit = list(set(count_edit + product2.ids))
                             values[field_name] = product_code
 
                         elif fields_dict[col_idx] == 'default_code':
                             values[field_name] = str(cell_obj.value)
+                            prod_ref=values[field_name]
                         elif fields_dict[col_idx] == 'season_id':
-                            season_id=self.env['product.season'].search([('name','=',cell_obj.value)],limit=1)
+                            season_id=self.env['product.season'].search([('name','=',cell_obj.value)])
                             if not season_id:
                                 season_id = self.env['product.season'].create({'name':cell_obj.value})
                             values[field_name] = season_id.id
 
                         elif fields_dict[col_idx] == 'categ_id':
-                            category=self.env['product.category'].search([('name','=',cell_obj.value)],limit=1)
+                            category=self.env['product.category'].search([('name','=',cell_obj.value)])
                             if not category:
                                 raise UserError(_('Product category %s not exist!' %cell_obj.value))
                             else:    # season_id = self.env['product.season'].create({'name':cell_obj.value})
@@ -172,143 +179,110 @@ class ImportProductVariant(models.TransientModel):
                         if not attribute_value:
                             attribute_value = attribute_value_obj.create({'name':str(attribute_value_name),'attribute_id':attribute_id})
                         attribute_values.append(attribute_value.id)
-                        if product_name:
-                            if not product_name in template_attributes:
-                                template_attributes[product_name] = {}
-                            if attribute_id and not attribute_id in template_attributes[product_name]:
-                                template_attributes[product_name][attribute_id] = []
-                            template_attributes[product_name][attribute_id].append(attribute_value.id)
+                        if product_code:
+                            if product_code not in xl_values:
+                                xl_values[product_code]=[]
+                            xl_values[product_code] = list(set(xl_values[product_code] + attribute_values))
+
+
+                            if not prod_ref in template_attributes:
+                                template_attributes[prod_ref] = {}
+                            if attribute_id and not attribute_id in template_attributes[prod_ref]:
+                                template_attributes[prod_ref][attribute_id] = []
+                            template_attributes[prod_ref][attribute_id].append(attribute_value.id)
 
                 if col_idx == (num_cols -1):
-                    if not product_name:
+                    if not prod_ref:
                         raise UserError(_('Empty Product Name!'))
-                    if not product_code:
-                        raise UserError(_('Empty Product Barcode!'))
-                    if product_code not in import_data:
-                        import_data[product_code] = {}
-                    if not attribute_values:
-                        import_data[product_code] = values.copy()
 
+                    if prod_ref not in import_data:
+                        import_data[prod_ref] = {}
+                    if not attribute_values:
+                        import_data[prod_ref] = values.copy()
                     else:
                         attribute_values = list(set(attribute_values.copy()))
-                        import_data[product_code][tuple(attribute_values)] = values.copy()
+                        lstxx.append(attribute_values)
+                        values['attribute'] = attribute_values
+                        import_data[prod_ref][product_code] = values.copy()
+                    if values['barcode'] not in lst_field:
+                        lst_field[values['barcode']]= values
 
 
 
         x = 0
 
         temp_barcode=''
-        for code in import_data:
-            x +=1
-            if not template_attributes:
-                prod_name = import_data[code]['name']
-                default_code = import_data[code]['default_code']
-                product_templ = self.env['product.template'].search([('barcode', '=', code)])
-            else:
-                value = next(iter(import_data[code]))
-                prod_name = import_data[code][value]['name']
-                default_code = import_data[code][value]['default_code']
 
-                product_templ = self.env['product.template'].search([('default_code', '=', default_code)],limit=1)
+        if not template_attributes:
+            for code in lst_field:
+                x += 1
+                default_code = lst_field[code]['default_code']
+                prod_name = lst_field[code]['name']
+                barcode = lst_field[code]['barcode']
+                field_vals = lst_field[barcode]
+                field_vals['tag_ids'] = [(6, 0, lst_field[code]['tag_ids'])]
+                product_templ = self.env['product.template'].search([('barcode', '=', code)], limit=1)
 
                 if not product_templ:
-                    product = self.env['product.product'].search([('default_code', '=', default_code)], limit=1)
-                    product_templ =product.product_tmpl_id
-            if not product_templ:
-                print("xx == ", x, "product_templ = ", product_templ)
-                vals = {}
-                vals['name'] = prod_name
-                vals['barcode'] = code
-                vals['default_code'] = default_code
-                vals['attribute_line_ids'] = []
-                temp_barcode=code
-                if prod_name in template_attributes:
-                    for tmp_attrib in template_attributes[prod_name]:
-                        vals['attribute_line_ids'].append(
-                            (0, 0, {'attribute_id': tmp_attrib,
-                                    'value_ids': [], })
-                        )
-
-                        for att_val in set(template_attributes[prod_name][tmp_attrib]):
-                            vals['attribute_line_ids'][-1][2]['value_ids'].append((4, att_val))
-
-                product_templ = self.env['product.template'].create(vals)
-
-                if product_templ.id not in count_items:
-
-                    count_items.append(product_templ.id)
-
-
-            else:
-                temp_atts  = product_templ.attribute_line_ids.mapped('attribute_id')
-                product_templ.default_code = default_code
-                if template_attributes:
-                    for tmp_attrib in template_attributes[prod_name]:
-                        tmp_att_vals = []
-                        for att_val in set(template_attributes[prod_name][tmp_attrib]):
-                            tmp_att_vals.append((4, att_val))
-                        if tmp_attrib not in temp_atts.ids:
-                            vals = {
-                                'product_tmpl_id': product_templ.id,
-                                'attribute_id': tmp_attrib,
-                                'value_ids': tmp_att_vals,
-                            }
-
-                            # self.env['product.template.attribute.line'].create({
-                            #     'product_tmpl_id': product_templ.id,
-                            #     'attribute_id': tmp_attrib,
-                            #     'value_ids': tmp_att_vals,
-                            # })
-
-                            product_templ.write({'attribute_line_ids':[(0,0,vals)],'default_code':default_code})
-                            # product_templ.write({'attribute_line_ids':[(0,0,vals)]})
-
-                        else:
-                            product_templ.write({'default_code':default_code})
-
-                            for att_tmpl_line in product_templ.attribute_line_ids:
-
-                                if att_tmpl_line.attribute_id.id == tmp_attrib:
-                                    att_tmpl_line.write({'value_ids': tmp_att_vals})
-                                    break
-
-
-                product_templ.create_variant_ids()
-                if product_templ.id not in item_edit and product_templ.barcode == code:
-                    item_edit.append(product_templ.id)
-
-            prod_obj = self.env['product.product'].search([('barcode','=',code)])
-            if not prod_obj:
-                prod_obj= self.env['product.product'].search([('barcode','=',False),('name','=',prod_name)],limit=1,order='id')
-            if not prod_obj:
-                prod_obj = self.env['product.product'].search(
-                    [('barcode', '=', False), ('product_tmpl_id', '=', product_templ.id)],limit=1,order='id')
-            lst_vrnt=prod_obj.ids
-
-            if lst_vrnt not in count_variant and count_items:
-                count_variant = list(set(count_variant + lst_vrnt))
-            # for prod in product_templ.product_variant_ids:
-            if prod_obj:
-                if not prod_obj.barcode or prod_obj.barcode != code :
-                    prod_obj.write({'barcode':code})
-                    if not prod_obj.barcode:
-                        prod_obj.barcode = code
-                if not template_attributes:
-                    tags=import_data[prod_obj.barcode]['tag_ids']
+                    product_templ = self.env['product.template'].create(field_vals)
+                    product_templ.barcode = barcode
+                    if product_templ.id not in count_items:
+                        count_items.append(product_templ.id)
+                    # if product.id not in count_variant:
+                    #     count_variant.append(product.id)
                 else:
-                    value = next(iter(import_data[prod_obj.barcode]))
-                    tags = import_data[prod_obj.barcode][value]['tag_ids']
-                if tag_att:
-                    prod_obj.write({'tag_ids': [(6, 0, tags)]})
+                    product = self.env['product.template'].write(field_vals)
+                    if product_templ.id not in item_edit:
+                        item_edit.append(product_templ.id)
 
-                prod_att_values = set(prod_obj.attribute_value_ids.ids or [])
+                    # if product.id not in count_variant:
+                    #     count_variant.append(product.id)
+        else:
+            for line in import_data:
+                # print('x= ',x,' line == >',len(import_data[line]))
+                # print('x= ',x,' line 4== >',import_data[line])
+                for code in import_data[line]:
+                    x += 1
+                    # print('code == > ','x==',x,code)
 
-                for att_value_ids in import_data[prod_obj.barcode].keys():
-                    if not template_attributes:
-                        product_values = import_data[prod_obj.barcode]
+                    default_code =import_data[line][code]['default_code']
+                    barcode = import_data[line][code]['barcode']
+                    field_vals = lst_field[barcode]
+                    field_vals['attribute_value_ids'] = [(6, 0, xl_values[barcode])]
+                    field_vals['tag_ids'] = [(6, 0, import_data[line][code]['tag_ids'])]
+
+                    product = self.env['product.product'].search([('default_code', '=', default_code)],limit=1)
+                    product_templ = product.product_tmpl_id
+                    product_by_barcode = self.env['product.product'].search([('barcode', '=', barcode)])
+                    if product_by_barcode:
+                        product_templ = product_by_barcode.product_tmpl_id
+                        field_vals['product_tmpl_id']= product_templ.id
+                        product_by_barcode.write(field_vals)
+                        if product_templ.id not in item_edit:
+                            item_edit.append(product_templ.id)
+                        if product_by_barcode.id not in count_edit:
+                            count_edit.append(product_by_barcode.id)
+                        continue
+
+                    if not product_templ:
+                        product = self.env['product.product'].create(field_vals)
+                        product_templ = product.product_tmpl_id
+                        product_templ.barcode = barcode
+                        if product_templ.id not in count_items:
+                            count_items.append(product_templ.id)
+                        if product.id not in count_variant:
+                            count_variant.append(product.id)
+                        continue
                     else:
-                        product_values = import_data[prod_obj.barcode][att_value_ids]
-                    prod_obj.write(product_values.copy())
+                        field_vals['product_tmpl_id'] = product_templ.id
+
+                        product = self.env['product.product'].create(field_vals)
+                        # if product_templ.id not in item_edit:
+                        #     item_edit.append(product_templ.id)
+
+                        if product.id not in count_variant:
+                            count_variant.append(product.id)
+                        continue
 
         context = dict(self._context) or {}
         context['default_count_variant'] = len(count_variant)

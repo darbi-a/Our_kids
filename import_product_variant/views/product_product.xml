@@ -6,9 +6,13 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_normal_form_view"/>
         <field name="arch" type="xml">
+             <xpath expr="//field[@name='sale_ok']" position="after">
+                 <field name="un_edit" invisible="1" />
+            </xpath>
+
             
             <xpath expr="//field[@name='barcode']" position="after">
-                 <field name="vendor_num" />
+                 <field name="vendor_num" attrs="{'readonly': [('un_edit','=',True)]}"/>
                  <field name="vendor_color" />
                  <field name="categ_num" />
                  <field name="sale_price" />
