@@ -187,11 +187,25 @@ var field_utils = require('web.field_utils');
                 }
             }), 0), this.pos.currency.rounding);
         },
+        get_total_order_qty: function(){
+            var self = this;
+            var global_discount_line = this.get_global_discount_product()
+            return this.orderlines.reduce((function(sum, orderLine) {
+                if(orderLine.get_quantity() && (!global_discount_line || global_discount_line.get_product().id !== orderLine.get_product().id )){
+                    return sum + orderLine.get_quantity();
+                }
+                else{
+                    return sum
+                }
+
+            }), 0);
+        },
 
         get_global_discount_product:function(){
             var lines = this.get_orderlines();
             for (var i = 0; i < lines.length; i++) {
-                if(lines[i].price_unit < 0)
+//                if(lines[i].price_unit < 0)
+                if( lines[i].product.id === this.pos.config.discount_product_id[0] )
                 {
                     var product = lines[i].get_product();
                     return lines[i];
@@ -1049,7 +1063,7 @@ myDate.setSeconds(0);
                 var discount_amount = discount_ratio * total_with_tax_amount;
                 var product = global_discount.get_product();
                 selectedOrder.add_product(product, {
-                    price:  Math.abs(discount_amount),
+                    price:  Math.abs(round_pr(discount_amount,2)),
                 });
 //            	    var orderlines = selectedOrder.get_orderlines();
 //            	    console.log('orderlines');
