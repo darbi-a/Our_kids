@@ -14,7 +14,7 @@
         <field name="margin_right">0</field>
         <field name="header_line" eval="False"/>
         <field name="header_spacing">0</field>
-        <field name="dpi">300</field>
+        <field name="dpi">310</field>
     </record>
 
     <record id="product.report_product_template_label" model="ir.actions.report">
@@ -74,7 +74,7 @@
                                 <!--                                     style="margin-top: 1px;margin-left: -80px;margin-bottom: 1px;width:140%;height:7%;"/>-->
                                 <div style="background-color:white">
                                     <strong >
-                                        <span t-field="product.barcode" style="font-size: 31px;background-color:white;"/>
+                                        <span t-field="product.barcode" style="font-size: 32px;background-color:white;"/>
                                     </strong>
                                 </div>
                                 <!--                                <span t-field="product.barcode" style="font-size: 12px;"/>-->
