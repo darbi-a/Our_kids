@@ -13,7 +13,7 @@
                     </div>
                     <div class="ks_container oe_inline">
                         <label for="ks_global_discount_rate" string="Universal Discount :" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)]}"/>
-                        <field name="ks_global_discount_rate" class="oe_inline" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)],'readonly':[('ks_enable_discount','!=',True),('ks_amount_discount','!=',0)]}"/>
+                        <field name="ks_global_discount_rate" class="oe_inline" attrs="{'invisible':[('ks_enable_discount','!=',True),('ks_amount_discount','=',0)],'readonly':[('state', 'in', ['open', 'paid'])]}"/>
                     </div>
                 </xpath>
                 <xpath expr="//field[@name='tax_line_ids']" position="attributes">

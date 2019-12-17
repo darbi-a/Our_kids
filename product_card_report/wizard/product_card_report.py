@@ -38,35 +38,40 @@ class ProductCardReportWizard(models.TransientModel):
         return res
 
     def convert_date_to_utc(self,dat, tz):
-        local = pytz.timezone(tz)
+        local = pytz.timezone(tz) or pytz.timezone('UTC')
         date = local.localize(dat, is_dst=None)
         date = date.astimezone(pytz.utc)
         date.strftime('%Y-%m-%d: %H:%M:%S')
         return date.replace(tzinfo=None)
 
     def convert_date_to_local(self,dat, tz):
-        local = pytz.timezone(tz)
+        local = pytz.timezone(tz) or pytz.timezone('UTC')
         dat = dat.replace(tzinfo=pytz.utc)
         dat = dat.astimezone(local)
         dat.strftime('%Y-%m-%d: %H:%M:%S')
         return dat.replace(tzinfo=None)
 
-    def get_cost_from_entries(self,account_moves):
+    def get_cost_from_entries(self,line):
+        account_moves = line.move_id.account_move_ids
         total_debit = 0
         total_qty = 0
-        for move in account_moves:
-            for line in move.line_ids:
-                total_debit += line.debit if line.debit else 0
-                total_qty += line.quantity if line.debit else 0
+        if account_moves:
+            for move in account_moves:
+                for line in move.line_ids:
+                    total_debit += line.debit if line.debit else 0
+                    total_qty += line.quantity if line.debit else 0
 
-        if total_qty:
-            return (total_debit/total_qty)
+            if total_qty:
+                return (total_debit / total_qty)
+            else:
+                return 0.0
         else:
-            return 0.0
+            cost = line.product_id.get_history_price(self.env.user.company_id.id, date=line.date)
+            return cost
 
-    def get_report_data(self):
+    def get_report_data(self,product):
         data=[]
-        product = self.product_id
+
         date_to_utc = fields.Datetime.from_string(self.date_to) if self.date_to else datetime.now()
         domain = [('product_id','=',product.id),('state','=','done')]
 
@@ -80,7 +85,6 @@ class ProductCardReportWizard(models.TransientModel):
             data.append({
                 'date': str(self.convert_date_to_local(fields.Datetime.from_string(self.date_from),self.env.user.tz)),
                 'ref': '',
-                'order_ref': '',
                 'partner': '',
                 'from': '',
                 'to': '',
@@ -107,46 +111,30 @@ class ProductCardReportWizard(models.TransientModel):
 
         stock_move_lines = self.env['stock.move.line'].search(domain,order='date asc,id asc')
         for line in stock_move_lines:
-            inc = True if line.move_id.picking_code in ('incoming','internal') or (not line.move_id.picking_code and line.qty_done > 0) else False
-            out = True if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code and line.qty_done < 0) else False
-            qty = line.qty_done
-            cost = product.get_history_price(self.env.user.company_id.id,date=line.date) if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line.move_id.account_move_ids)
-            amount = qty * cost
-            qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
-            previous_amount_balance = data[-1]['amount_balance'] if data else 0
-            sign = -1 if (line.move_id.picking_code in ['outgoing'] or (not line.move_id.picking_code and line.qty_done < 0)) else 1
-            amount_balance = previous_amount_balance + sign*amount
-            cost_balance = (amount_balance / qty_balance) if qty_balance else 0
-
-            picking = line.picking_id
-            order_ref = ''
-            picking_origin = ''
-            url_ref = ''
-            url_order_ref = ''
-            if picking:
-                picking_origin = picking.origin
-                url_ref = '/web#id=%s&model=stock.picking&view_type=form' %(picking.id)
-                types =['sale_id','purchase_id']
-                for ot in types:
-                    if picking[ot]:
-                        order_ref = picking[ot].name
-                        url_order_ref = '/web#id=%s&model=%s&view_type=form' %( picking[ot].id, picking[ot]._name)
-                if not order_ref and 'pos.order' in self.env:
-                    pos_order = self.env['pos.order'].search([('picking_id','=',picking.id)])
-                    order_ref = pos_order.name
-                    if not pos_order:
-                        pos_order = self.env['pos.order'].search([('name', '=', picking_origin)])
-                        order_ref = pos_order.name
-                    if pos_order:
-                        url_order_ref = '/web#id=%s&model=%s&view_type=form' % (pos_order.id, pos_order._name)
+            if not self.location_id:
+                inc = True if line.move_id.picking_code in ('incoming','internal') or (not line.move_id.picking_code and line.qty_done > 0) else False
+                out = True if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code and line.qty_done < 0) else False
+                qty = line.qty_done
+                cost = product.get_history_price(self.env.user.company_id.id,date=line.date) if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
+                amount = qty * cost
+                qty_balance = product.with_context(to_date=line.date).qty_available
+                amount_balance = product.with_context(to_date=line.date).stock_value
+                cost_balance = (amount_balance / qty_balance) if qty_balance else 0
+            else:
+                inc = True if line.location_dest_id == self.location_id else False
+                out = True if line.location_id == self.location_id else False
+                qty = line.qty_done
+                cost = product.get_history_price(self.env.user.company_id.id,date=line.date) if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
+                amount = qty * cost
+                qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
+                previous_amount_balance = data[-1]['amount_balance'] if data else 0
+                sign = -1 if out else 1
+                amount_balance = previous_amount_balance + sign*amount
+                cost_balance = (amount_balance / qty_balance) if qty_balance else 0
 
             data.append({
                 'date': str(self.convert_date_to_local(fields.Datetime.from_string(line.date),self.env.user.tz)),
                 'ref': line.reference,
-                'order_ref': order_ref or '',
-                'picking_origin': picking_origin,
-                'url_ref': url_ref,
-                'url_order_ref': url_order_ref,
                 'partner': line.move_id.partner_id.name or line.move_id.picking_id.partner_id.name or '',
                 'from': line.location_id.display_name,
                 'to': line.location_dest_id.display_name,
@@ -166,7 +154,6 @@ class ProductCardReportWizard(models.TransientModel):
         if stock_move_lines and not date_from_utc:
             date_from_utc = fields.Datetime.from_string(stock_move_lines[0].date)
         return data,date_to_utc,date_from_utc
-
 
     def add_excel_sheet(self,workbook,data,date_to_utc,date_from_utc,sheet_name):
         worksheet = workbook.add_sheet(sheet_name)
