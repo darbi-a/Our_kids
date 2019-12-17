@@ -69,9 +69,9 @@ class ProductCardReportWizard(models.TransientModel):
             cost = line.product_id.get_history_price(self.env.user.company_id.id, date=line.date)
             return cost
 
-    def get_report_data(self,product):
+    def get_report_data(self):
         data=[]
-
+        product = self.product_id
         date_to_utc = fields.Datetime.from_string(self.date_to) if self.date_to else datetime.now()
         domain = [('product_id','=',product.id),('state','=','done')]
 
@@ -85,6 +85,7 @@ class ProductCardReportWizard(models.TransientModel):
             data.append({
                 'date': str(self.convert_date_to_local(fields.Datetime.from_string(self.date_from),self.env.user.tz)),
                 'ref': '',
+                'order_ref': '',
                 'partner': '',
                 'from': '',
                 'to': '',
@@ -132,9 +133,35 @@ class ProductCardReportWizard(models.TransientModel):
                 amount_balance = previous_amount_balance + sign*amount
                 cost_balance = (amount_balance / qty_balance) if qty_balance else 0
 
+            picking = line.picking_id
+            order_ref = ''
+            picking_origin = ''
+            url_ref = ''
+            url_order_ref = ''
+            if picking:
+                picking_origin = picking.origin
+                url_ref = '/web#id=%s&model=stock.picking&view_type=form' %(picking.id)
+                types =['sale_id','purchase_id']
+                for ot in types:
+                    if picking[ot]:
+                        order_ref = picking[ot].name
+                        url_order_ref = '/web#id=%s&model=%s&view_type=form' %( picking[ot].id, picking[ot]._name)
+                if not order_ref and 'pos.order' in self.env:
+                    pos_order = self.env['pos.order'].search([('picking_id','=',picking.id)])
+                    order_ref = pos_order.name
+                    if not pos_order:
+                        pos_order = self.env['pos.order'].search([('name', '=', picking_origin)])
+                        order_ref = pos_order.name
+                    if pos_order:
+                        url_order_ref = '/web#id=%s&model=%s&view_type=form' % (pos_order.id, pos_order._name)
+
             data.append({
                 'date': str(self.convert_date_to_local(fields.Datetime.from_string(line.date),self.env.user.tz)),
                 'ref': line.reference,
+                'order_ref': order_ref or '',
+                'picking_origin': picking_origin,
+                'url_ref': url_ref,
+                'url_order_ref': url_order_ref,
                 'partner': line.move_id.partner_id.name or line.move_id.picking_id.partner_id.name or '',
                 'from': line.location_id.display_name,
                 'to': line.location_dest_id.display_name,
@@ -333,8 +360,6 @@ class ProductCardReportWizard(models.TransientModel):
 
         if self.date_to and not self.date_from:
             raise ValidationError(_('Start date is not set'))
-
-
 
         report_data,date_to_utc,date_from_utc = self.get_report_data()
         self.add_excel_sheet(workbook, report_data,date_to_utc,date_from_utc, _('كارت صنف قيمة'))
