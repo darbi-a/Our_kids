@@ -13,7 +13,7 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['account','stock','vendor_payments_report'],
+    'depends': ['account','stock','vendor_payments_report','product_season'],
 
     # always loaded
     'data': [

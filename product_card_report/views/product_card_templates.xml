@@ -47,7 +47,7 @@
                     <t t-if="location">
                         <div>
                             <span>مخزن:</span>
-                            <t t-esc="date_to"/>
+                            <t t-esc="location"/>
                         </div>
                     </t>
 
