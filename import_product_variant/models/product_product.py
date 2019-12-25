@@ -36,6 +36,7 @@ class ProductProduct(models.Model):
         for product in self:
             if product.sale_price:
                 product.list_price = product.sale_price
+                product.lst_price = product.sale_price
             if to_uom:
                 list_price = product.uom_id._compute_price(product.list_price, to_uom)
             else:
@@ -112,6 +113,7 @@ class ProductTemplate(models.Model):
     vendor_num = fields.Char(string="Vendor Number", required=False, )
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
+    sale_price =fields.Float("Sales Price2")
 
 
 class SupplierInfo(models.Model):
