@@ -142,11 +142,21 @@ class ImportProductVariant(models.TransientModel):
                             values[field_name] = season_id.id
 
                         elif fields_dict[col_idx] == 'categ_id':
-                            category=self.env['product.category'].search([('name','=',cell_obj.value)])
-                            if not category:
-                                raise UserError(_('Product category %s not exist!' %cell_obj.value))
-                            else:    # season_id = self.env['product.season'].create({'name':cell_obj.value})
-                                values[field_name] = category.id
+                            cat_id = cell_obj.value
+                            categ_name = worksheet.cell(row_idx, col_idx + 1)
+                            if isinstance(cat_id, float) or isinstance(cat_id, int) :
+                                category=self.env['product.category'].search([('id','=',int(cell_obj.value))])
+
+                                if not category :
+                                    if fields_dict[col_idx +1] == 'categ_name':
+                                        category = self.env['product.category'].search([('name', '=', categ_name.value)],limit=1)
+                                        if not category:
+                                            raise UserError(_('Product category %s not exist!' %categ_name.value))
+                                        else:
+                                            values[field_name] = category.id
+                                else:
+                                    values[field_name] = category.id
+                            else: raise UserError(_('The categ_id of  Product category %s  must be integer!' %categ_name.value))
                         elif fields_dict[col_idx] == 'tag_ids':
                             tags = cell_obj.value.split(',')
                             tag_ids = []
@@ -217,6 +227,7 @@ class ImportProductVariant(models.TransientModel):
             for code in lst_field:
                 x += 1
                 default_code = lst_field[code]['default_code']
+                sale_price = lst_field[code]['sale_price']
                 prod_name = lst_field[code]['name']
                 barcode = lst_field[code]['barcode']
                 field_vals = lst_field[barcode]
@@ -226,12 +237,16 @@ class ImportProductVariant(models.TransientModel):
                 if not product_templ:
                     product_templ = self.env['product.template'].create(field_vals)
                     product_templ.barcode = barcode
+                    product_templ.list_price = sale_price
                     if product_templ.id not in count_items:
                         count_items.append(product_templ.id)
                     # if product.id not in count_variant:
                     #     count_variant.append(product.id)
                 else:
-                    product = self.env['product.template'].write(field_vals)
+
+                    product_templ.write(field_vals)
+                    product_templ.list_price= sale_price
+                    # print('list_price == ',sale_price)
                     if product_templ.id not in item_edit:
                         item_edit.append(product_templ.id)
 
