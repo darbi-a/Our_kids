@@ -117,6 +117,8 @@ class RetailSalesWizard(models.TransientModel):
                 'vendor_color':product.vendor_color,
                 'categ':product.categ_id.name,
                 'barcode':product.barcode,
+                'default_code':product.default_code,
+                'date_order':ol.order_id.date_order,
                 'product':product.name,
                 'order_name':ol.order_id.name,
                 'season':product.season_id.name,
@@ -257,9 +259,13 @@ class RetailSalesWizard(models.TransientModel):
         col += 1
         worksheet.write(row, col, _('اسم المنتج'), header_format)
         col += 1
+        worksheet.write(row, col, _('الموديل'), header_format)
+        col += 1
         worksheet.write(row, col, _('الموسم'), header_format)
         col += 1
         worksheet.write(row, col, _('رقم ايصال البيع'), header_format)
+        col += 1
+        worksheet.write(row, col, _('تاريخ الايصال'), header_format)
         col += 1
         worksheet.write(row, col, _('اجمالي كمية المبيعات'), header_format)
         col += 1
@@ -304,9 +310,13 @@ class RetailSalesWizard(models.TransientModel):
             col += 1
             worksheet.write(row, col, data[key]['product'], STYLE_LINE_Data)
             col += 1
+            worksheet.write(row, col, data[key]['default_code'], STYLE_LINE_Data)
+            col += 1
             worksheet.write(row, col, data[key]['season'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, data[key]['order_name'], STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, data[key]['date_order'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, data[key]['qty'], STYLE_LINE_Data)
             col += 1
@@ -401,6 +411,7 @@ class RetailSalesWizard(models.TransientModel):
 
     def action_print(self):
         if self.type == 'xls':
+            print("aaaa")
             return self.action_print_excel_file()
 
         elif self.type == 'pdf':

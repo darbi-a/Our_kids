@@ -38,8 +38,10 @@
                                 <th>تصنيف المنتج</th>
                                 <th>باركود المنتج</th>
                                 <th>اسم المنتج</th>
+                                <th>الموديل</th>
                                 <th>الموسم</th>
                                 <th>رقم ايصال البيع</th>
+                                <th>تاريخ الايصال</th>
                                 <th>اجمالي كمية المبيعات</th>
                                 <th>سعر البيع</th>
                                 <th>اجمالي المبيعات</th>
@@ -110,10 +112,17 @@
                                             <t t-esc="data.get(key)['product']"/>
                                         </td>
                                         <td>
+                                            <t t-esc="data.get(key)['default_code']"/>
+                                        </td>
+
+                                        <td>
                                             <t t-esc="data.get(key)['season']"/>
                                         </td>
                                         <td>
                                             <t t-esc="data.get(key)['order_name']" />
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['date_order']" />
                                         </td>
                                         <td>
                                             <t t-esc="round(data.get(key)['qty'],2)"/>

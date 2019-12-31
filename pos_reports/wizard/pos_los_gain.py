@@ -47,37 +47,39 @@ class PosLosGain(models.TransientModel):
         end_date = self.date_to
         end_time = datetime.max.time()
         end_date = datetime.combine(end_date, end_time)
-        _sql_query = """
-        select s.user_id,date_trunc('day',stop_at) as stop,
-         sum(CASE when stl.amount < 0 THEN -1*stl.amount END) as loss,
-         sum(CASE when stl.amount > 0 THEN stl.amount END) as gain
-            from pos_session s
-            join account_bank_statement st on s.id = st.pos_session_id
-            join account_bank_statement_line stl on st.id = stl.statement_id
-            join pos_config c on s.config_id = c.id
-        where s.state = 'closed' and s.stop_at >= %s and  s.stop_at <= %s 
-        and stl.pos_statement_id is NULL and stl.ref is NULL and c.pos_branch_id in %s
-        group by stop,s.user_id
-        order by stop,s.user_id
-        """
-        self._cr.execute(_sql_query,(self.date_from,end_date,tuple(branch_ids)))
-        for r in self._cr.fetchall():
-            # branch_id = r[0]
-            user_id = r[0]
-            day = r[1]
-            loss = r[2] or 0.0
-            gain = r[3] or 0.0
-            day_str = day.strftime('%Y/%m/%d')
-            # branch = self.env['pos.branch'].browse(branch_id)
-            user = self.env['res.users'].browse(user_id)
-            # branch_name = branch.name
-            # data.setdefault(branch_name,[])
-            # gain = difference if difference > 0 else 0
-            # loss = difference if difference < 0 else 0
-            data.append((day_str,user.name, gain, loss ))
-            totals['loss'] += loss
-            totals['gain'] += gain
-            totals['total'] += gain - loss
+        for pranch in branches:
+            _sql_query = """
+            select s.user_id,date_trunc('day',stop_at) as stop,
+             sum(CASE when stl.amount < 0 THEN -1*stl.amount END) as loss,
+             sum(CASE when stl.amount > 0 THEN stl.amount END) as gain
+                from pos_session s
+                join account_bank_statement st on s.id = st.pos_session_id
+                join account_bank_statement_line stl on st.id = stl.statement_id
+                join pos_config c on s.config_id = c.id
+            where s.state = 'closed' and s.stop_at >= %s and  s.stop_at <= %s 
+            and stl.pos_statement_id is NULL and stl.ref is NULL and c.pos_branch_id = %s
+            group by stop,s.user_id
+            order by stop,s.user_id
+            """
+            self._cr.execute(_sql_query,(self.date_from,end_date,pranch.id))
+            # print('self._cr.fetchall() -', self._cr.fetchall())
+            for r in self._cr.fetchall():
+                # branch_id = r[0]
+                user_id = r[0]
+                day = r[1]
+                loss = r[2] or 0.0
+                gain = r[3] or 0.0
+                day_str = day.strftime('%Y/%m/%d')
+                # branch = self.env['pos.branch'].browse(branch_id)
+                user = self.env['res.users'].browse(user_id)
+                branch_name = pranch.name
+                # data.setdefault(branch_name,[])
+                # gain = difference if difference > 0 else 0
+                # loss = difference if difference < 0 else 0
+                data.append((day_str,user.name, gain, loss,branch_name ))
+                totals['loss'] += loss
+                totals['gain'] += gain
+                totals['total'] += gain - loss
         branch_names = ' - '.join(branches.mapped('name'))
         return data,totals,branch_names
 

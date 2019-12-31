@@ -60,16 +60,16 @@
                         }
 
                         table {
-                            table-layout: auto;
-                            border-collapse: collapse;
-                            width: 100%;
+                        table-layout: auto;
+                        border-collapse: collapse;
+                        width: 100%;
                         }
                         table td {
-                            border: 1px solid black;
-                            padding: 5px;
+                        border: 1px solid black;
+                        padding: 5px;
                         }
                         table th {
-                            border: 1px solid black;
+                        border: 1px solid black;
                         }
 
                     </style>
@@ -136,7 +136,12 @@
                                 <t t-esc="round(o['qty_in'] or 0,2)"/>
                             </td>
                             <td>
-                                <t t-esc="round(o['cost_in'] or 0,2)"/>
+                                <t t-if="o['cost_in']">
+                                    <t t-esc="round(o['cost_in'] or 0,2)"/>
+                                </t>
+                                <t t-elif="not o['cost_in']">
+                                    <span>-</span>
+                                </t>
                             </td>
                             <td>
                                 <t t-esc="round(o['amount_in'] or 0,2)"/>
@@ -145,7 +150,13 @@
                                 <t t-esc="round(o['qty_out'] or 0,2)"/>
                             </td>
                             <td>
-                                <t t-esc="round(o['cost_out'] or 0,2)"/>
+<!--                                <t t-esc="round(o['cost_out'] or 0,2)"/>-->
+                                <t t-if="o['cost_out']">
+                                    <t t-esc="round(o['cost_out'] or 0,2)"/>
+                                </t>
+                                <t t-esle="">
+                                    -
+                                </t>
                             </td>
                             <td>
                                 <t t-esc="round(o['amount_out'] or 0,2)"/>
@@ -154,7 +165,13 @@
                                 <t t-esc="round(o['qty_balance'] or 0,2)"/>
                             </td>
                             <td>
-                                <t t-esc="round(o['cost_balance'] or 0,2)"/>
+<!--                                <t t-esc="round(o['cost_balance'] or 0,2)"/>-->
+                                <t t-if="o['cost_balance']">
+                                    <t t-esc="round(o['cost_balance'] or 0,2)"/>
+                                </t>
+                                <t t-esle="">
+                                    -
+                                </t>
                             </td>
                             <td>
                                 <t t-esc="round(o['amount_balance'] or 0,2)"/>

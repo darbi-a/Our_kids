@@ -112,15 +112,19 @@ class ProductCardReportWizard(models.TransientModel):
                 return (total_debit / total_qty)
             else:
                 return 0.0
-        else:
+        elif line.prodcut_id.cost_method != 'fifo':
             cost = line.product_id.get_history_price(self.env.user.company_id.id, date=line.date)
             return cost
+        else:
+            return 0
 
     def get_data_product_fifo(self):
         data = []
 
         date_to_utc = fields.Datetime.from_string(self.date_to) if self.date_to else datetime.now()
         date_from_utc = fields.Datetime.from_string(self.date_from) if self.date_from else None
+        company_id = self.env.user.company_id.id
+        internal_locations = self.env['stock.location'].search( [('company_id', '=', company_id), ('usage', 'in', ['internal', 'transit'])])
         stock_move_lines = self.env['stock.move.line']
         if self.product_id.product_tmpl_id.valuation == 'manual_periodic':
             stock_move_lines = self.product_id.stock_fifo_manual_move_ids.filtered(lambda ml: ml.date <= date_to_utc)
@@ -174,8 +178,10 @@ class ProductCardReportWizard(models.TransientModel):
 
                 for line in stock_move_lines:
                     product = self.product_id
-                    inc = True if line.move_id.picking_code in ('incoming','internal') or (not line.move_id.picking_code and line.move_id.value > 0) else False
-                    out = True if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code and line.move_id.value < 0) else False
+                    inc = True if line.location_dest_id in internal_locations else False
+                    out = True if line.location_id in internal_locations else False
+                    if inc and out:
+                        inc = out = False
                     qty = line.qty_done
                     cost = 0 if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
                     amount = sum(line.mapped('move_id.value'))
@@ -231,7 +237,7 @@ class ProductCardReportWizard(models.TransientModel):
                     inc = True if line.location_dest_id == self.location_id else False
                     out = True if line.location_id == self.location_id else False
                     qty = line.qty_done
-                    cost = 0 if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
+                    cost = 0 if line.move_id.picking_code in ('outgoing','internal') or out else self.get_cost_from_entries(line)
                     journal_items = line.mapped('move_id.account_move_ids.line_ids').filtered(lambda aml:aml.account_id == valuation_account_id)
                     amount = abs(sum(m.debit-m.credit for m in journal_items))
                     qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
@@ -246,17 +252,19 @@ class ProductCardReportWizard(models.TransientModel):
             else:
                 for line in stock_move_lines:
                     product = self.product_id
-                    inc = True if line.move_id.picking_code in ('incoming','internal') or (not line.move_id.picking_code and line.move_id.value > 0) else False
-                    out = True if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code and line.move_id.value < 0) else False
+                    inc = True if line.location_dest_id in internal_locations else False
+                    out = True if line.location_id in internal_locations else False
+                    if inc and out:
+                        inc = out = False
                     qty = line.qty_done
-                    cost = 0 if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
+                    cost = 0 if line.move_id.picking_code in ('outgoing','internal') or out else self.get_cost_from_entries(line)
                     journal_items = line.mapped('move_id.account_move_ids.line_ids').filtered(lambda aml:aml.account_id == valuation_account_id)
-                    amount = sum(m.debit-m.credit for m in journal_items)
-                    qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
+                    amount = abs(sum(m.debit-m.credit for m in journal_items))
+                    qty_balance = product.with_context(to_date=line.date).qty_available
                     previous_amount_balance = data[-1]['amount_balance'] if data else 0
                     sign = -1 if out else 1
-                    # amount_balance = previous_amount_balance + sign*amount
-                    amount_balance = self.product_id.with_context(to_date=str(line.date)).stock_value
+                    amount_balance = previous_amount_balance + sign*amount
+                    # amount_balance = self.product_id.with_context(to_date=str(line.date)).stock_value
                     cost_balance = 0
                     line_data = self.get_data_from_line(line, qty, cost, amount, inc, out, qty_balance, cost_balance,
                                                         amount_balance)
@@ -270,6 +278,8 @@ class ProductCardReportWizard(models.TransientModel):
         date_to_utc = fields.Datetime.from_string(self.date_to) if self.date_to else datetime.now()
         date_from_utc = fields.Datetime.from_string(self.date_from) if self.date_from else None
         domain = [('product_id','=',product.id),('state','=','done')]
+        company_id = self.env.user.company_id.id
+        internal_locations = self.env['stock.location'].search( [('company_id', '=', company_id), ('usage', 'in', ['internal', 'transit'])])
         if product.cost_method == 'fifo':
             data,stock_move_lines = self.get_data_product_fifo()
         else:
@@ -311,8 +321,10 @@ class ProductCardReportWizard(models.TransientModel):
             stock_move_lines = self.env['stock.move.line'].search(domain,order='date asc,id asc')
             for line in stock_move_lines:
                 if not self.location_id:
-                    inc = True if line.move_id.picking_code in ('incoming','internal') or (not line.move_id.picking_code and line.move_id.value > 0) else False
-                    out = True if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code and line.move_id.value < 0) else False
+                    inc = True if line.location_dest_id in internal_locations else False
+                    out = True if line.location_id in internal_locations else False
+                    if inc and out:
+                        inc = out = False
                     qty = line.qty_done
                     cost = product.get_history_price(self.env.user.company_id.id,date=line.date) if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
                     amount = qty * cost
