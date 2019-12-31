@@ -10,7 +10,7 @@
     'website': "http://www.itss-c.com",
 
     'category': 'purchase',
-    'version': '1.3',
+    'version': '1.4',
 
     # any module necessary for this one to work correctly
     'depends': ['purchase','purchase_stock','import_product_variant'],
