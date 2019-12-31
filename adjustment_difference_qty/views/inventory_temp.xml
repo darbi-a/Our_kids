@@ -5,6 +5,7 @@
            <xpath expr="//table[2]" position="replace">
                <t t-set="the_qty" t-value="0.0"/>
                <t t-set="def_qty" t-value="0.0"/>
+               <t t-set="real_qty" t-value="0.0"/>
                 <table class="table table-sm">
                     <thead>
                         <tr>
@@ -35,6 +36,7 @@
                                 <td class="text-right"><span t-field="line.difference_qty"/> <span t-field="line.product_uom_id" groups="uom.group_uom"/></td>
                                 <t t-set="the_qty" t-value="the_qty + line.theoretical_qty"/>
                                 <t t-set="def_qty" t-value="def_qty + line.difference_qty"/>
+                                <t t-set="real_qty" t-value="real_qty + line.product_qty"/>
                             </tr>
 
                         </t>
@@ -43,23 +45,27 @@
 
            </xpath>
 
-            <xpath expr="//div[hasclass('col-4')]" position="replace">
+<!--            <xpath expr="//div[hasclass('col-4')]" position="replace">-->
+<!--            <xpath expr="//t[@t-if='o.filter == 'product' and o.product_id']" position="replace">-->
+            <xpath expr="//div[hasclass('justify-content-end')]/.." position="replace">
+                <div class="row justify-content-end">
                     <div class="col-12">
                         <table class="table table-sm">
                             <tr class="border-black">
                                 <td><strong>Total Quantity</strong></td>
-                                <td class="text-right">
+                                <td class="text-center">
                                     <span t-esc="the_qty"/> <span t-field="o.product_id.uom_id"/>
                                 </td>
-                                <td class="text-right">
-                                    <span t-field="o.total_qty"/> <span t-field="o.product_id.uom_id"/>
+                                <td class="text-center">
+                                    <span t-esc="real_qty"/> <span t-field="o.product_id.uom_id"/>
                                 </td>
-                                <td class="text-right">
+                                <td class="text-center">
                                     <span t-esc="def_qty"/> <span t-field="o.product_id.uom_id"/>
                                 </td>
                             </tr>
                         </table>
                     </div>
+                </div>
             </xpath>
         </template>
 

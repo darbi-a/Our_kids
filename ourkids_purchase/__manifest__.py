@@ -13,14 +13,16 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['purchase'],
+    'depends': ['purchase','purchase_stock','import_product_variant'],
 
     # always loaded
     'data': [
+        'wizard/po_product_select.xml',
         'views/purchase_order_line.xml',
         'views/purchase_order.xml',
         'views/product_product.xml',
         'views/account_invoice.xml',
+        'views/stock_move.xml',
     ],
 
 

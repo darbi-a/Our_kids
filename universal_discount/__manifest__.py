@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': "Universal Discount",
-    'version': '12.3',
+    'version': '12.5',
 
     'summary': """
-        Universal Discount v12.4""",
+        Universal Discount v12.5""",
 
     'description': """
         - Apply a field in Sales, Purchase and Invoice module to calculate discount after the order lines are inserted.

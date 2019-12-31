@@ -20,10 +20,10 @@
                         <div class="page" dir="rtl">
                             <h2 class="text-center">تقرير ارباح وخسائر بالكاشير</h2>
                             <div class="row mt32 mb32">
-                                <div class="col-4">
-                                    <strong>الفرع:</strong>
-                                    <p t-esc="branch_names"/>
-                                </div>
+<!--                                <div class="col-4">-->
+<!--                                    <strong>الفرع:</strong>-->
+<!--                                    <p t-esc="branch_names"/>-->
+<!--                                </div>-->
                                 <div class="col-4">
                                     <strong>التاريخ من:</strong>
                                     <p t-esc="date_from"/>
@@ -38,6 +38,7 @@
                                 <tr>
                                     <th>التاريخ</th>
                                     <th>اسم الكاشير</th>
+                                    <th>اسم الفرع</th>
                                     <th>العجز</th>
                                     <th>الزيادة</th>
                                     <th>الاجمالي</th>
@@ -52,6 +53,9 @@
                                             <t t-esc="d[1]"/>
                                         </td>
                                         <td>
+                                            <t t-esc="d[4]"/>
+                                        </td>
+                                        <td>
                                             <t t-esc="abs(d[3])"/>
                                         </td>
                                         <td>
@@ -63,7 +67,7 @@
                                     </tr>
                                 </t>
                                 <tr>
-                                    <td colspan="2">
+                                    <td colspan="3">
                                         <span>الاجمالي</span>
                                     </td>
                                     <td>

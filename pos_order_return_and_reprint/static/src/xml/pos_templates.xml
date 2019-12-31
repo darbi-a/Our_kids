@@ -840,6 +840,7 @@
                     </div>
                     <br/>
                 </t>
+                <t t-set="total_line_discount" t-value="0" />
                 <table class='receipt-orderlines'>
                     <colgroup>
                         <col width='40%' />
@@ -854,41 +855,54 @@
                         <th>Price</th>
                         <th style="text-align: right;">Value</th>
                     </tr>
-                    <tr t-foreach="orderlines" t-as="orderline">
-                        <td>
-                            <t t-esc="orderline.get_product().display_name"/>
-<!--                             <t t-if="orderline.get_discount() > 0">-->
-<!--                                <div class="pos-disc-font">-->
-<!--                                    With a <t t-esc="orderline.get_discount()"/>% discount-->
-<!--                                </div>-->
-<!--                            </t>-->
-<!--                            <t t-if="orderline.get_display_price() * order.get_total_with_tax() &lt; 0">-->
-<!--&lt;!&ndash;                                <t t-set="discount" t-value="Math.abs(orderline.get_display_price())"/>&ndash;&gt;-->
-<!--                                <t t-set="sub_total" t-value="Math.abs(order.get_total_without_tax())"/>-->
-<!--                                (<t t-esc="Math.round(1000*discount/(sub_total + discount))/10" /> %)-->
-<!--                            </t>-->
-                        </td>
-                        <td style='text-align:center'>
-                            <t t-esc="orderline.get_quantity_str_with_unit()"/>
-                        </td>
-                        <td style='text-align:center'>
-                            <t t-set="a" t-value="orderline.quantityStr"></t>
-                            <t t-set="b" t-value="orderline.get_display_price()"></t>
-                            <t t-set="c" t-value="b/a"></t>
-                            <t t-esc="c"/>
-                        </td>
-                        <td style='text-align:right'>
-                            <t t-esc="widget.format_currency(orderline.get_display_price())"/>
-                        </td>
-                    </tr>
+                    <t t-foreach="orderlines" t-as="orderline">
+                         <tr style="margin-bottom:10px;height: 70px;">
+                            <td>
+                                <t t-esc="orderline.get_product().display_name"/>
+                                <br/>
+                                <span t-if="orderline.get_product().barcode"><t t-esc="orderline.get_product().barcode"/></span>
+    <!--                             <t t-if="orderline.get_discount() > 0">-->
+    <!--                                <div class="pos-disc-font">-->
+    <!--                                    With a <t t-esc="orderline.get_discount()"/>% discount-->
+    <!--                                </div>-->
+    <!--                            </t>-->
+    <!--                            <t t-if="orderline.get_display_price() * order.get_total_with_tax() &lt; 0">-->
+    <!--&lt;!&ndash;                                <t t-set="discount" t-value="Math.abs(orderline.get_display_price())"/>&ndash;&gt;-->
+    <!--                                <t t-set="sub_total" t-value="Math.abs(order.get_total_without_tax())"/>-->
+    <!--                                (<t t-esc="Math.round(1000*discount/(sub_total + discount))/10" /> %)-->
+    <!--                            </t>-->
+                            </td>
+                            <td style='text-align:center'>
+                                <t t-esc="orderline.get_quantity_str_with_unit()"/>
+                            </td>
+                            <td style='text-align:center'>
+                                <t t-set="a" t-value="orderline.quantityStr"></t>
+                                <t t-set="b" t-value="orderline.get_display_price()"></t>
+                                <t t-set="c" t-value="b/a"></t>
+                                <t t-esc="Math.round(100*c)/100"/>
+                            </td>
+                            <td style='text-align:right'>
+                                <t t-esc="widget.format_currency(orderline.get_display_price())"/>
+                                <br/>
+                                <t t-set="line_discount" t-value="orderline.get_product().lst_price - c" />
+
+                                <t t-if="line_discount &amp;&amp; orderline.get_product().lst_price">
+                                    <span>Disc <t t-esc="Math.round(1000 * line_discount / orderline.get_product().lst_price)/10" /> %</span>
+                                    <t t-set="total_line_discount" t-value="total_line_discount + line_discount" />
+                                </t>
+                            </td>
+                         </tr>
+                    </t>
                 </table>
                 <br />
+                <span>---------------------------------------------------------------------</span>
+                <t t-set="global_discount" t-value="0" />
                 <table class='receipt-total'>
-                    <colgroup>
-                        <col width='40%' />
-                        <col width='30%' />
-                        <col width='30%' />
-                    </colgroup>
+<!--                    <colgroup>-->
+<!--                        <col width='40%' />-->
+<!--                        <col width='30%' />-->
+<!--                        <col width='30%' />-->
+<!--                    </colgroup>-->
 <!--                    <tr>-->
 <!--                        &lt;!&ndash;<td></td>&ndash;&gt;-->
 <!--                        <td colspan="2">Subtotal Before Discount:</td>-->
@@ -896,18 +910,68 @@
 <!--                            <t t-esc="widget.format_currency(order.get_total_without_discount_tax())"/>-->
 <!--                        </td>-->
 <!--                    </tr>-->
+
                     <tr>
-                        <td></td>
-                        <td>Subtotal:</td>
-                        <td style='text-align:right'>
+<!--                        <td></td>-->
+                        <td>Total Qty:</td>
+                        <td style='text-align:center'>
+                            <t t-esc="order.get_total_order_qty()"/>
+                        </td>
+                    </tr>
+                    <tr>
+<!--                        <td></td>-->
+                        <td>Total Without Tax:</td>
+                        <td style='text-align:center'>
                             <t t-esc="widget.format_currency(order.get_total_without_tax())"/>
                         </td>
                     </tr>
+                    <tr>
+<!--                        <td></td>-->
+                        <td>Total Tax:</td>
+                        <td style='text-align:center'>
+                            <t t-esc="widget.format_currency(order.get_total_tax())"/>
+                        </td>
+                    </tr>
+                    <tr>
+<!--                        <td></td>-->
+                        <td>Total With Tax:</td>
+                        <td style='text-align:center'>
+                            <t t-esc="widget.format_currency(order.get_total_with_tax())"/>
+                        </td>
+                    </tr>
+                    <tr>
+<!--                        <td></td>-->
+                        <td>Line Discount:</td>
+                        <td style='text-align:center'>
+                            <t t-esc="widget.format_currency(total_line_discount)"/>
+                        </td>
+                    </tr>
+                    <tr>
+<!--                        <td></td>-->
+                        <td>Total Discount:</td>
+                        <td style='text-align:center'>
+                            <t t-if="order.get_global_discount_product()">
+                                <t t-set="global_discount" t-value="Math.abs(order.get_global_discount_product().price)" />
+                                <t t-esc="widget.format_currency(global_discount)"/>
+                            </t>
+                            <t t-else="">
+                                <t t-esc="widget.format_currency(0)" />
+                            </t>
+                        </td>
+                    </tr>
+                    <tr>
+<!--                        <td></td>-->
+                        <td>All Discount:</td>
+                        <td style='text-align:center'>
+                            <t t-esc="widget.format_currency(total_line_discount + global_discount )"/>
+                        </td>
+                    </tr>
+
 <!--                    <t t-foreach="order.get_tax_details()" t-as="taxdetail">-->
 <!--                        <tr>-->
 <!--                            <td></td>-->
 <!--                            <td><t t-esc="taxdetail.name" /></td>-->
-<!--                            <td style='text-align:right'>-->
+<!--                            <td style='text-align:center'>-->
 <!--                                <t t-esc="widget.format_currency(taxdetail.amount)"/>-->
 <!--                            </td>-->
 <!--                        </tr>-->
@@ -915,23 +979,23 @@
 <!--                    <tr>-->
 <!--                        <td></td>-->
 <!--                        <td>Discount:</td>-->
-<!--                        <td style='text-align:right'>-->
+<!--                        <td style='text-align:center'>-->
 <!--                            <t t-esc="widget.format_currency(order.get_total_discount())"/>-->
 <!--                        </td>-->
 <!--                    </tr>-->
                     <!--<tr>-->
                         <!--&lt;!&ndash;<td></td>&ndash;&gt;-->
                         <!--<td colspan="2">Discount percentage:</td>-->
-                        <!--<td style='text-align:right'>-->
+                        <!--<td style='text-align:center'>-->
                             <!--<t t-esc="Math.round(1000*order.get_total_discount()/(order.get_total_without_discount_tax()))/10"/> %-->
                         <!--</td>-->
                     <!--</tr>-->
-                    <tr class="emph">
-                        <td>Total:</td>
-                        <td colspan="2" style='text-align:right'>
-                            <t t-esc="widget.format_currency(order.get_total_with_tax())"/>
-                        </td>
-                    </tr>
+<!--                    <tr class="emph">-->
+<!--                        <td>Total:</td>-->
+<!--                        <td colspan="2" style='text-align:center'>-->
+<!--                            <t t-esc="widget.format_currency(order.get_total_with_tax())"/>-->
+<!--                        </td>-->
+<!--                    </tr>-->
                 </table>
                 <br/>
                 <table class='receipt-paymentlines'>
@@ -982,6 +1046,14 @@
                     </div>
                     <br/>
                 </t>
+                <script>
+                    var barcode = <t t-esc="order.barcode" />;
+                    JsBarcode("#barcode", barcode, {
+                        format: "EAN13",
+                        displayValue: true,
+                        fontSize: 25
+                    })
+                </script>
             </div>
         </t>
     </t>

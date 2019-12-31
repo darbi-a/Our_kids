@@ -64,6 +64,7 @@ class TotalsReportWizard(models.TransientModel):
         total_cash = 0
         total_bank = 0
         month_names = []
+        branch_names = []
         # data['date_from'] = convert_date_to_local(self.date_from,self.env.user.tz)
         # data['date_from'] = convert_date_to_local(self.date_from,self.env.user.tz)
         data['date_from'] = self.date_from
@@ -74,39 +75,40 @@ class TotalsReportWizard(models.TransientModel):
         else:
             branches = self.env['pos.branch'].search([])
 
-        # for branch in branches:
-        data.setdefault('branches',{})
-        # data['branches'].setdefault(branch.name,{})
-        for month in monthes:
-            start_month = month[0]
-            end_month = month[1]
-            month_name = month[2]
-            # month_name = month_sart.strftime('%Y-%B')
-            pos_sessions = self.env['pos.session'].search([
-                ('state', '=', 'closed'),
-                ('config_id.pos_branch_id', 'in', branches.ids),
-                ('stop_at', '<=', end_month),
-                ('stop_at', '>=', start_month)])
+        for branch in branches:
+            branch_names.append(branch.name)
+            data.setdefault('branches',{})
+            data['branches'].setdefault(branch.name,{})
+            for month in monthes:
+                start_month = month[0]
+                end_month = month[1]
+                month_name = month[2]
+                # month_name = month_sart.strftime('%Y-%B')
+                pos_sessions = self.env['pos.session'].search([
+                    ('state', '=', 'closed'),
+                    ('config_id.pos_branch_id', '=', branch.id),
+                    ('stop_at', '<=', end_month),
+                    ('stop_at', '>=', start_month)])
 
-            statements = pos_sessions.mapped('statement_ids')
-            cash_statements = statements.filtered(lambda x: x.journal_id.type == 'cash')
-            bank_statements = statements.filtered(lambda x: x.journal_id.type == 'bank')
-            cash = sum(cash_statements.mapped('line_ids').filtered(lambda l:l.pos_statement_id.id != False).mapped('amount'))
-            bank = sum(bank_statements.mapped('line_ids').filtered(lambda l:l.pos_statement_id.id != False).mapped('amount'))
-            total_amount = cash + bank
-            total_cash += cash
-            total_bank += bank
-            total += total_amount
-            # data['branches'][branch.name][month_name] = {
-            data['branches'][month_name] = {
-                'cash': cash,
-                'bank': bank,
-                'total_amount': total_amount,
-            }
+                statements = pos_sessions.mapped('statement_ids')
+                cash_statements = statements.filtered(lambda x: x.journal_id.type == 'cash')
+                bank_statements = statements.filtered(lambda x: x.journal_id.type == 'bank')
+                cash = sum(cash_statements.mapped('line_ids').filtered(lambda l:l.pos_statement_id.id != False).mapped('amount'))
+                bank = sum(bank_statements.mapped('line_ids').filtered(lambda l:l.pos_statement_id.id != False).mapped('amount'))
+                total_amount = cash + bank
+                total_cash += cash
+                total_bank += bank
+                total += total_amount
+                data['branches'][branch.name][month_name] = {
+                # data['branches'][month_name] = {
+                    'cash': cash,
+                    'bank': bank,
+                    'total_amount': total_amount,
+                }
         for month in monthes:
             month_names.append(month[2])
         data['monthes'] = month_names
-        branch_names = ' - '.join(branches.mapped('name'))
+        # branch_names = ' - '.join(branches.mapped('name'))
         data['branch_names'] = branch_names
         return data
 

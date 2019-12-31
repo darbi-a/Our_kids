@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ init object """
 from odoo import fields, models, api, _
+from odoo.exceptions import ValidationError
 
 class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
@@ -43,6 +44,14 @@ class PurchaseOrderLine(models.Model):
             'context':{'other_sale_order_lines': other_sale_order_lines.ids}
 
         }
+
+    @api.constrains('partner_id')
+    def check_partner(self):
+        for rec in self:
+            if rec.partner_id and rec.product_id.seller_ids:
+                vendors = rec.product_id.seller_ids.mapped('name')
+                if rec.partner_id not in vendors:
+                    raise ValidationError(_('This vendor is not the supplier of this product %s')  %(rec.product_id.name))
 
 
 

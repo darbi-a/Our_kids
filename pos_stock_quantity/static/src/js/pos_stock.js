@@ -10,6 +10,7 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
     var rpc = require('web.rpc');
     var bus_service = require('bus.BusService');
     var task;
+    var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
 
     models.load_fields('product.product', ['type']);
 
@@ -49,6 +50,29 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
             }
             return false;
         },
+        update_qty_db: function(product_ids){
+            var self = this;
+            const request = indexedDB.open("pos", 1);
+            request.onsuccess = function(event) {
+                const db = event.target.result;
+                const tx = db.transaction('products', 'readwrite');
+                const store = tx.objectStore('products');
+                console.log(product_ids);
+                for (var i = 0 ; i < product_ids.length ; i ++)
+                {
+                      store.get(product_ids[i]).onsuccess = function(e) {
+                            var result = e.target.result;
+                            if (result){
+                                result.qty_available = self.db.qty_by_product_id[result.id];
+                                store.put(result);
+                            }
+                      };
+
+                }
+            }
+
+        },
+
         load_qty_after_load_product: function () {
             var wait = this.get_model('account.journal');
             var _wait_super_loaded = wait.loaded;
@@ -67,7 +91,11 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
                         self.db.qty_by_product_id = {};
                         res.forEach(function (product) {
                             self.db.qty_by_product_id[product.id] = product.qty_available;
+
                         });
+                        var product_ids = _.map(res, function(val) { return val.id; });
+                        self.update_qty_db(product_ids);
+
                         self.refresh_qty();
                         done.resolve();
                     });
@@ -127,30 +155,33 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
         qty_sync: function (product_ids) {
             var self = this;
             var done = new $.Deferred();
-            if (this.config && this.config.show_qty_available && this.config.location_only) {
+//            if (this.config && this.config.show_qty_available && this.config.location_only) {
+                var stock_location_id = self.stock_location_ids || [self.config.stock_location_id[0]] || []
                 rpc.query({
                     model: 'stock.quant',
                     method: 'get_qty_available',
-                    args: [false, self.stock_location_ids, product_ids]
+                    args: [false, stock_location_id, product_ids]
                 }).then(function (res) {
                     self.recompute_qty_in_pos_location(product_ids, res);
+                    var new_product_ids = _.map(res, function(val) { return val.product_id[0]; });
+                    self.update_qty_db(new_product_ids);
                     done.resolve();
                 });
-
-            } else if (this.config && this.config.show_qty_available) {
-                rpc.query({
-                    model: 'product.product',
-                    method: 'get_qty_available',
-                    args: [product_ids, self.config.stock_location_id[0] ],
-                }).then(function (res) {
-                    res.forEach(function (product) {
-                        self.db.qty_by_product_id[product.id] = product.qty_available;
-                    });
-                    done.resolve();
-                });
-            } else {
+//
+//            } else if (this.config && this.config.show_qty_available) {
+//                rpc.query({
+//                    model: 'product.product',
+//                    method: 'get_qty_available',
+//                    args: [product_ids, self.config.stock_location_id[0] ],
+//                }).then(function (res) {
+//                    res.forEach(function (product) {
+//                        self.db.qty_by_product_id[product.id] = product.qty_available;
+//                    });
+//                    done.resolve();
+//                });
+//            } else {
                 done.resolve();
-            }
+//            }
             return done.promise();
         },
         compute_qty_in_pos_location: function (res) {
@@ -196,8 +227,8 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
         refresh_qty: function () {
             var self = this;
             $('.product-list').find('.qty_tag').each(function () {
-//                var $product = $(this).parents('.product');
-//                var id = parseInt($product.attr('data-product-id'));
+                var $product = $(this).parents('.product');
+                var id = parseInt($product.attr('data-product-id'));
                 var id = parseInt($(this).parent().attr('data-product-id'));
 
                 var qty = self.db.qty_by_product_id[id];

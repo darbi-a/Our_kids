@@ -14,7 +14,9 @@ class ProductProduct(models.Model):
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
     sale_price =fields.Float("Sales Price2")
-    seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', string='Vendors',compute='_onchange_vendor_num', help="Define vendor pricelists.")
+    seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', string='Vendors',compute='_onchange_seller', help="Define vendor pricelists.")
+    variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id',compute='_onchange_vendor_num',)
+
     un_edit = fields.Boolean(string="UN Edit",compute='_compute_un_edit' )
 
     def _compute_un_edit(self):
@@ -59,19 +61,49 @@ class ProductProduct(models.Model):
                     })
                     seller_id= [(6,0,seller.ids)]
                 else:
-                    seller_id = [(6, 0, seller.ids)]
+                    seller_id= [(6,0,seller.ids)]
         if seller_id:
             return seller_id
         else: return False
+
 
     @api.one
     @api.depends('vendor_num')
     def _onchange_vendor_num(self):
         try:
             seller = self._assin_seller()
-            self.seller_ids = seller
+            print("seller == ",seller)
+            # for rec in self:
+            #     if rec.product_tmpl_id:
+            #         rec.product_tmpl_id.variant_seller_ids = seller
+            #         rec.product_tmpl_id.seller_ids = seller
+            #
+                # rec.variant_seller_ids = seller
+            self.variant_seller_ids = seller
         except:
             return True
+
+    @api.one
+    @api.depends('variant_seller_ids')
+    def _onchange_seller(self):
+        for rec in self:
+            if rec.variant_seller_ids:
+                rec.seller_ids = rec.variant_seller_ids
+
+    @api.multi
+    def write(self,vals):
+        print('vals == ',vals)
+        if 'vendor_num' in vals:
+            seller = self._assin_seller()
+            print("** seller == ", seller)
+            self.product_tmpl_id.variant_seller_ids = seller
+            self.product_tmpl_id.seller_ids = seller
+            self.variant_seller_ids = seller
+            self.seller_ids = seller
+
+        super(ProductProduct, self).write(vals)
+        return True
+
 
     # @api.model
     # def create(self,vals):
@@ -115,11 +147,23 @@ class ProductTemplate(models.Model):
     categ_num = fields.Char(string="Category Number", required=False, )
     sale_price =fields.Float("Sales Price2")
 
+    @api.multi
+    def write(self, vals):
+        print('template vals == ', vals)
+        super(ProductTemplate, self).write(vals)
+        return True
 
-class SupplierInfo(models.Model):
-    _inherit = "product.supplierinfo"
 
-    product_uom = fields.Many2one(
-        'uom.uom', 'Unit of Measure',
-        related='product_id.uom_po_id',
-        help="This comes from the product form.")
+# class SupplierInfo(models.Model):
+#     _inherit = "product.supplierinfo"
+#
+#     product_uom = fields.Many2one(
+#         'uom.uom', 'Unit of Measure',
+#         related='product_id.uom_po_id',
+#         help="This comes from the product form.")
+#
+#     @api.multi
+#     def write(self, vals):
+#         print('SupplierInfo vals == ', vals)
+#         super(SupplierInfo, self).write(vals)
+#         return True

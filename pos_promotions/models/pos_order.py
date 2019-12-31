@@ -18,3 +18,11 @@ class PosOrder(models.Model):
             })
 
         return order_fields
+
+
+class PosOrderLine(models.Model):
+    _inherit = 'pos.order.line'
+
+    is_promotion = fields.Boolean(string="Is Promotion ?", default=False,readonly=True )
+    applied_promotion_id = fields.Many2one(comodel_name="pos.promotion", string="", required=False, )
+    promotion_id = fields.Many2one(comodel_name="pos.promotion", string="", required=False, )

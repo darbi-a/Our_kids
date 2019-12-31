@@ -45,10 +45,10 @@ class AccountBankStatementLine(models.Model):
 
 
     @api.one
-    @api.depends('FIELDS_NAMES')
+    @api.depends('journal_box_id','statement_id')
     def compute_journal(self):
-        if self.journal_box_id:
-            self.journal_id=self.journal_box_id.id
-        else:
-            self.journal_id = self.statement_id.journal_id.id
-        pass
+        for stat in self:
+            if stat.journal_box_id:
+                stat.journal_id=stat.journal_box_id.id
+            else:
+                stat.journal_id = stat.statement_id.journal_id.id

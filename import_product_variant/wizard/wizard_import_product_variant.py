@@ -107,8 +107,9 @@ class ImportProductVariant(models.TransientModel):
             for col_idx in range(0, num_cols):  # Iterate through columns
                 cell_obj = worksheet.cell(row_idx, col_idx)  # Get cell object by row, col
 
-                if not cell_obj.value:
-                    raise UserError(_('Empty Row value!'))
+                # if not cell_obj.value:
+                #     print(col_idx , row_idx)
+                #     raise UserError(_('Empty Row value!'))
                 if cell_obj.value:
                     if col_idx in fields_dict:
                         field_name = fields_dict[col_idx]
@@ -133,7 +134,10 @@ class ImportProductVariant(models.TransientModel):
                             values[field_name] = product_code
 
                         elif fields_dict[col_idx] == 'default_code':
-                            values[field_name] = str(cell_obj.value)
+                            c =cell_obj.value
+                            if isinstance(c, float):
+                                c =  int(c)
+                            values[field_name] = str(c)
                             prod_ref=values[field_name]
                         elif fields_dict[col_idx] == 'season_id':
                             season_id=self.env['product.season'].search([('name','=',cell_obj.value)])
@@ -182,6 +186,13 @@ class ImportProductVariant(models.TransientModel):
                             tags_ids = tag_obj.browse(tag_ids)
 
                             values[field_name]=tag_ids
+                        elif fields_dict[col_idx] == 'vendor_num':
+                            vend_num = cell_obj.value
+                            if isinstance(vend_num, float) or isinstance(vend_num, int) :
+                                vend_num=int(vend_num)
+                                values[field_name] = vend_num
+                            else:
+                                values[field_name] = vend_num
                     elif col_idx in attributes_dict:
                         attribute_id = attributes_dict[col_idx]
                         attribute_value_name = cell_obj.value
@@ -232,10 +243,11 @@ class ImportProductVariant(models.TransientModel):
                 barcode = lst_field[code]['barcode']
                 field_vals = lst_field[barcode]
                 field_vals['tag_ids'] = [(6, 0, lst_field[code]['tag_ids'])]
-                product_templ = self.env['product.template'].search([('barcode', '=', code)], limit=1)
+                product = self.env['product.product'].search([('barcode', '=', code)], limit=1)
 
-                if not product_templ:
-                    product_templ = self.env['product.template'].create(field_vals)
+                if not product:
+                    product = self.env['product.product'].create(field_vals)
+                    product_templ = product.product_tmpl_id
                     product_templ.barcode = barcode
                     product_templ.list_price = sale_price
                     if product_templ.id not in count_items:
@@ -244,7 +256,9 @@ class ImportProductVariant(models.TransientModel):
                     #     count_variant.append(product.id)
                 else:
 
-                    product_templ.write(field_vals)
+                    product.write(field_vals)
+                    product_templ = product.product_tmpl_id
+
                     product_templ.list_price= sale_price
                     # print('list_price == ',sale_price)
                     if product_templ.id not in item_edit:

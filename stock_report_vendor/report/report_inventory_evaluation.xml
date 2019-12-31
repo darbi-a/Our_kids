@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+
+        <report
+                id="inventory_evaluation_report"
+                model="inventory.valuation.report.wizard"
+                report_type="qweb-pdf"
+                string="Inventory Evaluation By Partner"
+                name="stock_report_vendor.report_valuation"
+                file="stock_report_vendor.report_valuation"
+        />
+
+
+        <template id="report_valuation">
+            <t t-call="web.html_container">
+                <t t-call="web.external_layout">
+                    <div class="page" dir="rtl">
+                        <h2 class="text-center">تقرير تقييم المخزون</h2>
+                        <div class="row mt32 mb32">
+                            <div class="col-6">
+                                <strong>التاريخ:</strong>
+                                <p t-esc="date"/>
+                            </div>
+                            <!--                            <div class="col-4">-->
+                            <!--                                <strong>التاريخ الى:</strong>-->
+                            <!--                                <p t-esc="date_to"/>-->
+                            <!--                            </div>-->
+                            <div class="col-6">
+                                <t t-if="tags">
+                                    <strong>نوع الموردين:</strong>
+                                    <p t-esc="tags"/>
+                                </t>
+                            </div>
+                        </div>
+
+                        <table style="text-align:right;" class="table table-bordered">
+<!--                        <table style="text-align:right;" >-->
+                            <tr>
+                                <th rowspan="2">اسم المورد</th>
+                                <th rowspan="2">نوع المورد</th>
+                                <th rowspan="2">لون المورد</th>
+                                <th rowspan="2">تصنيف المنتج</th>
+                                <th rowspan="2">الموديل (internal reference)</th>
+                                <th rowspan="2">باركود</th>
+                                <th rowspan="2">الموسم</th>
+                                <th rowspan="2">اسم المنتج</th>
+                                <th rowspan="2">الكمية المتوفرة</th>
+                                <th rowspan="2">سعر البيع</th>
+                                <th rowspan="2">تكلفة الوحدة</th>
+                                <th rowspan="2">اجمالي القيمة</th>
+                                <t t-foreach="warehouses" t-as="w">
+                                    <th rowspan="1" colspan="2">
+                                        <t t-esc="w"/>
+                                    </th>
+                                </t>
+                                <th rowspan="2">اجمالي (subtotal)</th>
+                            </tr>
+                            <tr>
+                                <t t-foreach="warehouses" t-as="w">
+                                    <th>الكمية</th>
+                                    <th>القيمة</th>
+                                </t>
+                            </tr>
+                            <t t-foreach="data" t-as="partner">
+                                <t t-foreach="data[partner]" t-as="product">
+                                    <t t-set="product_data" t-value="data[partner][product]"/>
+                                    <tr>
+                                        <td>
+                                            <t t-esc="partner"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['vendor_type']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['vendor_color']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['categ']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['product_ref']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['barcode']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['season']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['qty']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['sale_price']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['unit_cost']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['cost']"/>
+                                        </td>
+                                        <t t-foreach="warehouses" t-as="w">
+                                            <td>
+                                                <t t-esc="product_data[w]['qty']"/>
+                                            </td>
+                                            <td>
+                                                <t t-esc="product_data[w]['evaluation']"/>
+                                            </td>
+
+                                        </t>
+                                        <td>
+                                            <t t-esc="product_data['total_qty']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="product_data['total_cost']"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </t>
+                            <tr>
+                                <td colspan="11">الاجمالي</td>
+                                <td>
+                                    <t t-esc="totals['all_total']['all_products']"/>
+                                </td>
+                                <t t-foreach="warehouses" t-as="w">
+                                    <td>
+                                    </td>
+                                    <td>
+                                        <t t-esc="totals[w]"/>
+                                    </td>
+
+                                </t>
+                                <td></td>
+                                <td><t t-esc="totals['all_total']['warehouses']"/></td>
+                            </tr>
+                        </table>
+
+                    </div>
+
+                </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>

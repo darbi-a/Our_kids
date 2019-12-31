@@ -27,5 +27,5 @@ class ProductCard(http.Controller):
                                                                               'product_name':report_obj.product_id.name,
                                                                               'date_from':report_obj.date_from,
                                                                               'date_to':report_obj.date_to,
-                                                                              'location':report_obj.location_id.name,
+                                                                              'location':report_obj.location_id.display_name,
                                                                               })

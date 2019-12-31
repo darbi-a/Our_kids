@@ -31,11 +31,17 @@
 
                         <table style="text-align:right;" class="table table-bordered">
                             <tr>
+                                <th>اسم المورد</th>
+                                <th>نوع المورد</th>
+                                <th>لون المورد</th>
                                 <th>اسم الفرع</th>
-                                <th> تصنيف المنتج</th>
+                                <th>تصنيف المنتج</th>
                                 <th>باركود المنتج</th>
                                 <th>اسم المنتج</th>
+                                <th>الموديل</th>
                                 <th>الموسم</th>
+                                <th>رقم ايصال البيع</th>
+                                <th>تاريخ الايصال</th>
                                 <th>اجمالي كمية المبيعات</th>
                                 <th>سعر البيع</th>
                                 <th>اجمالي المبيعات</th>
@@ -43,31 +49,56 @@
                                 <th>صافي المبيعات</th>
                                 <th>قيمة التكلفة</th>
                                 <th>اجمالي التكلفة</th>
-                                <th> البائع</th>
+                                <th>البائع</th>
                             </tr>
-                            <t t-set="previous_branch" t-value="'0'" />
+
                             <t t-if="data">
+                                <t t-set="i" t-value="0"/>
+                                <t t-set="previous_branch" t-value="docs.get_branch_id(keys[0])"/>
+                                <t t-set="count" t-value="len(keys)"/>
                                 <t t-foreach="keys" t-as="key">
-                                    <t t-set="branch_id" t-value="docs.get_branch_id(key)" />
+                                    <t t-set="branch_id" t-value="docs.get_branch_id(key)"/>
+                                    <t t-set="i" t-value="i+1"/>
                                     <t t-if="previous_branch != branch_id">
-                                        <tr>
+                                        <tr style="background-color:yellow">
                                             <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td><t t-esc="round(totals.get(branch_id)['qty'],2)" /></td>
                                             <td></td>
-                                            <td><t t-esc="round(totals.get(branch_id)['total_sales'],2)" /></td>
                                             <td></td>
-                                            <td><t t-esc="round(totals.get(branch_id)['net'],2)" /></td>
                                             <td></td>
-                                            <td><t t-esc="round(totals.get(branch_id)['total_cost'],2)" /></td>
+                                            <td></td>
+                                            <td>
+                                                <t t-esc="round(totals.get(previous_branch)['qty'],2)"/>
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                                <t t-esc="round(totals.get(previous_branch)['total_sales'],2)"/>
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                                <t t-esc="round(totals.get(previous_branch)['net'],2)"/>
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                                <t t-esc="round(totals.get(previous_branch)['total_cost'],2)"/>
+                                            </td>
                                             <td></td>
                                         </tr>
-                                        <t t-set="previous_branch" t-value="branch_id" />
+                                        <t t-set="previous_branch" t-value="branch_id"/>
                                     </t>
                                     <tr>
+                                        <td>
+                                            <t t-esc="data.get(key)['partner']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['vendor_type']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['vendor_color']"/>
+                                        </td>
                                         <td>
                                             <t t-esc="data.get(key)['branch']"/>
                                         </td>
@@ -81,7 +112,17 @@
                                             <t t-esc="data.get(key)['product']"/>
                                         </td>
                                         <td>
+                                            <t t-esc="data.get(key)['default_code']"/>
+                                        </td>
+
+                                        <td>
                                             <t t-esc="data.get(key)['season']"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['order_name']" />
+                                        </td>
+                                        <td>
+                                            <t t-esc="data.get(key)['date_order']" />
                                         </td>
                                         <td>
                                             <t t-esc="round(data.get(key)['qty'],2)"/>
@@ -108,7 +149,62 @@
                                             <t t-esc="data.get(key)['cashier']"/>
                                         </td>
                                     </tr>
+                                    <t t-if="i == count ">
+                                        <tr style="background-color:yellow">
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td>
+                                                <t t-esc="round(totals.get(previous_branch)['qty'],2)"/>
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                                <t t-esc="round(totals.get(previous_branch)['total_sales'],2)"/>
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                                <t t-esc="round(totals.get(previous_branch)['net'],2)"/>
+                                            </td>
+                                            <td></td>
+                                            <td>
+                                                <t t-esc="round(totals.get(previous_branch)['total_cost'],2)"/>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </t>
                                 </t>
+                                <tr style="background-color:yellow">
+                                    <td colspan="9">الاجمالي</td>
+<!--                                    <td></td>-->
+<!--                                    <td></td>-->
+<!--                                    <td></td>-->
+<!--                                    <td></td>-->
+<!--                                    <td></td>-->
+<!--                                    <td></td>-->
+                                    <td>
+                                        <t t-esc="round(totals['all_total']['qty'],2)"/>
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        <t t-esc="round(totals.get('all_total')['total_sales'],2)"/>
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        <t t-esc="round(totals.get('all_total')['net'],2)"/>
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        <t t-esc="round(totals.get('all_total')['total_cost'],2)"/>
+                                    </td>
+                                    <td></td>
+                                </tr>
+
                             </t>
                         </table>
 

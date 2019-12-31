@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates id="gift_point_of_sale_template" xml:space="preserve">
+
+
+    <t t-name="PosTicketGift">
+<!--        <t t-jquery='.pos-sale-ticket' t-operation='after'>-->
+        <!--            <t t-name="PosTicket">-->
+        <div class="pos-sale-ticket">
+                    <h2 class="pos-center-align">
+                    Gift Receipt
+                    </h2>
+
+
+            <div class="pos-center-align"><t t-esc="order.formatted_validation_date"/>
+                <t t-esc="order.name"/></div>
+            <br/>
+            <t t-esc="widget.pos.company.name"/>
+            <br/>
+            <div class="receipt-phone">
+                Phone: <t t-esc="widget.pos.company.phone || ''"/>
+                <br/>
+                </div>
+            <div class="receipt-user">
+                User: <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/>
+                <br/>
+                </div>
+            <br/>
+            <t t-if="receipt.header">
+                        <div style='text-align:center'>
+                        <t t-esc="receipt.header"/>
+                        </div>
+                <br/>
+                        </t>
+            <table class='receipt-orderlines'>
+                            <colgroup>
+                            <col width='75%'/>
+                                <!--                            <col width='25%' />-->
+                                <col width='25%'/>
+                            </colgroup>
+                <tr t-foreach="orderlines" t-as="orderline">
+                                             <td>
+                                                 <t t-esc="orderline.get_product().display_name"/>
+                                                 <!--                                                 <t t-if="orderline.get_discount() > 0">-->
+                                                 <!--                                                <div class="pos-disc-font">-->
+                                                 <!--                                                    With a <t t-esc="orderline.get_discount()"/>% discount-->
+                                                 <!--                                                </div>-->
+                                                 <!--                                                    </t>-->
+                                            </td>
+                    <td class="pos-right-align">
+                                                <t t-esc="orderline.get_quantity_str_with_unit()"/>
+                                            </td>
+                                </tr>
+                        </table>
+            <br/>
+<!--            <br/>-->
+            <img id="barcode" style="width:230px;height:90px;display:block;margin:auto;margin-top:20px;"/>
+            <br/>
+<!--            <br/>-->
+            <t t-if="receipt.footer">
+                <br/>
+                <div style='text-align:center'>
+                <t t-esc="receipt.footer"/>
+                </div>
+            </t>
+        </div>
+        <script>
+            var barcode = <t t-esc="order.barcode" />;
+            JsBarcode("#barcode", barcode, {
+                format: "EAN13",
+                displayValue: true,
+                fontSize: 25
+            })
+        </script>
+        <!--            </t>-->
+        <!--        </t>-->
+    </t>
+
+    <t t-name="ReprintButton">
+        <div class="button Print-Gift-Receipt">
+            <i class='fa fa-print'></i>
+            Print Gift Receipt
+
+        </div>
+    </t>
+
+    <t t-extend="ReceiptScreenWidget">
+        <t t-jquery='div.receipt-screen.screen > div > div.centered-content.touch-scrollable > div.button.print'
+           t-operation="after">
+            <div class="button Print-Gift-Receipt">
+                <i class='fa fa-print'></i>
+                Print Gift Receipt
+
+            </div>
+        </t>
+
+    </t>
+
+
+
+</templates>

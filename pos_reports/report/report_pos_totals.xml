@@ -23,10 +23,10 @@
                         <div class="page" dir="rtl">
                             <h2 class="text-center">تقرير مبيعات عام بالاجماليات</h2>
                             <div class="row mt32 mb32">
-                                <div class="col-4">
-                                    <strong>الفرع:</strong>
-                                    <p t-esc="branch_names"/>
-                                </div>
+<!--                                <div class="col-4">-->
+<!--                                    <strong>الفرع:</strong>-->
+<!--                                    <p t-esc="branch_names"/>-->
+<!--                                </div>-->
                                 <div class="col-4">
                                     <strong>التاريخ من:</strong>
                                     <p t-esc="date_from"/>
@@ -40,16 +40,22 @@
                             <table style="text-align:right;" class="table table-bordered">
                                 <tr>
                                     <th>الشهر</th>
+                                    <th>الفرع</th>
                                     <th>النقدي</th>
                                     <th>الفيزا</th>
                                     <th>الاجمالي</th>
                                 </tr>
                                 <t t-set="l" t-value="len(monthes)"/>
-                                <t t-set="k" t-value="0"/>
+                                <t t-set="b" t-value="len(branch_names)"/>
+
+                                <t t-set="bk" t-value="0"/>
                                 <t t-foreach="range(0,l)" t-as="i">
+                                     <t t-set="k" t-value="0"/>
+                                     <t t-foreach="range(0,b)" t-as="bi">
                                     <tr>
-                                        <t t-set="month_name" t-value="monthes[k]"/>
-                                        <t t-set="month_data" t-value="branches[month_name]"/>
+                                        <t t-set="month_name" t-value="monthes[bk]"/>
+                                        <t t-set="branch_name" t-value="branch_names[k]"/>
+                                        <t t-set="month_data" t-value="branches[branch_name][month_name]"/>
                                         <t t-set="total_cash" t-value="total_cash + month_data['cash']"/>
                                         <t t-set="total_amount" t-value="total_amount + month_data['total_amount']"/>
                                         <t t-set="total_bank" t-value="total_bank + month_data['bank']"/>
@@ -58,30 +64,36 @@
                                             <t t-raw="month_name"/>
                                         </td>
                                         <td>
-                                            <t t-esc="month_data['cash']"/>
+                                            <t t-raw="branch_name"/>
+                                        </td>
+                                        <td>
+                                            <t t-esc="round(month_data['cash'],2)"/>
                                             <!--                                            <t t-esc="l"/>-->
                                         </td>
                                         <td>
-                                            <t t-esc="month_data['bank']"/>
+                                            <t t-esc="round(month_data['bank'],2)"/>
                                             <!--                                            <t t-esc="monthes[1]"/>-->
                                         </td>
                                         <td>
-                                            <t t-esc="month_data['total_amount']"/>
+                                            <t t-esc="round(month_data['total_amount'],2)"/>
                                         </td>
                                     </tr>
+
+                                     </t>
+                                    <t t-set="bk" t-value="bk+1"/>
                                 </t>
                                 <tr>
-                                    <td>
+                                    <td colspan="2">
                                         <span>الاجمالي</span>
                                     </td>
                                     <td>
-                                        <t t-esc="total_cash"/>
+                                        <t t-esc="round(total_cash,2)"/>
                                     </td>
                                     <td>
-                                        <t t-esc="total_bank"/>
+                                        <t t-esc="round(total_bank,2)"/>
                                     </td>
                                     <td>
-                                        <t t-esc="total_amount"/>
+                                        <t t-esc="round(total_amount,2)"/>
                                     </td>
                                 </tr>
                             </table>
