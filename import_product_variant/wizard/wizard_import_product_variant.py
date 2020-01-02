@@ -237,12 +237,14 @@ class ImportProductVariant(models.TransientModel):
         if not template_attributes:
             for code in lst_field:
                 x += 1
-                default_code = lst_field[code]['default_code']
-                sale_price = lst_field[code]['sale_price']
-                prod_name = lst_field[code]['name']
-                barcode = lst_field[code]['barcode']
+                fld = lst_field[code]
+                default_code = fld.get('default_code')
+                sale_price = fld.get('sale_price')
+                prod_name = fld.get('name')
+                barcode = fld.get('barcode')
                 field_vals = lst_field[barcode]
-                field_vals['tag_ids'] = [(6, 0, lst_field[code]['tag_ids'])]
+                if fld.get('tag_ids'):
+                    field_vals['tag_ids'] = [(6, 0, fld.get('tag_ids'))]
                 product = self.env['product.product'].search([('barcode', '=', code)], limit=1)
 
                 if not product:
@@ -273,12 +275,13 @@ class ImportProductVariant(models.TransientModel):
                 for code in import_data[line]:
                     x += 1
                     # print('code == > ','x==',x,code)
-
-                    default_code =import_data[line][code]['default_code']
-                    barcode = import_data[line][code]['barcode']
+                    fld = import_data[line][code]
+                    default_code =fld.get('default_code')
+                    barcode = fld.get('barcode')
                     field_vals = lst_field[barcode]
                     field_vals['attribute_value_ids'] = [(6, 0, xl_values[barcode])]
-                    field_vals['tag_ids'] = [(6, 0, import_data[line][code]['tag_ids'])]
+                    if fld.get('tag_ids'):
+                        field_vals['tag_ids'] = [(6, 0, fld.get('tag_ids'))]
 
                     product = self.env['product.product'].search([('default_code', '=', default_code)],limit=1)
                     product_templ = product.product_tmpl_id
