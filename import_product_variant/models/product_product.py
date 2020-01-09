@@ -72,7 +72,6 @@ class ProductProduct(models.Model):
     def _onchange_vendor_num(self):
         try:
             seller = self._assin_seller()
-            print("seller == ",seller)
             # for rec in self:
             #     if rec.product_tmpl_id:
             #         rec.product_tmpl_id.variant_seller_ids = seller
@@ -92,10 +91,8 @@ class ProductProduct(models.Model):
 
     @api.multi
     def write(self,vals):
-        print('vals == ',vals)
         if 'vendor_num' in vals:
             seller = self._assin_seller()
-            print("** seller == ", seller)
             self.product_tmpl_id.variant_seller_ids = seller
             self.product_tmpl_id.seller_ids = seller
             self.variant_seller_ids = seller
@@ -135,10 +132,6 @@ class ProductProduct(models.Model):
     #         else:
     #             rec.seller_ids = False
 
-
-
-
-
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
@@ -149,21 +142,14 @@ class ProductTemplate(models.Model):
 
     @api.multi
     def write(self, vals):
-        print('template vals == ', vals)
         super(ProductTemplate, self).write(vals)
         return True
 
 
-# class SupplierInfo(models.Model):
-#     _inherit = "product.supplierinfo"
-#
-#     product_uom = fields.Many2one(
-#         'uom.uom', 'Unit of Measure',
-#         related='product_id.uom_po_id',
-#         help="This comes from the product form.")
-#
-#     @api.multi
-#     def write(self, vals):
-#         print('SupplierInfo vals == ', vals)
-#         super(SupplierInfo, self).write(vals)
-#         return True
+class SupplierInfo(models.Model):
+    _inherit = "product.supplierinfo"
+
+    product_uom = fields.Many2one(
+        'uom.uom', 'Unit of Measure',
+        related='product_id.uom_po_id',
+        help="This comes from the product form.")
