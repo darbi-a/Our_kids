@@ -89,7 +89,7 @@
                                             <t t-esc="product_data['season']"/>
                                         </td>
                                         <td>
-                                            <t t-esc="product"/>
+                                            <t t-esc="product_data['product_name']"/>
                                         </td>
                                         <td>
                                             <t t-esc="product_data['qty']"/>

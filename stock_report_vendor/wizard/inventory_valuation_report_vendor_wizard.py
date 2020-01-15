@@ -110,18 +110,20 @@ class InventoryValuationReportVendor(models.TransientModel):
         for partner in partners:
             # partner_products = products.filtered(lambda p:p.vendor_num == partner.vendor_num)
             supplier_info = self.env['product.supplierinfo'].search([('name','=',partner.id)])
-            partner_products = products.filtered(lambda p:p.variant_seller_ids in supplier_info)
+            # partner_products = products.filtered(lambda p:p.variant_seller_ids in supplier_info)
+            partner_products = products & supplier_info.mapped('product_id')
             data.setdefault(partner.name,{})
 
             for product in partner_products:
                 # data[partner].setdefault(product,{})
                 qty = product.with_context(to_date=start_date,company_owned=True).qty_available
-                data[partner.name][product.display_name] = {
+                data[partner.name][str(product.id)] = {
                     'vendor_type': partner.vendor_type,
                     'vendor_color': product.vendor_color,
                     'product_ref': product.default_code,
                     'unit_cost': product.standard_price,
                     'barcode': product.barcode,
+                    'product_name': product.display_name,
                     'categ': product.categ_id.name ,
                     'season': product.season_id.name,
                     'qty': qty,
@@ -136,15 +138,15 @@ class InventoryValuationReportVendor(models.TransientModel):
                     totals.setdefault(warehouse.name,0)
                     qty = product.with_context(warehouse=warehouse.id,to_date=start_date).qty_available
                     # evaluation = self.get_valuation(product,warehouse)
-                    data[partner.name][product.display_name][warehouse.name] = {
+                    data[partner.name][str(product.id)][warehouse.name] = {
                         'qty':qty,
                         # 'evaluation': evaluation,
                         'evaluation': qty * product.standard_price,
                     }
                     totals[warehouse.name] += qty * product.standard_price
                     totals['all_total']['warehouses'] += qty * product.standard_price
-                    data[partner.name][product.display_name]['total_qty'] += qty
-                    data[partner.name][product.display_name]['total_cost'] += qty * product.standard_price
+                    data[partner.name][str(product.id)]['total_qty'] += qty
+                    data[partner.name][str(product.id)]['total_cost'] += qty * product.standard_price
 
         return data,warehouses,totals
 
@@ -296,7 +298,7 @@ class InventoryValuationReportVendor(models.TransientModel):
                 col += 1
                 worksheet.write(row,col,product_data['season'],STYLE_LINE_Data)
                 col += 1
-                worksheet.write(row,col,product,STYLE_LINE_Data)
+                worksheet.write(row,col,product_data['product_name'],STYLE_LINE_Data)
                 col += 1
                 worksheet.write(row,col,product_data['qty'],STYLE_LINE_Data)
                 col += 1

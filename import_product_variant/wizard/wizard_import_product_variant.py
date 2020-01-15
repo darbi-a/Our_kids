@@ -106,10 +106,6 @@ class ImportProductVariant(models.TransientModel):
 
             for col_idx in range(0, num_cols):  # Iterate through columns
                 cell_obj = worksheet.cell(row_idx, col_idx)  # Get cell object by row, col
-
-                # if not cell_obj.value:
-                #     print(col_idx , row_idx)
-                #     raise UserError(_('Empty Row value!'))
                 if cell_obj.value:
                     if col_idx in fields_dict:
                         field_name = fields_dict[col_idx]
@@ -148,7 +144,7 @@ class ImportProductVariant(models.TransientModel):
                         elif fields_dict[col_idx] == 'categ_id':
                             cat_id = cell_obj.value
                             categ_name = worksheet.cell(row_idx, col_idx + 1)
-                            if isinstance(cat_id, float) or isinstance(cat_id, int) :
+                            if isinstance(cat_id, float) or isinstance(cat_id, int) or isinstance(cat_id, str) :
                                 category=self.env['product.category'].search([('id','=',int(cell_obj.value))])
 
                                 if not category :
@@ -262,7 +258,6 @@ class ImportProductVariant(models.TransientModel):
                     product_templ = product.product_tmpl_id
 
                     product_templ.list_price= sale_price
-                    # print('list_price == ',sale_price)
                     if product_templ.id not in item_edit:
                         item_edit.append(product_templ.id)
 
@@ -270,11 +265,8 @@ class ImportProductVariant(models.TransientModel):
                     #     count_variant.append(product.id)
         else:
             for line in import_data:
-                # print('x= ',x,' line == >',len(import_data[line]))
-                # print('x= ',x,' line 4== >',import_data[line])
                 for code in import_data[line]:
                     x += 1
-                    # print('code == > ','x==',x,code)
                     fld = import_data[line][code]
                     default_code =fld.get('default_code')
                     barcode = fld.get('barcode')
@@ -318,9 +310,16 @@ class ImportProductVariant(models.TransientModel):
 
         context = dict(self._context) or {}
         context['default_count_variant'] = len(count_variant)
+        context['lst_count_variant'] = count_variant
+
         context['default_count_items'] = len(count_items)
+        context['lst_count_items'] = count_items
+
         context['default_count_edit'] = len(count_edit)
+        context['lst_count_edit'] = count_edit
+
         context['default_count_items_edit'] = len(item_edit)
+        context['lst_count_items_edit'] = item_edit
         return {
             'name': 'Import Resalt',
             'type': 'ir.actions.act_window',

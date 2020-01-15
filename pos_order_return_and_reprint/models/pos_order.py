@@ -125,16 +125,31 @@ class pos_order(models.Model):
         global_discount_percent = 0
         global_discount = 0
         total_without_discount = 0
-        for orderline in orderlines:
+        total_line_discount = 0
+        total_qty = 0
 
+        for orderline in orderlines:
+            line_discount = 0
+            line_discount_percent = 0
+            # price_unit = orderline.price_unit
+            price_subtotal = orderline.price_subtotal
+            price_unit = price_subtotal / orderline.qty
+            if orderline.product_id.type == 'product':
+                line_discount = orderline.product_id.lst_price * orderline.qty - price_subtotal
+                if orderline.product_id.lst_price and orderline.qty:
+                    line_discount_percent = 100*line_discount/(orderline.product_id.lst_price* orderline.qty)
+                total_qty += orderline.qty
+            total_line_discount += line_discount
             new_vals = {
                 'product_id': orderline.product_id.display_name,
                 'qty': orderline.qty,
-                'price_unit': orderline.price_unit,
-                'discount': orderline.discount,
+                'barcode': orderline.product_id.barcode,
+                'price_unit': price_unit,
+                'discount': line_discount,
+                'line_discount_percent': line_discount_percent,
                 }
             sub_total_before_discount += orderline.price_unit * orderline.qty
-            if orderline.price_unit * order_id.amount_total < 0:
+            if orderline.price_unit * order_id.amount_total < 0 and orderline.product_id.type == 'service':
                 global_discount = abs(orderline.price_unit * orderline.qty)
             else:
                 total_without_discount += orderline.price_subtotal_incl
@@ -142,9 +157,9 @@ class pos_order(models.Model):
             output.append(new_vals)
         if global_discount and total_without_discount:
             global_discount_percent = 100*global_discount/total_without_discount
-
+        all_discount = total_line_discount + global_discount
         date_order = self.convert_date_to_local(self.date_order,self.env.user.tz)
-        return [output, discount, paymentlines, change, sub_total_before_discount,global_discount_percent,date_order]
+        return [output, discount, paymentlines, change, sub_total_before_discount,global_discount_percent,date_order,self.amount_tax,self.amount_total,total_line_discount,global_discount,all_discount,total_qty]
 
 
 class PosOrderLine(models.Model):

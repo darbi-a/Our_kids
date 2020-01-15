@@ -123,7 +123,7 @@ class RetailSalesWizard(models.TransientModel):
                 'order_name':ol.order_id.name,
                 'season':product.season_id.name,
                 'qty':0,
-                'sales_price': product.list_price,
+                'sales_price': product.sale_price,
                 'total_sales':0,
                 'discount':0,
                 'net':0,
@@ -134,7 +134,7 @@ class RetailSalesWizard(models.TransientModel):
 
             data.setdefault(key,product_data.copy())
             totals.setdefault(branch.id,totals_dic.copy())
-            total_sales = product.list_price * ol.qty
+            total_sales = product.sale_price * ol.qty
             total_discount = total_sales - ol.price_subtotal
             data[key]['qty'] += ol.qty
             data[key]['total_sales'] += total_sales
