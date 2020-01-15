@@ -38,14 +38,14 @@ class ProductCardReportWizard(models.TransientModel):
         return res
 
     def convert_date_to_utc(self,dat, tz):
-        local = pytz.timezone(tz) or pytz.timezone('UTC')
+        local = tz and pytz.timezone(tz) or pytz.timezone('UTC')
         date = local.localize(dat, is_dst=None)
         date = date.astimezone(pytz.utc)
-        date.strftime('%Y-%m-%d: %H:%M:%S')
+        date.strftime('%Y-%m-%d %H:%M:%S')
         return date.replace(tzinfo=None)
 
     def convert_date_to_local(self,dat, tz):
-        local = pytz.timezone(tz) or pytz.timezone('UTC')
+        local = tz and pytz.timezone(tz) or pytz.timezone('UTC')
         dat = dat.replace(tzinfo=pytz.utc)
         dat = dat.astimezone(local)
         dat.strftime('%Y-%m-%d: %H:%M:%S')
@@ -91,186 +91,35 @@ class ProductCardReportWizard(models.TransientModel):
             'cost_out': cost if out else 0,
             'amount_out': amount if out else 0,
             'qty_balance': qty_balance,
-            # 'qty_balance': product.with_context(to_date=line.date,warehouse=self.warehouse.id).qty_available,
             'cost_balance': cost_balance,
-            # 'cost_balance':  product.get_history_price(self.env.user.company_id.id,date=line.date),
             'amount_balance': amount_balance,
-            # 'amount_balance': product.with_context(to_date=line.date).stock_value,
         }
 
-    def get_cost_from_entries(self,line):
-        account_moves = line.move_id.account_move_ids
-        total_debit = 0
-        total_qty = 0
-        if account_moves:
-            for move in account_moves:
-                for line in move.line_ids:
-                    total_debit += line.debit if line.debit else 0
-                    total_qty += line.quantity if line.debit else 0
+    def get_amount_balance(self,date_from_utc):
+        if self.location_id:
+            domain = [('product_id','=',self.product_id.id),('state','=','done'),('date', '<', str(date_from_utc)), '|', ('location_id', 'child_of', self.location_id.id),
+                      ('location_dest_id', 'child_of', self.location_id.id)]
 
-            if total_qty:
-                return (total_debit / total_qty)
+            stock_move_lines = self.env['stock.move.line'].search(domain)
+            balance = 0
+            if self.product_id.cost_method == 'fifo':
+                for ml in stock_move_lines:
+                    balance += ml.move_id.remaining_value
+                return balance
             else:
-                return 0.0
-        elif line.prodcut_id.cost_method != 'fifo':
-            cost = line.product_id.get_history_price(self.env.user.company_id.id, date=line.date)
-            return cost
+                for ml in stock_move_lines:
+                    balance += ml.qty_done * ml.product_id.get_history_price(self.env.user.company_id.id,date=date_from_utc)
+                return balance
         else:
-            return 0
+            return self.product_id.with_context(to_date=str(date_from_utc)).stock_value
 
-    def get_data_product_fifo(self):
-        data = []
+    def get_line_amount(self,line):
+        if line.product_id.cost_method != 'fifo':
+            amount = line.qty_done * line.product_id.get_history_price(self.env.user.company_id.id, date=line.date)
+        else:
+            amount = line.move_id.remaining_value
 
-        date_to_utc = fields.Datetime.from_string(self.date_to) if self.date_to else datetime.now()
-        date_from_utc = fields.Datetime.from_string(self.date_from) if self.date_from else None
-        company_id = self.env.user.company_id.id
-        internal_locations = self.env['stock.location'].search( [('company_id', '=', company_id), ('usage', 'in', ['internal', 'transit'])])
-        stock_move_lines = self.env['stock.move.line']
-        if self.product_id.product_tmpl_id.valuation == 'manual_periodic':
-            stock_move_lines = self.product_id.stock_fifo_manual_move_ids.filtered(lambda ml: ml.date <= date_to_utc)
-            if self.location_id:
-                stock_move_lines = stock_move_lines.filtered(
-                    lambda ml: ml.location_id == self.location_id or ml.location_dest_id == self.location_id)
-            if self.date_from:
-                previous_move_lines = stock_move_lines.filtered(lambda ml: ml.date < date_from_utc)
-                stock_move_lines = stock_move_lines.filtered(lambda ml: ml.date >= date_from_utc)
-
-                data.append({
-                    'date': str(self.convert_date_to_local(fields.Datetime.from_string(self.date_from),self.env.user.tz)),
-                    'ref': '',
-                    'order_ref': '',
-                    'partner': '',
-                    'from': '',
-                    'to': '',
-                    'qty_in': '',
-                    'cost_in': '',
-                    'amount_in': '',
-                    'qty_out': '',
-                    'cost_out': '',
-                    'amount_out': '',
-                    'qty_balance': self.product_id.with_context(to_date=str(date_from_utc),location=self.location_id.id).qty_available,
-                    'cost_balance':  0,
-                    # 'amount_balance': product.with_context(to_date=str(date_from_utc)).stock_value,
-                    'amount_balance': sum(previous_move_lines.mapped('move_id.value')),
-                    # 'amount_balance': product.with_context(to_date=str(date_from_utc)).stock_value if not self.warehouse else (qty_balance * cost_balance),
-                })
-
-            if self.location_id:
-                stock_move_lines = stock_move_lines.sorted(key=lambda l:(l.date,l.id))
-
-                for line in stock_move_lines:
-                    product = self.product_id
-                    inc = True if line.location_dest_id == self.location_id else False
-                    out = True if line.location_id == self.location_id else False
-                    qty = line.qty_done
-                    cost = 0 if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
-                    amount = abs(sum(line.mapped('move_id.value')))
-                    qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
-                    previous_amount_balance = data[-1]['amount_balance'] if data else 0
-                    sign = -1 if out else 1
-                    amount_balance = previous_amount_balance + sign*amount
-                    cost_balance = 0
-                    line_data = self.get_data_from_line(line, qty, cost, amount, inc, out, qty_balance, cost_balance,
-                                                        amount_balance)
-                    data.append(line_data)
-            else:
-                stock_move_lines = stock_move_lines.sorted(key=lambda l:(l.date,l.id))
-
-                for line in stock_move_lines:
-                    product = self.product_id
-                    inc = True if line.location_dest_id in internal_locations else False
-                    out = True if line.location_id in internal_locations else False
-                    if inc and out:
-                        inc = out = False
-                    qty = line.qty_done
-                    cost = 0 if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
-                    amount = sum(line.mapped('move_id.value'))
-                    qty_balance = product.with_context(to_date=line.date).qty_available
-                    previous_amount_balance = data[-1]['amount_balance'] if data else 0
-                    sign = -1 if out else 1
-                    amount_balance = previous_amount_balance + sign*amount
-                    cost_balance = 0
-                    line_data = self.get_data_from_line(line, qty, cost, amount, inc, out, qty_balance, cost_balance,
-                                                        amount_balance)
-                    data.append(line_data)
-
-        if self.product_id.product_tmpl_id.valuation == 'real_time':
-            valuation_account_id = self.product_id.categ_id.property_stock_valuation_account_id
-            stock_move_lines = stock_move_lines.search([
-                ('state','=','done'),
-                ('product_id','=',self.product_id.id),
-            ])
-
-            if self.location_id:
-                stock_move_lines = stock_move_lines.filtered(
-                    lambda ml: ml.location_id == self.location_id or ml.location_dest_id == self.location_id)
-            if self.date_from:
-                previous_move_lines = stock_move_lines.filtered(lambda ml: ml.date < date_from_utc)
-                stock_move_lines = stock_move_lines.filtered(lambda ml: ml.date >= date_from_utc)
-                journal_items = previous_move_lines.mapped('move_id.account_move_ids.line_ids').filtered(lambda aml:aml.account_id == valuation_account_id)
-                amount_balance = sum(m.debit-m.credit for m in journal_items) if self.location_id else self.product_id.with_context(to_date=str(date_from_utc)).stock_value
-                data.append({
-                    'date': str(self.convert_date_to_local(fields.Datetime.from_string(self.date_from),self.env.user.tz)),
-                    'ref': '',
-                    'order_ref': '',
-                    'partner': '',
-                    'from': '',
-                    'to': '',
-                    'qty_in': '',
-                    'cost_in': '',
-                    'amount_in': '',
-                    'qty_out': '',
-                    'cost_out': '',
-                    'amount_out': '',
-                    'qty_balance': self.product_id.with_context(to_date=str(date_from_utc),location=self.location_id.id).qty_available,
-                    'cost_balance':  0,
-                    # 'amount_balance': product.with_context(to_date=str(date_from_utc)).stock_value,
-                    'amount_balance': amount_balance,
-                    # 'amount_balance': product.with_context(to_date=str(date_from_utc)).stock_value if not self.warehouse else (qty_balance * cost_balance),
-                })
-
-            stock_move_lines = stock_move_lines.sorted(key=lambda l: (l.date, l.id))
-            if self.location_id:
-
-                for line in stock_move_lines:
-                    product = self.product_id
-                    inc = True if line.location_dest_id == self.location_id else False
-                    out = True if line.location_id == self.location_id else False
-                    qty = line.qty_done
-                    cost = 0 if line.move_id.picking_code in ('outgoing','internal') or out else self.get_cost_from_entries(line)
-                    journal_items = line.mapped('move_id.account_move_ids.line_ids').filtered(lambda aml:aml.account_id == valuation_account_id)
-                    amount = abs(sum(m.debit-m.credit for m in journal_items))
-                    qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
-                    previous_amount_balance = data[-1]['amount_balance'] if data else 0
-                    sign = -1 if out else 1
-                    amount_balance = previous_amount_balance + sign*amount
-                    cost_balance = 0
-                    line_data = self.get_data_from_line(line, qty, cost, amount, inc, out, qty_balance, cost_balance,
-                                                        amount_balance)
-                    data.append(line_data)
-
-            else:
-                for line in stock_move_lines:
-                    product = self.product_id
-                    inc = True if line.location_dest_id in internal_locations else False
-                    out = True if line.location_id in internal_locations else False
-                    if inc and out:
-                        inc = out = False
-                    qty = line.qty_done
-                    cost = 0 if line.move_id.picking_code in ('outgoing','internal') or out else self.get_cost_from_entries(line)
-                    journal_items = line.mapped('move_id.account_move_ids.line_ids').filtered(lambda aml:aml.account_id == valuation_account_id)
-                    amount = abs(sum(m.debit-m.credit for m in journal_items))
-                    qty_balance = product.with_context(to_date=line.date).qty_available
-                    previous_amount_balance = data[-1]['amount_balance'] if data else 0
-                    sign = -1 if out else 1
-                    amount_balance = previous_amount_balance + sign*amount
-                    # amount_balance = self.product_id.with_context(to_date=str(line.date)).stock_value
-                    cost_balance = 0
-                    line_data = self.get_data_from_line(line, qty, cost, amount, inc, out, qty_balance, cost_balance,
-                                                        amount_balance)
-                    data.append(line_data)
-
-        return data,stock_move_lines
+        return amount
 
     def get_report_data(self):
         data=[]
@@ -279,72 +128,71 @@ class ProductCardReportWizard(models.TransientModel):
         date_from_utc = fields.Datetime.from_string(self.date_from) if self.date_from else None
         domain = [('product_id','=',product.id),('state','=','done')]
         company_id = self.env.user.company_id.id
-        internal_locations = self.env['stock.location'].search( [('company_id', '=', company_id), ('usage', 'in', ['internal', 'transit'])])
-        if product.cost_method == 'fifo':
-            data,stock_move_lines = self.get_data_product_fifo()
+        if self.location_id:
+            internal_locations = self.location_id
         else:
-            date_from_utc = None
-            if self.date_from:
-                date_from_utc = fields.Datetime.from_string(self.date_from)
-                domain.append(('date','>=',str(date_from_utc)))
-                qty_balance = product.with_context(to_date=str(date_from_utc),location=self.location_id.id).qty_available
-                # qty_balance = product.with_context(to_date=str(date_from_utc),warehouse=self.warehouse.id).qty_available
-                cost_balance = product.get_history_price(self.env.user.company_id.id,date=str(date_from_utc))
-                data.append({
-                    'date': str(self.convert_date_to_local(fields.Datetime.from_string(self.date_from),self.env.user.tz)),
-                    'ref': '',
-                    'order_ref': '',
-                    'partner': '',
-                    'from': '',
-                    'to': '',
-                    'qty_in': '',
-                    'cost_in': '',
-                    'amount_in': '',
-                    'qty_out': '',
-                    'cost_out': '',
-                    'amount_out': '',
-                    'qty_balance': qty_balance,
-                    'cost_balance':  cost_balance,
-                    # 'amount_balance': product.with_context(to_date=str(date_from_utc)).stock_value,
-                    'amount_balance': product.with_context(to_date=str(date_from_utc)).stock_value if not self.location_id else (qty_balance * cost_balance),
-                    # 'amount_balance': product.with_context(to_date=str(date_from_utc)).stock_value if not self.warehouse else (qty_balance * cost_balance),
-                })
+            internal_locations = self.env['stock.location'].search( [('company_id', '=', company_id), ('usage', 'in', ['internal', 'transit'])])
 
-            if self.date_to:
-                domain.append(('date','<=',str(date_to_utc)))
+        if self.date_from:
+            date_from_utc = fields.Datetime.from_string(self.date_from)
+            domain.append(('date','>=',str(date_from_utc)))
+            qty_balance = product.with_context(to_date=date_from_utc,location=self.location_id.id).qty_available
+            amount_balance = self.get_amount_balance(date_from_utc)
+            cost_balance = amount_balance / qty_balance if qty_balance and self.product_id.cost_method != 'fifo' else 0
 
-            if self.location_id:
-                domain.extend(['|',('location_id', 'child_of', self.location_id.id),('location_dest_id', 'child_of', self.location_id.id)])
-            # if self.warehouse:
-            #     domain.append(('move_id.warehouse_id', '=', self.warehouse.id))
+            data.append({
+                'date': str(self.convert_date_to_local(fields.Datetime.from_string(self.date_from),self.env.user.tz)),
+                'ref': '',
+                'order_ref': '',
+                'partner': '',
+                'from': '',
+                'to': '',
+                'qty_in': '',
+                'cost_in': '',
+                'amount_in': '',
+                'qty_out': '',
+                'cost_out': '',
+                'amount_out': '',
+                'qty_balance': qty_balance,
+                'cost_balance':  cost_balance,
+                'amount_balance': amount_balance,
+            })
 
-            stock_move_lines = self.env['stock.move.line'].search(domain,order='date asc,id asc')
-            for line in stock_move_lines:
-                if not self.location_id:
-                    inc = True if line.location_dest_id in internal_locations else False
-                    out = True if line.location_id in internal_locations else False
-                    if inc and out:
-                        inc = out = False
-                    qty = line.qty_done
-                    cost = product.get_history_price(self.env.user.company_id.id,date=line.date) if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
-                    amount = qty * cost
-                    qty_balance = product.with_context(to_date=line.date).qty_available
-                    amount_balance = product.with_context(to_date=line.date).stock_value
-                    cost_balance = (amount_balance / qty_balance) if qty_balance else 0
-                else:
-                    inc = True if line.location_dest_id == self.location_id else False
-                    out = True if line.location_id == self.location_id else False
-                    qty = line.qty_done
-                    cost = product.get_history_price(self.env.user.company_id.id,date=line.date) if line.move_id.picking_code in ('outgoing','internal') or (not line.move_id.picking_code) else self.get_cost_from_entries(line)
-                    amount = qty * cost
-                    qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
-                    previous_amount_balance = data[-1]['amount_balance'] if data else 0
-                    sign = -1 if out else 1
-                    amount_balance = previous_amount_balance + sign*amount
-                    cost_balance = (amount_balance / qty_balance) if qty_balance else 0
+        if self.date_to:
+            domain.append(('date','<=',str(date_to_utc)))
 
-                line_data = self.get_data_from_line(line,qty,cost,amount,inc,out,qty_balance,cost_balance,amount_balance)
-                data.append(line_data)
+        if self.location_id:
+            domain.extend(['|',('location_id', 'child_of', self.location_id.id),('location_dest_id', 'child_of', self.location_id.id)])
+        # if self.warehouse:
+        #     domain.append(('move_id.warehouse_id', '=', self.warehouse.id))
+
+        stock_move_lines = self.env['stock.move.line'].search(domain,order='date asc,id asc')
+        for line in stock_move_lines:
+
+            inc = True if line.location_dest_id in internal_locations else False
+            out = True if line.location_id in internal_locations else False
+            qty = line.qty_done
+
+            amount = self.get_line_amount(line)
+            cost = amount/qty if qty and product.cost_method != 'fifo' else 0
+            # qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
+            previous_amount_balance = data[-1]['amount_balance'] if data else 0
+            previous_qty_balance = data[-1]['qty_balance'] if data else 0
+
+            if out and not inc :
+                sign = -1
+            elif not out and inc:
+                sign = 1
+            else:
+                sign = 0
+
+            qty_balance = previous_qty_balance + sign * qty
+            amount_balance = previous_amount_balance + sign * amount
+            cost_balance = (amount_balance / qty_balance) if qty_balance and self.product_id.cost_method != 'fifo' else 0
+
+            line_data = self.get_data_from_line(line,qty,cost,amount,inc,out,qty_balance,cost_balance,amount_balance)
+            data.append(line_data)
+
         if stock_move_lines and not date_from_utc:
             date_from_utc = fields.Datetime.from_string(stock_move_lines[0].date)
         return data,date_to_utc,date_from_utc

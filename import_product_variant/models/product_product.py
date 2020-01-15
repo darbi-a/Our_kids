@@ -62,6 +62,8 @@ class ProductProduct(models.Model):
                     seller_id= [(6,0,seller.ids)]
                 else:
                     seller_id= [(6,0,seller.ids)]
+            else:return False
+
         if seller_id:
             return seller_id
         else: return False
@@ -139,16 +141,50 @@ class ProductTemplate(models.Model):
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
     sale_price =fields.Float("Sales Price2")
+    custom_attribute_lines = fields.Many2many(comodel_name='product.template.attribute.line', string='Product Attributes',compute='_get_attributes')
 
-    @api.multi
-    def write(self, vals):
-        super(ProductTemplate, self).write(vals)
-        return True
+
+    @api.one
+    @api.depends('product_variant_count')
+    def _get_attributes(self):
+        att={}
+        if self.product_variant_count>1:
+            variants = self.with_prefetch().product_variant_ids
+            for vart in variants:
+                for line in vart.attribute_value_ids:
+                    if line.attribute_id.id not in att:
+                        att[line.attribute_id.id] = []
+                        att[line.attribute_id.id].append(line.id)
+                    else:
+                        if line.id not in att[line.attribute_id.id]:
+                            att[line.attribute_id.id].append(line.id)
+
+            lst_vart=[]
+            for v in att:
+                val = {'attribute_id':v,'value_ids':[]}
+                for vt in att[v]:
+                    val['value_ids'].append((4,vt))
+                vart = self.env['product.template.attribute.line'].sudo().create(val)
+                lst_vart.append(vart.id)
+            self.custom_attribute_lines = [(6, 0, lst_vart)]
+
+
+
+
+class product_att(models.Model):
+    _inherit = 'product.template.attribute.line'
+
+    product_tmpl_id = fields.Many2one('product.template', string='Product Template', ondelete='cascade', required=False, index=True)
+
+class product_att_val(models.Model):
+    _inherit = 'product.template.attribute.value'
+    product_tmpl_id = fields.Many2one(
+        'product.template', string='Product Template',
+        required=False, ondelete='cascade', index=True)
 
 
 class SupplierInfo(models.Model):
     _inherit = "product.supplierinfo"
-
     product_uom = fields.Many2one(
         'uom.uom', 'Unit of Measure',
         related='product_id.uom_po_id',

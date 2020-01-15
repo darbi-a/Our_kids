@@ -872,6 +872,13 @@ myDate.setSeconds(0);
 		            var sub_total_before_discount = output[4];
 		            var global_discount_percent = output[5];
 		            var date_order = output[6];
+		            var tax = output[7];
+		            var amount_total = output[8];
+		            var amount_without_tax = amount_total + tax;
+		            var total_line_discount = output[9];
+		            var global_discount = output[10];
+		            var all_discount = output[11];
+		            var total_qty = output[12];
 		            self.gui.show_screen('ReceiptScreenWidgetNew');
 		            $('.pos-receipt-container').html(QWeb.render('PosTicket1',{
 		                widget:self,
@@ -886,6 +893,12 @@ myDate.setSeconds(0);
 		                sub_total_before_discount: sub_total_before_discount,
 		                tax: tax,
 		                date_order: date_order,
+                        amount_total : amount_total,
+                        amount_without_tax : amount_without_tax,
+                        total_line_discount : total_line_discount,
+                        global_discount: global_discount,
+                        all_discount : all_discount,
+                        total_qty : total_qty,
 		            }));
 				});
             });

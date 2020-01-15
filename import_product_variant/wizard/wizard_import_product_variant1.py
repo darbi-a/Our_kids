@@ -249,6 +249,7 @@ class ImportProductVariant(models.TransientModel):
         context['default_count_items'] = len(count_items)
         context['default_count_edit'] = len(count_edit)
         context['default_count_items_edit'] = len(item_edit)
+        context['list_item'] = item_edit
         return {
             'name': 'Import Resalt',
             'type': 'ir.actions.act_window',
