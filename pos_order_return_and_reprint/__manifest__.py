@@ -19,6 +19,7 @@
     'data': [
         'views/templates.xml',
         'views/pos_order.xml',
+        'views/pos_config.xml',
     ],
 
     'qweb': [

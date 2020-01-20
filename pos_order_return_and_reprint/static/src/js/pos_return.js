@@ -389,24 +389,24 @@ myDate.setSeconds(0);
 
         button_click: function() {
             var self = this;
-            this.gui.show_popup('pos_barcode_popup_widget', {});
-//            if (self.pos.config.allow_return_password == true) {
-//            self.gui.show_popup('passwordinput', {
-//                'title': _t('Password ?'),
-//                 confirm: function (pw) {
-//                    if (pw !== self.pos.config.return_order_password) {
-//                        self.gui.show_popup('error', {
-//                            'title': _t('Error'),
-//                            'body': _t('Incorrect password. Please try again'),
-//                        });
-//                    } else {
-//                        return self.gui.show_popup('pos_barcode_popup_widget', {});
-//                    }
-//                    },
-//                });
-//            } else {
-//                return self.gui.show_popup('pos_barcode_popup_widget', {});
-//            }
+//            this.gui.show_popup('pos_barcode_popup_widget', {});
+            if (self.pos.config.allow_return_password == true) {
+            self.gui.show_popup('passwordinput', {
+                'title': _t('Password ?'),
+                 confirm: function (pw) {
+                    if (pw !== self.pos.config.return_order_password) {
+                        self.gui.show_popup('error', {
+                            'title': _t('Error'),
+                            'body': _t('Incorrect password. Please try again'),
+                        });
+                    } else {
+                        return self.gui.show_popup('pos_barcode_popup_widget', {});
+                    }
+                    },
+                });
+            } else {
+                return self.gui.show_popup('pos_barcode_popup_widget', {});
+            }
         },
 
     });
@@ -906,23 +906,23 @@ myDate.setSeconds(0);
             //Return Order
             this.$('.orders-list-contents').delegate('.return-order', 'click', function(result) {
                 var order_id = parseInt(this.id);
-                if (self.pos.config.allow_return_password == true) {
-                    self.gui.show_popup('passwordinput', {
-                        'title': _t('Password ?'),
-                         confirm: function (pw) {
-                            if (pw !== self.pos.config.return_order_password) {
-                                self.gui.show_popup('error', {
-                                    'title': _t('Error'),
-                                    'body': _t('Incorrect password. Please try again'),
-                                });
-                            } else {
-                                return self.show_return_order_popup(order_id);
-                            }
-                            },
-                        });
-                    } else {
+//                if (self.pos.config.allow_return_password == true) {
+//                    self.gui.show_popup('passwordinput', {
+//                        'title': _t('Password ?'),
+//                         confirm: function (pw) {
+//                            if (pw !== self.pos.config.return_order_password) {
+//                                self.gui.show_popup('error', {
+//                                    'title': _t('Error'),
+//                                    'body': _t('Incorrect password. Please try again'),
+//                                });
+//                            } else {
+//                                return self.show_return_order_popup(order_id);
+//                            }
+//                            },
+//                        });
+//                    } else {
                         return self.show_return_order_popup(order_id);
-                    }
+//                    }
 
             });
             //End Return Order
@@ -1420,7 +1420,24 @@ myDate.setSeconds(0);
 
         button_click: function() {
             var self = this;
-            this.gui.show_screen('see_all_orders_screen_widget', {});
+            if (self.pos.config.allow_return_password == true) {
+                self.gui.show_popup('passwordinput', {
+                    'title': _t('Password ?'),
+                     confirm: function (pw) {
+                        if (pw !== self.pos.config.return_order_password) {
+                            self.gui.show_popup('error', {
+                                'title': _t('Error'),
+                                'body': _t('Incorrect password. Please try again'),
+                            });
+                        } else {
+                            this.gui.show_screen('see_all_orders_screen_widget', {});
+                        }
+                        },
+                    });
+                } else {
+                        this.gui.show_screen('see_all_orders_screen_widget', {});
+                    }
+//            this.gui.show_screen('see_all_orders_screen_widget', {});
         },
 
     });
