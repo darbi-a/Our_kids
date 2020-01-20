@@ -328,7 +328,7 @@ class InventoryValuationReportVendor(models.TransientModel):
         worksheet.write(row, col, totals['all_total']['all_products'], STYLE_LINE_Data)
         col += 1
         for wh in warehouses:
-            worksheet.write(row,col+1,totals[wh.name],STYLE_LINE_Data)
+            worksheet.write(row,col+1,totals.get(wh.name,0.0),STYLE_LINE_Data)
             col += 2
         worksheet.write(row, col+1, totals['all_total']['warehouses'], STYLE_LINE_Data)
 

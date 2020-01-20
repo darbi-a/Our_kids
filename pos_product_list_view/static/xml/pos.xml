@@ -14,7 +14,7 @@
                         <th>Name</th>
                         <th>UoM</th>
                         <th>Sale Price</th>
-                        <th class="text-center">Available Qty</th>
+                        <th class="text-center oe_hidden" >Available Qty</th>
                         <th class="text-center">View Stock Qty</th>
                     </tr>
                 </thead>
@@ -61,7 +61,7 @@
                         </t>
                     </span>
                 </td>
-                <td class="text-center qty_tag">
+                <td class="text-center qty_tag oe_hidden">
                     <t t-esc="product.qty_available"/>
                 </td>
                 <td class="text-center">

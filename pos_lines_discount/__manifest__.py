@@ -15,9 +15,9 @@ This module allows the cashier to quickly give a percentage
 sale discount to all pos order lines.
 
 """,
-    'depends': ['point_of_sale'],
+    'depends': ['point_of_sale','pos_lock_price_discount'],
     'data': [
-        # 'views/pos_discount_views.xml',
+        'views/pos_discount_views.xml',
         'views/pos_discount_templates.xml'
     ],
     'qweb': [

@@ -130,7 +130,7 @@
                                     <td>
                                     </td>
                                     <td>
-                                        <t t-esc="totals[w]"/>
+                                        <t t-esc="totals.get(w,0.0)"/>
                                     </td>
 
                                 </t>

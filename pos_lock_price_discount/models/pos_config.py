@@ -9,7 +9,7 @@ class PosConfig(models.Model):
 
     lock_price = fields.Boolean(string="Lock price", default=False)
     price_password = fields.Char(string=u"Password")
-    lock_discount = fields.Boolean(string="Lock discount", default=False)
+    lock_discount = fields.Boolean(string="Lock Line discount", default=False)
     discount_password = fields.Char(string=u"Password")
     lock_delete = fields.Boolean(string="Lock delete", default=False)
     delete_password = fields.Char(string=u"Password")

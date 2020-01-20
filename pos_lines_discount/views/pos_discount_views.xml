@@ -1,20 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-        <record id="pos_config_view_form_inherit_pos_discount" model="ir.ui.view">
-            <field name="name">pos.config.form.inherit.pos.discount</field>
-            <field name="model">pos.config</field>
-            <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />
-            <field name="arch" type="xml">
-                <div id="btn_use_pos_discount" position="replace">
-                    <div class="row mt16">
-                        <label string="Discount Product" for="discount_product_id" class="col-lg-3 o_light_label"/>
-                        <field name="discount_product_id" attrs="{'required':[('module_pos_discount','=',True)]}"/>
-                    </div>
-                    <div class="row">
-                        <label string="Discount %" for="discount_pc" class="col-lg-3 o_light_label"/>
-                        <field name="discount_pc"/>
-                    </div>
-                </div>
-            </field>
-        </record>
+<!--        <record id="pos_config_view_form_inherit_pos_discount" model="ir.ui.view">-->
+<!--            <field name="name">pos.config.form.inherit.pos.discount</field>-->
+<!--            <field name="model">pos.config</field>-->
+<!--            <field name="inherit_id" ref="point_of_sale.pos_config_view_form" />-->
+<!--            <field name="arch" type="xml">-->
+<!--                <div id="btn_use_pos_discount" position="replace">-->
+<!--                    <div class="row mt16">-->
+<!--                        <label string="Discount Product" for="discount_product_id" class="col-lg-3 o_light_label"/>-->
+<!--                        <field name="discount_product_id" attrs="{'required':[('module_pos_discount','=',True)]}"/>-->
+<!--                    </div>-->
+<!--                    <div class="row">-->
+<!--                        <label string="Discount %" for="discount_pc" class="col-lg-3 o_light_label"/>-->
+<!--                        <field name="discount_pc"/>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </field>-->
+<!--        </record>-->
+    <!-- Inherit Form View to Modify it -->
+    <record id="pos_lock_all_disc_pos_config_inherit" model="ir.ui.view">
+        <field name="name">pos.config.form</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="pos_lock_price_discount.pos_lock_mode_pos_config_inherit"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@id='pos_lock_price_discount']" position="inside">
+                <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="lock_all_disc"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="lock_all_disc"/>
+                                <br/>
+                                <label for="all_disc_password" attrs="{'invisible':[('lock_all_disc', '=', False)]}"/>
+                                <field name="all_disc_password"
+                                       attrs="{'invisible':[('lock_all_disc', '=', False)], 'required':[('lock_all_disc', '=', True)]}"
+                                       password="True"/>
+                            </div>
+                        </div>
+                <!-- Add your fields or attributes here -->
+            </xpath>
+
+        </field>
+    </record>
 </odoo>
