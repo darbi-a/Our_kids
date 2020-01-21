@@ -13,7 +13,7 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['product','stock'],
+    'depends': ['product','stock','point_of_sale'],
 
     # always loaded
     'data': [
@@ -21,6 +21,7 @@
         'security/security.xml',
         'views/inventory_valuation.xml',
         'views/stock_picking.xml',
+        'views/pos_config.xml',
 
     ],
 }
