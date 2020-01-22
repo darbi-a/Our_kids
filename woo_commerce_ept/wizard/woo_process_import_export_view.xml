@@ -8,7 +8,7 @@
                 <form string="Import/Export" style="height: 200px">
                 	<group invisible="context.get('process','') not in ['prepare_product_for_export']">
                 		<field name="instance_ids" widget="many2many_tags"/>
-                		<p colspan="2" class="alert alert-warning" role="alert"><b>Caution:</b> Products without Internal Reference (SKU) will not be prepare for export in Woo.</p>
+                		<!--<p colspan="2" class="alert alert-warning" role="alert"><b>Caution:</b> Products without Internal Reference (SKU) will not be prepare for export in Woo.</p>-->
                 	</group>
                 	<group invisible="context.get('process','') not in ['sync_selective_products']">
 						<field name="sync_images_with_product"/>

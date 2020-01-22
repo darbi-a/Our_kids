@@ -443,13 +443,14 @@ class stock_picking(models.Model):
             res_id = wiz.get('res_id')
             wiz_obj = self.env['stock.immediate.transfer'].browse(res_id)
             wiz_obj.process()
+
     """
     Method Parameter :- picking id,order_line_field_key
     For Ex:- if use shopify shopify_line_id set in sale order line..use order_line_field_key = shopify_line_id
     For Ex:- picking_id = 25
     This way call Method :-  self.env['stock.picking'].get_tracking_numbers(25,'shopify_line_id')
     Method return :- 
-            {'default_code' :[{
+            {'barcode' :[{
                                 'order_line_field_key':'',
                                 'tracking_no':tracking_no,
                                 'qty':qty
@@ -460,7 +461,7 @@ class stock_picking(models.Model):
                                 'qty':qty
                                 }
                             ],
-            'default_code' :[{
+            'barcode' :[{
                                 'order_line_field_key':'',
                                 'tracking_no':tracking_no,
                                 'qty':qty
@@ -493,19 +494,18 @@ class stock_picking(models.Model):
             
             update_move_ids+=moves.ids
             product_qty= sale_line_id.product_qty or 0.0
-            default_code = sale_line_id.product_id.default_code
-            if default_code in line_items:
-                for line in line_items.get(default_code):
+            barcode = sale_line_id.product_id.barcode
+            if barcode in line_items:
+                for line in line_items.get(barcode):
                     if tracking_no in line.get('tracking_no'):
                         quantity=line.get('quantity')
                         product_qty=quantity+product_qty                                
                         line.update({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})
                 else:
-                    line_items.get(default_code).append({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})                                                         
+                    line_items.get(barcode).append({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})                                                         
             else:
-                line_items.update({default_code:[]})
-                line_items.get(default_code).append({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})
-            
+                line_items.update({barcode:[]})
+                line_items.get(barcode).append({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})
         return line_items,update_move_ids
          
     @api.multi
@@ -523,16 +523,16 @@ class stock_picking(models.Model):
                         tracking_no=move.result_package_id.tracking_no
                     product_qty=move.qty_done or 0.0
                     product_qty=int(product_qty)
-                    default_code = move.product_id.default_code
-                    if default_code in line_items:
-                        for line in line_items.get(default_code):
+                    barcode = move.product_id.barcode
+                    if barcode in line_items:
+                        for line in line_items.get(barcode):
                             if tracking_no in line.get('tracking_no'):
                                 quantity=line.get('quantity')
                                 product_qty=quantity+product_qty                                
                                 line.update({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})
                         else:
-                            line_items.get(default_code).append({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})                                                         
+                            line_items.get(barcode).append({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})                                                         
                     else:
-                        line_items.update({default_code:[]})
-                        line_items.get(default_code).append({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})
+                        line_items.update({barcode:[]})
+                        line_items.get(barcode).append({'quantity':product_qty,'line_id':line_id,'tracking_no':tracking_no})
         return line_items

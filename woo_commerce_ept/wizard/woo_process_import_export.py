@@ -348,7 +348,7 @@ class woo_process_import_export(models.TransientModel):
         for instance in self.instance_ids:
             sale_order_obj.update_woo_order_status(instance)
         return True            
-    
+
     @api.multi
     def prepare_product_for_export(self):
         woo_template_obj=self.env['woo.product.template.ept']
@@ -356,9 +356,12 @@ class woo_process_import_export(models.TransientModel):
         woo_product_categ=self.env['woo.product.categ.ept']
         woo_product_image_obj = self.env['woo.product.image.ept']
         template_ids=self._context.get('active_ids',[])
-        odoo_templates=self.env['product.template'].search([('id','in',template_ids),('default_code','!=',False)])
-        if not odoo_templates:
-            raise Warning("Internel Reference (SKU) not set in selected products")
+
+        #,('default_code','!=',False)
+        odoo_templates=self.env['product.template'].search([('id','in',template_ids)])
+        # if not odoo_templates:
+        #     raise Warning("Barcode (SKU) not set in selected products")
+        #
         for instance in self.instance_ids:
             for odoo_template in odoo_templates:
                 woo_categ_ids = [(6, 0, [])]
@@ -384,9 +387,9 @@ class woo_process_import_export(models.TransientModel):
                 for variant in odoo_template.product_variant_ids:
                     woo_variant = woo_product_obj.search([('woo_instance_id','=',instance.id),('product_id','=',variant.id)])
                     if not woo_variant:
-                        woo_variant.create({'woo_instance_id':instance.id,'product_id':variant.id,'woo_template_id':woo_template.id,'default_code':variant.default_code,'name':variant.display_name,'woo_variant_url':variant.image_url or ''})
+                        woo_variant.create({'woo_instance_id':instance.id,'product_id':variant.id,'woo_template_id':woo_template.id,'barcode':variant.barcode,'name':variant.display_name,'woo_variant_url':variant.image_url or ''})
         return True
-    
+
     """ Create Category tree in woo commerce module """
     @api.multi
     def create_categ_in_woo(self,categ_id,instance,ctg_list = []):
@@ -504,14 +507,14 @@ class woo_process_import_export(models.TransientModel):
 
     @api.multi
     def check_products(self,woo_templates):
-        if self.env['woo.product.product.ept'].search([('woo_template_id','in',woo_templates.ids),('default_code','=',False)]):
-            raise Warning("Default code is not set in some variants")
+        if self.env['woo.product.product.ept'].search([('woo_template_id','in',woo_templates.ids),('barcode','=',False)]):
+            raise Warning("Barcode is not set in some variants")
     
     @api.multi
     def filter_templates(self,woo_templates):
         filter_templates=[]
         for woo_template in woo_templates:
-            if not self.env['woo.product.product.ept'].search([('woo_template_id','=',woo_template.id),('default_code','=',False)]):
+            if not self.env['woo.product.product.ept'].search([('woo_template_id','=',woo_template.id),('barcode','=',False)]):
                 filter_templates.append(woo_template)
         return filter_templates    
     
@@ -671,7 +674,7 @@ class woo_process_import_export(models.TransientModel):
                             else:
                                 for variation in response.get('variations'):
                                     for product in product_template.product_tmpl_id.product_variant_ids:
-                                        if variation.get('sku')==product.default_code and product.type=='product': 
+                                        if variation.get('sku')==product.barcode and product.type=='product':
                                             if variation.get('managing_stock') or variation.get('manage_stock'):
                                                 stock_data={}
                                                 product_qty=variation.get('stock_quantity')

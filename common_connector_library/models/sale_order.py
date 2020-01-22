@@ -51,4 +51,3 @@ class sale_order(models.Model):
             'carrier_id':vals.get('carrier_id','')
             })
         return order_vals
-        
