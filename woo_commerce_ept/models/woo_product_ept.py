@@ -675,7 +675,7 @@ class woo_product_template_ept(models.Model):
             domain and domain.append(('product_tmpl_id','=',product_template.id))
             if domain:    
                 odoo_product = odoo_product_obj.search(domain) 
-            odoo_product and odoo_product.write({'default_code':sku})
+            odoo_product and odoo_product.write({'barcode':sku})
             if odoo_product and sync_price_with_product:
                 pricelist_item=self.env['product.pricelist.item'].search([('pricelist_id','=',instance.pricelist_id.id),('product_id','=',odoo_product.id)],limit=1)
                 if not pricelist_item:
@@ -784,7 +784,7 @@ class woo_product_template_ept(models.Model):
                 if product_count == odoo_template.product_variant_count:
                     for woo_sku,odoo_sku in zip(result.get('variations'),odoo_template.product_variant_ids):
                         woo_skus.append(woo_sku.get('sku'))
-                        odoo_sku.default_code and odoo_skus.append(odoo_sku.default_code)
+                        odoo_sku.barcode and odoo_skus.append(odoo_sku.barcode)
                     
                     woo_skus = list(filter(lambda x: len(x)>0, woo_skus))
                     odoo_skus = list(filter(lambda x: len(x)>0, odoo_skus)) 
@@ -1089,11 +1089,11 @@ class woo_product_template_ept(models.Model):
                                 
                 woo_product = woo_product_obj.search([('variant_id','=',variant_id),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    woo_product=woo_product_obj.search([('default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)
+                    woo_product=woo_product_obj.search([('barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    woo_product=woo_product_obj.search([('product_id.default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)                                    
+                    woo_product=woo_product_obj.search([('product_id.barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    odoo_product=odoo_product_obj.search([('default_code','=',sku)],limit=1)
+                    odoo_product = odoo_product_obj.search([('barcode','=',sku)],limit=1)
                 if woo_product and skip_existing_products:
                     # Added code for skip the product sync if already product imported
                     continue
@@ -1114,7 +1114,7 @@ class woo_product_template_ept(models.Model):
                     if instance.auto_import_product:                       
                         if not onetime_call:
                             self.create_variant_product(result,instance)
-                            odoo_product = odoo_product_obj.search([('default_code','=',sku)],limit=1)
+                            odoo_product = odoo_product_obj.search([('barcode', '=', sku)],limit=1)
                             onetime_call = True
                             if not odoo_product:
                                 message="Attribute(s) are not set properly in Product: %s and ID: %s."%(template_title,result.get('id'))
@@ -1162,8 +1162,9 @@ class woo_product_template_ept(models.Model):
                     created_at = created_at[1:]                 
                 if updated_at.startswith('-'):
                     updated_at = updated_at[1:]
-                    
-                variant_info = {'name':template_title,'default_code':sku,'created_at':created_at,'updated_at':updated_at}
+
+
+                variant_info = {'name':template_title,'barcode':sku,'created_at':created_at,'updated_at':updated_at}
                 if instance.is_image_url and sync_images_with_product:
                     variant_info.update({'response_url':var_image_src,'woo_image_id':var_image_id})
                                                                                        
@@ -1238,12 +1239,13 @@ class woo_product_template_ept(models.Model):
                 sku=result.get('sku')
                 price = result.get('regular_price') or result.get('sale_price')
                 woo_product = woo_product_obj.search([('variant_id','=',woo_tmpl_id),('woo_instance_id','=',instance.id)],limit=1)
+                ###########################################
                 if not woo_product:
-                    woo_product=woo_product_obj.search([('default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)
+                    woo_product=woo_product_obj.search([('barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    woo_product=woo_product_obj.search([('product_id.default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)                        
+                    woo_product=woo_product_obj.search([('product_id.barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    odoo_product=odoo_product_obj.search([('default_code','=',sku)],limit=1)                    
+                    odoo_product=odoo_product_obj.search([('barcode','=',sku)],limit=1)
                 
                 is_importable = True
                 is_importable,message = self.is_product_importable(result,instance,odoo_product,woo_product)
@@ -1261,7 +1263,7 @@ class woo_product_template_ept(models.Model):
                         if not result.get('parent_id'):
                             if instance.auto_import_product == True:
                                 vals={'name':template_title,
-                                                        'default_code':sku,
+                                                        'barcode':sku,
                                                         'type':'product',
                                                         }
                                 product_template = product_template_obj.create(vals)
@@ -1322,7 +1324,7 @@ class woo_product_template_ept(models.Model):
                                      })
                         
                         woo_template=self.create(tmpl_info)                        
-                    variant_info = {'name':template_title,'default_code':sku,'created_at':template_created_at,
+                    variant_info = {'name':template_title,'barcode':sku,'created_at':template_created_at,
                                     'updated_at':template_updated_at,'product_id':odoo_product.id,                             
                                     'variant_id':woo_tmpl_id,'woo_template_id':woo_template.id,                                 
                                     'woo_instance_id':instance.id,'exported_in_woo':True}               
@@ -1353,7 +1355,7 @@ class woo_product_template_ept(models.Model):
                             woo_template=woo_product.woo_template_id                            
 
                         woo_template.write(tmpl_info)                                            
-                    variant_info = {'name':template_title,'default_code':sku,'created_at':template_created_at,'updated_at':template_updated_at,
+                    variant_info = {'name':template_title,'barcode':sku,'created_at':template_created_at,'updated_at':template_updated_at,
                                     'variant_id':woo_tmpl_id,'woo_template_id':woo_template.id,'woo_instance_id':instance.id,                                                                 
                                     'exported_in_woo':True}     
                     woo_product.write(variant_info) 
@@ -1492,11 +1494,11 @@ class woo_product_template_ept(models.Model):
                 
                 woo_product = woo_product_obj.search([('variant_id','=',variant_id),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    woo_product=woo_product_obj.search([('default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)
+                    woo_product=woo_product_obj.search([('barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    woo_product=woo_product_obj.search([('product_id.default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)
+                    woo_product=woo_product_obj.search([('product_id.barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    odoo_product=odoo_product_obj.search([('default_code','=',sku)],limit=1)
+                    odoo_product=odoo_product_obj.search([('barcode','=',sku)],limit=1)
                 if woo_product:
                     odoo_product=woo_product.product_id
                     # Added code for skip the product sync if already product imported
@@ -1519,7 +1521,7 @@ class woo_product_template_ept(models.Model):
                     if instance.auto_import_product:
                         if not onetime_call:
                             self.create_variant_product(result,instance)
-                            odoo_product = odoo_product_obj.search([('default_code','=',sku)],limit=1)
+                            odoo_product = odoo_product_obj.search([('barcode','=',sku)],limit=1)
                             onetime_call = True
                     else:
                         message="%s Product Not found for sku %s"%(template_title,sku)
@@ -1563,7 +1565,7 @@ class woo_product_template_ept(models.Model):
                 if updated_at and updated_at.startswith('-'):
                     updated_at = updated_at[1:]
                     
-                variant_info = {'name':template_title,'default_code':sku,'created_at':created_at or False,'updated_at':updated_at or False,'producturl':product_url or False}
+                variant_info = {'name':template_title,'barcode':sku,'created_at':created_at or False,'updated_at':updated_at or False,'producturl':product_url or False}
                 if instance.is_image_url and sync_images_with_product:
                     variant_info.update({'response_url':var_image_src,'woo_image_id':var_image_id})
                                                                                        
@@ -1682,11 +1684,11 @@ class woo_product_template_ept(models.Model):
                 price = result.get('regular_price') or result.get('sale_price')
                 woo_product = woo_product_obj.search([('variant_id','=',woo_tmpl_id),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    woo_product=woo_product_obj.search([('default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)
+                    woo_product=woo_product_obj.search([('barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    woo_product=woo_product_obj.search([('product_id.default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)                        
+                    woo_product=woo_product_obj.search([('product_id.barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_product:
-                    odoo_product=odoo_product_obj.search([('default_code','=',sku)],limit=1)
+                    odoo_product=odoo_product_obj.search([('barcode','=',sku)],limit=1)
                 
                 is_importable = True
                 is_importable,message = self.is_product_importable(result,instance,odoo_product,woo_product)
@@ -1704,7 +1706,7 @@ class woo_product_template_ept(models.Model):
                         if instance.auto_import_product == True:
                             if instance.auto_import_product == True:
                                 vals={'name':template_title,
-                                        'default_code':sku,
+                                        'barcode':sku,
                                         'type':'product',
                                         'producturl':product_url,
                                         }
@@ -1769,7 +1771,7 @@ class woo_product_template_ept(models.Model):
                                      'total_variants_in_woo':1                                     
                                      })
                         woo_template=self.create_woo_template(tmpl_info,result,instance)
-                    variant_info = {'name':template_title,'default_code':sku,'created_at':template_created_at,
+                    variant_info = {'name':template_title,'barcode':sku,'created_at':template_created_at,
                                     'updated_at':template_updated_at,'product_id':odoo_product.id,                             
                                     'variant_id':woo_tmpl_id,'woo_template_id':woo_template.id,                                 
                                     'woo_instance_id':instance.id,'exported_in_woo':True,'producturl':product_url}               
@@ -1799,7 +1801,7 @@ class woo_product_template_ept(models.Model):
                         if not woo_template:
                             woo_template=woo_product.woo_template_id                            
                         self.update_woo_template(tmpl_info, woo_template, result, instance)
-                    variant_info = {'name':template_title,'default_code':sku,'created_at':template_created_at,'updated_at':template_updated_at,
+                    variant_info = {'name':template_title,'barcode':sku,'created_at':template_created_at,'updated_at':template_updated_at,
                                     'variant_id':woo_tmpl_id,'woo_template_id':woo_template.id,'woo_instance_id':instance.id,                                                                 
                                     'exported_in_woo':True}     
                     self.update_woo_product(variant_info, woo_product, result, instance)
@@ -2670,7 +2672,7 @@ class woo_product_template_ept(models.Model):
             att.append(att_data)
         if update_image:                                        
             variation_data.update(self.get_variant_image(instance, variant))
-        variation_data.update({'attributes':att,'sku':str(variant.default_code),'weight':str(variant.product_id.weight)})
+        variation_data.update({'attributes':att,'sku':str(variant.barcode),'weight':str(variant.product_id.weight)})
         return variation_data
     
     @api.model
@@ -2844,7 +2846,7 @@ class woo_product_template_ept(models.Model):
             default_att =  variations and variations[0].get('attributes') or []
             data.update({'attributes':attributes,'default_attributes':default_att,'variations':variations})
             if data.get('type')=='simple':
-                data.update({'sku':str(variant.default_code)})
+                data.update({'sku':str(variant.barcode)})
         else:
             variant = woo_template.woo_product_ids
             data.update(self.get_variant_data(variant,instance,update_image))
@@ -3181,7 +3183,7 @@ class woo_product_template_ept(models.Model):
                 if not variant.variant_id:
                     continue
                 info= {}
-                info.update({'sku':variant.default_code,'weight':variant.product_id.weight})
+                info.update({'sku':variant.barcode,'weight':variant.product_id.weight})
                 var_url = ''
                 if update_image:
                     if instance.is_image_url:                
@@ -3403,7 +3405,8 @@ class woo_product_template_ept(models.Model):
                     variant_created_at = variant_created_at[1:]                 
                 if variant_updated_at.startswith('-'):
                     variant_updated_at = variant_updated_at[1:]
-                woo_product = woo_product_product_ept.search([('default_code','=',variant_sku),('woo_template_id','=',woo_template.id),('woo_instance_id','=',instance.id)])
+
+                woo_product = woo_product_product_ept.search([('barcode','=',variant_sku),('woo_template_id','=',woo_template.id),('woo_instance_id','=',instance.id)])
                 response_variant_data.update({'variant_id':variant_id,'created_at':variant_created_at,'updated_at':variant_updated_at,'exported_in_woo':True})
                 woo_product and woo_product.write(response_variant_data) 
             woo_tmpl_id = response.get('id')
@@ -3413,6 +3416,7 @@ class woo_product_template_ept(models.Model):
                 tmpl_image_data = {}
                 img_id = tmpl_image.get('id')
                 position = tmpl_image.get('position')
+
                 if not template.attribute_line_ids and position == 0:
                     continue
                 if instance.is_image_url:                                                       
@@ -3564,7 +3568,7 @@ class woo_product_template_ept(models.Model):
                     variant_created_at = variant_created_at[1:]                 
                 if variant_updated_at.startswith('-'):
                     variant_updated_at = variant_updated_at[1:]
-                woo_product = woo_product_product_ept.search([('default_code','=',variant_sku),('woo_template_id','=',woo_template.id),('woo_instance_id','=',instance.id)])
+                woo_product = woo_product_product_ept.search([('barcode','=',variant_sku),('woo_template_id','=',woo_template.id),('woo_instance_id','=',instance.id)])
                 response_variant_data.update({'variant_id':variant_id,'created_at':variant_created_at,'updated_at':variant_updated_at,'exported_in_woo':True})
                 woo_product and woo_product.write(response_variant_data) 
             woo_tmpl_id = response.get('id')
@@ -3635,7 +3639,7 @@ class woo_product_product_ept(models.Model):
     producturl=fields.Text("Product URL")
     name=fields.Char("Title")    
     woo_instance_id=fields.Many2one("woo.instance.ept","Instance",required=1)
-    default_code=fields.Char("Default Code")
+    barcode=fields.Char()
     product_id=fields.Many2one("product.product","Product",required=1)
     woo_template_id=fields.Many2one("woo.product.template.ept","Woo Template",required=1,ondelete="cascade")
     exported_in_woo=fields.Boolean("Exported In Woo")

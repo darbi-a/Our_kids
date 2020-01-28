@@ -85,7 +85,7 @@
                                     </td>
                                     <td style="width: 42px;text-align:center;">
                                         <button style="border-radius: 30%;width:60%;border: 2px solid #00bbd2; background:#00bbd2;">
-                                            <i class="fa fa-tags" style='font-size: 28px;color:white;' >
+                                            <i class="fa fa-tags" style='font-size: 28px;color:white;'>
                                             </i>
                                         </button>
                                     </td>
@@ -101,25 +101,25 @@
                                     <!--</i>-->
                                     <!--</button>-->
                                     <!--</td>-->
-    <!--                                <td style="width: 42px;text-align:center;">-->
-    <!--                                    <button style="border-radius: 30%;width:60%;border: 2px solid #00bbd2; background:#00bbd2;">-->
-    <!--                                        <i class="fa fa-gift" style='font-size: 28px;color:white;' aria-hidden="true">-->
-    <!--                                        </i>-->
-    <!--                                    </button>-->
-    <!--                                </td>-->
+                                    <!--                                <td style="width: 42px;text-align:center;">-->
+                                    <!--                                    <button style="border-radius: 30%;width:60%;border: 2px solid #00bbd2; background:#00bbd2;">-->
+                                    <!--                                        <i class="fa fa-gift" style='font-size: 28px;color:white;' aria-hidden="true">-->
+                                    <!--                                        </i>-->
+                                    <!--                                    </button>-->
+                                    <!--                                </td>-->
                                     <td style="width: 42px;text-align:center;">
                                         <button style="border-radius: 30%;width:60%;border: 2px solid #00bbd2; background:#00bbd2;">
                                             <i class="fa fa-arrow-circle-left" style='font-size: 28px;color:white;'>
                                             </i>
                                         </button>
                                     </td>
-    <!--                                <td style="width: 42px;text-align:center;">-->
-    <!--                                    <button style="border-radius: 30%;width:60%;border: 2px solid #00bbd2; background:#00bbd2;">-->
-    <!--                                        <i class="fa fa-motorcycle" style='font-size: 28px;color:white;'-->
-    <!--                                           aria-hidden="true">-->
-    <!--                                        </i>-->
-    <!--                                    </button>-->
-    <!--                                </td>-->
+                                    <!--                                <td style="width: 42px;text-align:center;">-->
+                                    <!--                                    <button style="border-radius: 30%;width:60%;border: 2px solid #00bbd2; background:#00bbd2;">-->
+                                    <!--                                        <i class="fa fa-motorcycle" style='font-size: 28px;color:white;'-->
+                                    <!--                                           aria-hidden="true">-->
+                                    <!--                                        </i>-->
+                                    <!--                                    </button>-->
+                                    <!--                                </td>-->
                                     <!--<td style="width: 42px;text-align:center;" >
                                         <button style="border-radius: 30%;width:60%;border: 2px solid #00bbd2; background:#00bbd2;">
                                             <i class="fa fa-desktop" style='font-size: 28px;color:white;' aria-hidden="true">
@@ -144,15 +144,15 @@
                                     <!--<td style="width: 42px;text-align:center;" >-->
                                     <!--<field name="total_cancel_order"/>-->
                                     <!--</td>-->
-    <!--                                <td style="width: 42px;text-align:center;">-->
-    <!--                                    <field name="number_of_coupons"/>-->
-    <!--                                </td>-->
+                                    <!--                                <td style="width: 42px;text-align:center;">-->
+                                    <!--                                    <field name="number_of_coupons"/>-->
+                                    <!--                                </td>-->
                                     <td style="width: 42px;text-align:center;">
                                         <field name="returned_amount"/>
                                     </td>
-    <!--                                <td style="width: 42px;text-align:center;">-->
-    <!--                                    <field name="total_delivery"/>-->
-    <!--                                </td>-->
+                                    <!--                                <td style="width: 42px;text-align:center;">-->
+                                    <!--                                    <field name="total_delivery"/>-->
+                                    <!--                                </td>-->
                                     <!--<td style="width: 42px;text-align:center;" >
                                         <field name="total_sesstion"/>
                                     </td>-->
@@ -163,33 +163,33 @@
                                     <td style="width: 42px;text-align:center;">Quantity Sale</td>
                                     <!--<td style="width: 42px;text-align:center;" >Invoice </td>-->
                                     <!--<td style="width: 42px;text-align:center;" >Cancel</td>-->
-    <!--                                <td style="width: 42px;text-align:center;">Coupons</td>-->
+                                    <!--                                <td style="width: 42px;text-align:center;">Coupons</td>-->
                                     <td style="width: 42px;text-align:center;">Returned Amount</td>
-    <!--                                <td style="width: 42px;text-align:center;">Delivery</td>-->
+                                    <!--                                <td style="width: 42px;text-align:center;">Delivery</td>-->
                                     <!--<td style="width: 42px;text-align:center;" >Session</td>-->
                                 </tr>
                             </tbody>
                         </table>
                         <br/>
                         <table style="height: 30px;margin-top: 32px;" width="100%">
-                        <tbody>
-                            <tr>
-                                <t t-if='record.payment_details.raw_value'>
-                                    <td style='width: 90%;'>
-                                        <t t-raw="record.payment_details.raw_value"/>
-                                    </td>
-                                    <td/>
-                                </t>
-                            </tr>
-                        </tbody>
-                    </table>
+                            <tbody>
+                                <tr>
+                                    <t t-if='record.payment_details.raw_value'>
+                                        <td style='width: 90%;'>
+                                            <t t-raw="record.payment_details.raw_value"/>
+                                        </td>
+                                        <td/>
+                                    </t>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-            </xpath>
+                </xpath>
 
-        </field>
-    </record>
+            </field>
+        </record>
 
 
-</data>
-        </odoo>
+    </data>
+</odoo>
         

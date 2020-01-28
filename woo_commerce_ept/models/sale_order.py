@@ -5,6 +5,7 @@ import requests
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
+
 class sale_order(models.Model):
     _inherit="sale.order"
 
@@ -265,7 +266,7 @@ class sale_order(models.Model):
                         woo_variant = False
                 except:
                     woo_variant=False
-                    message="Variant Id %s not found in woo || default_code %s || order ref %s"%(line_product_id,line.get('sku'),order_number)
+                    message="Variant Id %s not found in woo || barcode %s || order ref %s"%(line_product_id,line.get('sku'),order_number)
                     log=transaction_log_obj.search([('woo_instance_id','=',instance.id),('message','=',message)])
                     if not log:
                         transaction_log_obj.create(
@@ -283,21 +284,23 @@ class sale_order(models.Model):
                 else:
                     barcode=0
             sku=line.get('sku') or ''
-            woo_variant=barcode and woo_product_obj.search([('product_id.default_code','=',barcode),('woo_instance_id','=',instance.id)],limit=1)
+            ################################
+
+            woo_variant=barcode and woo_product_obj.search([('product_id.barcode','=',barcode),('woo_instance_id','=',instance.id)],limit=1)
             if not woo_variant:
-                odoo_product=barcode and odoo_product_obj.search([('default_code','=',barcode)],limit=1) or False
+                odoo_product=barcode and odoo_product_obj.search([('barcode','=',barcode)],limit=1) or False
             if not odoo_product and not woo_variant:
-                woo_variant=sku and woo_product_obj.search([('default_code','=',sku),('woo_instance_id','=',instance.id)],limit=1)
+                woo_variant=sku and woo_product_obj.search([('barcode','=',sku),('woo_instance_id','=',instance.id)],limit=1)
                 if not woo_variant:
-                    odoo_product=sku and odoo_product_obj.search([('default_code','=',sku)],limit=1)
+                    odoo_product=sku and odoo_product_obj.search([('barcode','=',sku)],limit=1)
             
             if not odoo_product:
                 if instance.woo_version=="new" and line_product_id: 
                         woo_product_template_obj.sync_new_products(instance,line_product_id)
-                        odoo_product = odoo_product_obj.search([('default_code','=',sku)],limit=1) 
+                        odoo_product = odoo_product_obj.search([('barcode','=',sku)],limit=1)
                 if instance.woo_version=="old" and line_product_id: 
                         woo_product_template_obj.sync_products(instance,line_product_id)
-                        odoo_product = odoo_product_obj.search([('default_code','=',sku)],limit=1)
+                        odoo_product = odoo_product_obj.search([('barcode','=',sku)],limit=1)
                 
             if not woo_variant and not odoo_product:
                 message="%s Product Code Not found for order %s"%(sku,order_number)
@@ -312,7 +315,7 @@ class sale_order(models.Model):
                 mismatch=True
                 break
         return mismatch
-
+            ##############################################
     @api.model
     def create_woo_sale_order_line(self,line,tax_ids,product,quantity,fiscal_position,partner,pricelist_id,name,order,price,is_shipping=False):
         sale_order_line_obj=self.env['sale.order.line']
@@ -363,7 +366,7 @@ class sale_order(models.Model):
             woo_product=woo_product_obj.search([('woo_instance_id','=',instance.id),('variant_id','=',variant_id)],limit=1)
             if woo_product:
                 return woo_product
-            woo_product=woo_product_obj.search([('woo_instance_id','=',instance.id),('default_code','=',line.get('sku'))],limit=1)
+            woo_product=woo_product_obj.search([('woo_instance_id','=',instance.id),('barcode','=',line.get('sku'))],limit=1)
             woo_product and woo_product.write({'variant_id':variant_id})
             if woo_product:
                 return woo_product
@@ -399,7 +402,7 @@ class sale_order(models.Model):
                 woo_product_tmpl_obj.sync_new_products(instance,parent_id,update_templates=True)                        
             woo_product=woo_product_obj.search([('woo_instance_id','=',instance.id),('variant_id','=',variant_id)],limit=1)
         else:
-            woo_product=woo_product_obj.search([('woo_instance_id','=',instance.id),('default_code','=',line.get('sku'))],limit=1)
+            woo_product=woo_product_obj.search([('woo_instance_id','=',instance.id),('barcode','=',line.get('sku'))],limit=1)
             if woo_product:
                 return woo_product
         return woo_product

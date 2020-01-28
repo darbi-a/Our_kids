@@ -63,6 +63,10 @@
             </field>
         </record>
 
+        <record id="stock.action_picking_tree_ready" model="ir.actions.act_window">
+            <field name="domain">[('picking_type_id','=',active_id)]</field>
+        </record>
+
         <menuitem
                 action="stock_picking_type_action_restrict"
                 id="stock_picking_type_menu_restrict"

@@ -52,6 +52,19 @@
 
             </field>
         </record>
+        
+        <record id="view_stock_inventory_line_form_inherit_barcode" model="ir.ui.view">
+            <field name="name">stock.inventory.line.form.inherit</field>
+            <field name="model">stock.inventory.line</field>
+            <field name="inherit_id" ref="stock_barcode.stock_inventory_line_barcode"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//field[@name='theoretical_qty']" position="attributes">
+                    <attribute name="groups">stock.group_stock_user</attribute>
+                </xpath>
+                
+            </field>
+        </record>
 
 
     </data>

@@ -51,6 +51,19 @@ class ProductCardReportWizard(models.TransientModel):
         dat.strftime('%Y-%m-%d: %H:%M:%S')
         return dat.replace(tzinfo=None)
 
+    def get_amount_from_entries(self,line):
+        stock_valuation_account_id = line.product_id.categ_id.property_stock_valuation_account_id.id
+        account_moves = line.move_id.account_move_ids
+        total_amount = 0
+        total_qty = 0
+        if account_moves:
+            for move in account_moves:
+                for line in move.line_ids.filtered(lambda l:l.account_id.id == stock_valuation_account_id):
+                    total_amount += line.debit - line.credit
+                    total_qty += line.quantity
+
+        return abs(total_amount)
+
     def get_data_from_line(self,line,qty,cost,amount,inc,out,qty_balance,cost_balance,amount_balance):
         picking = line.picking_id
         order_ref = ''
@@ -104,7 +117,8 @@ class ProductCardReportWizard(models.TransientModel):
             balance = 0
             if self.product_id.cost_method == 'fifo':
                 for ml in stock_move_lines:
-                    balance += ml.move_id.remaining_value
+                    # balance += ml.move_id.remaining_value
+                    balance += self.get_amount_from_entries(ml)
                 return balance
             else:
                 for ml in stock_move_lines:
@@ -117,7 +131,8 @@ class ProductCardReportWizard(models.TransientModel):
         if line.product_id.cost_method != 'fifo':
             amount = line.qty_done * line.product_id.get_history_price(self.env.user.company_id.id, date=line.date)
         else:
-            amount = line.move_id.remaining_value
+            # amount = line.move_id.remaining_value
+            amount = self.get_amount_from_entries(line)
 
         return amount
 
@@ -174,7 +189,8 @@ class ProductCardReportWizard(models.TransientModel):
             qty = line.qty_done
 
             amount = self.get_line_amount(line)
-            cost = amount/qty if qty and product.cost_method != 'fifo' else 0
+            # cost = amount/qty if qty and product.cost_method != 'fifo' else 0
+            cost = amount/qty if qty else 0
             # qty_balance = product.with_context(to_date=line.date,location=self.location_id.id).qty_available
             previous_amount_balance = data[-1]['amount_balance'] if data else 0
             previous_qty_balance = data[-1]['qty_balance'] if data else 0

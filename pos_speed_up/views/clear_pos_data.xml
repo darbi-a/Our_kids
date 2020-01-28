@@ -10,9 +10,11 @@
                     <a style="cursor: pointer;" onclick="clearData()">
                         <i class="fa fa-refresh"></i> Refresh Data
                     </a>
-                    <div>
+
+                    <div groups="point_of_sale.group_pos_user">
                         <a type="edit">Settings</a>
                     </div>
+
                     <script>
                         function clearData() {
                             localStorage.clear();
