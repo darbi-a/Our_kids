@@ -15,7 +15,6 @@
                         <field name="restrict_locations" attrs="{'invisible': [('login','=', 'admin')]}"/>
                         <field name="default_location_id" attrs="{'invisible': ['|',('login','=', 'admin'),('restrict_locations','!=', True)],'required': [('restrict_locations','=', True)]}"/>
                     </group>
-
                 </group>
             <notebook position="inside">
                     <page string="Internal Transfers Locations" attrs="{'invisible': [('restrict_locations','!=', True)]}">
