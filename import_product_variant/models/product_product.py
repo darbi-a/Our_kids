@@ -143,6 +143,10 @@ class ProductTemplate(models.Model):
     sale_price =fields.Float("Sales Price2")
     custom_attribute_lines = fields.Many2many(comodel_name='product.template.attribute.line', string='Product Attributes',compute='_get_attributes')
 
+    @api.multi
+    def create_variant_ids(self):
+
+        return True
 
     @api.one
     @api.depends('product_variant_count')
@@ -166,7 +170,25 @@ class ProductTemplate(models.Model):
                     val['value_ids'].append((4,vt))
                 vart = self.env['product.template.attribute.line'].sudo().create(val)
                 lst_vart.append(vart.id)
+
             self.custom_attribute_lines = [(6, 0, lst_vart)]
+
+            # self.write({'attribute_line_ids': self.custom_attribute_lines})
+            # self.attribute_line_ids = self.custom_attribute_lines
+
+
+        else:
+            self.custom_attribute_lines=False
+        self.assign_attribute_lines()
+
+    def assign_attribute_lines(self):
+        for rec  in self:
+            rec.write({'attribute_line_ids' : rec.custom_attribute_lines})
+
+            if rec.custom_attribute_lines and not rec.attribute_line_ids:
+                ids =rec.custom_attribute_lines.ids
+                rec.write({'attribute_line_ids': [(6,0,ids)]})
+
 
 
 

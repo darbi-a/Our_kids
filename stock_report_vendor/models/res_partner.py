@@ -10,13 +10,13 @@ class ResPartner(models.Model):
 
     @api.model
     def create(self,vals):
-        if 'tag_id' in vals:
+        if vals.get('tag_id'):
             vals['category_id'] = [(6,0,[vals.get('tag_id')])]
         return super(ResPartner,self).create(vals)
 
     @api.multi
     def write(self,vals):
-        if 'tag_id' in vals:
+        if vals.get('tag_id'):
             vals['category_id'] = [(6,0,[vals.get('tag_id')])]
         return super(ResPartner,self).write(vals)
 

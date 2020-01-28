@@ -160,6 +160,8 @@
                                             <td></td>
                                             <td></td>
                                             <td></td>
+                                            <td></td>
+                                            <td></td>
                                             <td>
                                                 <t t-esc="round(totals.get(previous_branch)['qty'],2)"/>
                                             </td>
@@ -180,7 +182,7 @@
                                     </t>
                                 </t>
                                 <tr style="background-color:yellow">
-                                    <td colspan="9">الاجمالي</td>
+                                    <td colspan="11">الاجمالي</td>
 <!--                                    <td></td>-->
 <!--                                    <td></td>-->
 <!--                                    <td></td>-->

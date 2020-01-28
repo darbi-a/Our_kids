@@ -43,6 +43,13 @@ class RetailSalesWizard(models.TransientModel):
     def get_branch_id(self,key):
         return str(eval(key)[0])
 
+    def convert_date_to_local(self,dat, tz):
+        local = tz and pytz.timezone(tz) or pytz.timezone('UTC')
+        dat = dat.replace(tzinfo=pytz.utc)
+        dat = dat.astimezone(local)
+        dat.strftime('%Y-%m-%d: %H:%M:%S')
+        return dat.replace(tzinfo=None)
+
     def get_report_data(self):
         data = {}
         totals = {}
@@ -110,6 +117,8 @@ class RetailSalesWizard(models.TransientModel):
             user = ol.order_id.user_id
             # key = (branch.id,user.id,product.id)
             key = (branch.id,ol.id,user.id)
+            date_order = self.convert_date_to_local(ol.order_id.date_order,self.env.user.tz)
+            sale_price = product.sale_price or product.lst_price
             product_data = {
                 'partner':partner.name or '',
                 'vendor_type':partner.vendor_type or '',
@@ -118,12 +127,12 @@ class RetailSalesWizard(models.TransientModel):
                 'categ':product.categ_id.name,
                 'barcode':product.barcode,
                 'default_code':product.default_code,
-                'date_order':ol.order_id.date_order,
+                'date_order': datetime.strftime(date_order,'%d/%m/%Y: %H:%M:%S'),
                 'product':product.name,
                 'order_name':ol.order_id.name,
                 'season':product.season_id.name,
                 'qty':0,
-                'sales_price': product.sale_price,
+                'sales_price': sale_price,
                 'total_sales':0,
                 'discount':0,
                 'net':0,
@@ -134,7 +143,7 @@ class RetailSalesWizard(models.TransientModel):
 
             data.setdefault(key,product_data.copy())
             totals.setdefault(branch.id,totals_dic.copy())
-            total_sales = product.sale_price * ol.qty
+            total_sales = sale_price * ol.qty
             total_discount = total_sales - ol.price_subtotal
             data[key]['qty'] += ol.qty
             data[key]['total_sales'] += total_sales
@@ -288,10 +297,10 @@ class RetailSalesWizard(models.TransientModel):
             row += 1
             branch_id = key[0]
             if branch_id != previous_branch:
-                worksheet.write(row, 9, totals[previous_branch]['qty'], TABLE_data_tolal_line)
-                worksheet.write(row, 11, totals[previous_branch]['total_sales'], TABLE_data_tolal_line)
-                worksheet.write(row, 13, totals[previous_branch]['net'], TABLE_data_tolal_line)
-                worksheet.write(row, 15, totals[previous_branch]['total_cost'], TABLE_data_tolal_line)
+                worksheet.write(row, 11, totals[previous_branch]['qty'], TABLE_data_tolal_line)
+                worksheet.write(row, 13, totals[previous_branch]['total_sales'], TABLE_data_tolal_line)
+                worksheet.write(row, 15, totals[previous_branch]['net'], TABLE_data_tolal_line)
+                worksheet.write(row, 17, totals[previous_branch]['total_cost'], TABLE_data_tolal_line)
                 row += 1
                 previous_branch = branch_id
 
@@ -336,17 +345,17 @@ class RetailSalesWizard(models.TransientModel):
 
             if i == len(sorted_keys) -1:
                 row += 1
-                worksheet.write(row, 9, totals[branch_id]['qty'], TABLE_data_tolal_line)
-                worksheet.write(row, 11, totals[branch_id]['total_sales'], TABLE_data_tolal_line)
-                worksheet.write(row, 13, totals[branch_id]['net'], TABLE_data_tolal_line)
-                worksheet.write(row, 15, totals[branch_id]['total_cost'], TABLE_data_tolal_line)
+                worksheet.write(row, 11, totals[branch_id]['qty'], TABLE_data_tolal_line)
+                worksheet.write(row, 13, totals[branch_id]['total_sales'], TABLE_data_tolal_line)
+                worksheet.write(row, 15, totals[branch_id]['net'], TABLE_data_tolal_line)
+                worksheet.write(row, 17, totals[branch_id]['total_cost'], TABLE_data_tolal_line)
 
         row += 1
         worksheet.write_merge(row,row,0, 8, _('الاجمالي'), TABLE_data_tolal_line)
-        worksheet.write(row,9, totals['all_total']['qty'], TABLE_data_tolal_line)
-        worksheet.write(row, 11, totals['all_total']['total_sales'], TABLE_data_tolal_line)
-        worksheet.write(row, 13, totals['all_total']['net'], TABLE_data_tolal_line)
-        worksheet.write(row, 15, totals['all_total']['total_cost'], TABLE_data_tolal_line)
+        worksheet.write(row,11, totals['all_total']['qty'], TABLE_data_tolal_line)
+        worksheet.write(row, 13, totals['all_total']['total_sales'], TABLE_data_tolal_line)
+        worksheet.write(row, 15, totals['all_total']['net'], TABLE_data_tolal_line)
+        worksheet.write(row, 17, totals['all_total']['total_cost'], TABLE_data_tolal_line)
 
         output = BytesIO()
         if data:
@@ -411,7 +420,6 @@ class RetailSalesWizard(models.TransientModel):
 
     def action_print(self):
         if self.type == 'xls':
-            print("aaaa")
             return self.action_print_excel_file()
 
         elif self.type == 'pdf':

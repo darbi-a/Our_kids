@@ -13,7 +13,7 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['product','stock','point_of_sale'],
+    'depends': ['product','stock','point_of_sale','stock_barcode'],
 
     # always loaded
     'data': [
@@ -22,6 +22,13 @@
         'views/inventory_valuation.xml',
         'views/stock_picking.xml',
         'views/pos_config.xml',
+        'views/templates.xml',
+        'views/product_product.xml',
+        'views/account_move.xml',
 
+    ],
+
+    'qweb': [
+        'static/src/xml/qweb_templates.xml',
     ],
 }

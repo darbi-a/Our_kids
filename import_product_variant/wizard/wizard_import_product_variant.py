@@ -246,7 +246,7 @@ class ImportProductVariant(models.TransientModel):
                 if not product:
                     product = self.env['product.product'].create(field_vals)
                     product_templ = product.product_tmpl_id
-                    product_templ.barcode = barcode
+                    product_templ.default_code = default_code
                     product_templ.list_price = sale_price
                     if product_templ.id not in count_items:
                         count_items.append(product_templ.id)
@@ -291,7 +291,7 @@ class ImportProductVariant(models.TransientModel):
                     if not product_templ:
                         product = self.env['product.product'].create(field_vals)
                         product_templ = product.product_tmpl_id
-                        product_templ.barcode = barcode
+                        product_templ.default_code = default_code
                         if product_templ.id not in count_items:
                             count_items.append(product_templ.id)
                         if product.id not in count_variant:
