@@ -211,9 +211,11 @@ class ProductCardReportWizard(models.TransientModel):
 
         if stock_move_lines and not date_from_utc:
             date_from_utc = fields.Datetime.from_string(stock_move_lines[0].date)
-        return data,date_to_utc,date_from_utc
 
-    def add_excel_sheet(self,workbook,data,date_to_utc,date_from_utc,sheet_name):
+        balance_columns = 3 if self.product_id.cost_method != 'fifo' else 2
+        return data,date_to_utc,date_from_utc,balance_columns
+
+    def add_excel_sheet(self,workbook,data,date_to_utc,date_from_utc,balance_columns,sheet_name):
         worksheet = workbook.add_sheet(sheet_name)
 
         lang = self.env.user.lang
@@ -326,7 +328,7 @@ class ProductCardReportWizard(models.TransientModel):
         col += 3
         worksheet.write_merge(row, row, col, col+2, _('منصرف'), header_format)
         col += 3
-        worksheet.write_merge(row, row, col, col+2, _('رصيد'), header_format)
+        worksheet.write_merge(row, row, col, col+balance_columns - 1, _('رصيد'), header_format)
         col = 6
         worksheet.write(row+1,col, _('كمية'), header_format)
         col += 1
@@ -342,8 +344,9 @@ class ProductCardReportWizard(models.TransientModel):
         col += 1
         worksheet.write(row+1,col, _('كمية'), header_format)
         col += 1
-        worksheet.write(row+1,col, _('سعر'), header_format)
-        col += 1
+        if balance_columns == 3:
+            worksheet.write(row+1,col, _('سعر'), header_format)
+            col += 1
         worksheet.write(row+1,col, _('قيمة'), header_format)
         worksheet.col(0).width = 256 * 50
         row += 1
@@ -378,8 +381,9 @@ class ProductCardReportWizard(models.TransientModel):
             col += 1
             worksheet.write(row, col, d['qty_balance'], TABLE_data)
             col += 1
-            worksheet.write(row, col, d['cost_balance'] or ' - ', TABLE_data)
-            col += 1
+            if balance_columns == 3:
+                worksheet.write(row, col, d['cost_balance'] or ' - ', TABLE_data)
+                col += 1
             worksheet.write(row, col, d['amount_balance'], TABLE_data)
 
     @api.multi
@@ -392,8 +396,8 @@ class ProductCardReportWizard(models.TransientModel):
         if self.date_to and not self.date_from:
             raise ValidationError(_('Start date is not set'))
 
-        report_data,date_to_utc,date_from_utc = self.get_report_data()
-        self.add_excel_sheet(workbook, report_data,date_to_utc,date_from_utc, _('كارت صنف قيمة'))
+        report_data,date_to_utc,date_from_utc,balance_columns = self.get_report_data()
+        self.add_excel_sheet(workbook, report_data,date_to_utc,date_from_utc,balance_columns, _('كارت صنف قيمة'))
 
 
         xls_file_path = (_( self.product_id.name + ' كارت صنف قيمة.xls'))

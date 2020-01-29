@@ -27,6 +27,7 @@
 
         <template id="product_card_tmp_report">
             <t t-call="product_card_report.product_card_report_layout">
+                <t t-set="columns" t-value="data[3]" />
                 <div class="text-center">
                     <h2 class="text-center">Product Card For Product</h2>
                     <h2 class="text-center">
@@ -85,7 +86,7 @@
                                 <th rowspan="2">الى مخزن</th>
                                 <th colspan="3">وارد</th>
                                 <th colspan="3">منصرف</th>
-                                <th colspan="3">رصيد</th>
+                                <th t-att-colspan="columns">رصيد</th>
                             </tr>
                             <tr>
                                 <th>كمية</th>
@@ -95,7 +96,7 @@
                                 <th>سعر</th>
                                 <th>قيمة</th>
                                 <th>كمية</th>
-                                <th>سعر</th>
+                                <th t-if="columns == 3">سعر</th>
                                 <th>قيمة</th>
                             </tr>
                         </head>
@@ -154,8 +155,8 @@
                                 <t t-if="o['cost_out']">
                                     <t t-esc="round(o['cost_out'] or 0,2)"/>
                                 </t>
-                                <t t-esle="">
-                                    -
+                                <t t-elif="not o['cost_out']">
+                                    <span> - </span>
                                 </t>
                             </td>
                             <td>
@@ -164,7 +165,7 @@
                             <td>
                                 <t t-esc="round(o['qty_balance'] or 0,2)"/>
                             </td>
-                            <td>
+                            <td t-if="columns == 3">
 <!--                                <t t-esc="round(o['cost_balance'] or 0,2)"/>-->
                                 <t t-if="o['cost_balance']">
                                     <t t-esc="round(o['cost_balance'] or 0,2)"/>

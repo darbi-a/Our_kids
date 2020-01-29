@@ -171,17 +171,18 @@ class product_pricelist(models.Model):
                     if not cat:
                         continue
                 if rule.partner_id:
-                    owners = product.seller_ids
-                    lst_ids=[]
-                    for line in owners:
-                        if line.name.id == rule.partner_id.id:
-                            lst_ids.append(line.name.id)
-                            print('lst =',lst_ids)
-                            break
-                        cat = cat.parent_id
-                    print('**** lst =', lst_ids)
-                    if not owners or not lst_ids:
+                    if product.seller_ids:
+                        owners = product.seller_ids
+                        flag=False
+                        for owner in owners:
+                            if owner.name.id == rule.partner_id.id:
+                                flag = True
+                                break
+                        if not flag:
+                            continue
+                    else:
                         continue
+
                 if rule.base == 'pricelist' and rule.base_pricelist_id:
                     price_tmp = rule.base_pricelist_id._compute_price_rule([(product, qty, partner)])[product.id][0]  # TDE: 0 = price, 1 = rule
                     price = rule.base_pricelist_id.currency_id._convert(price_tmp, self.currency_id, self.env.user.company_id, date, round=False)
@@ -226,5 +227,4 @@ class product_pricelist(models.Model):
                 price = cur._convert(price, self.currency_id, self.env.user.company_id, date, round=False)
 
             results[product.id] = (price, suitable_rule and suitable_rule.id or False)
-
         return results

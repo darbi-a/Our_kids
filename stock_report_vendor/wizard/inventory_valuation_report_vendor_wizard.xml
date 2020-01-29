@@ -20,7 +20,7 @@
                             <field name="tag_ids" widget="many2many_tags"/>
                             <field name="warehouse_ids" widget="many2many_tags" domain="[('company_id','=',company_id)]"/>
                             <field name="season_ids" widget="many2many_tags"/>
-                            <field name="type" widget="radio"/>
+<!--                            <field name="type" widget="radio"/>-->
                         </group>
                     </sheet>
                     <footer>
