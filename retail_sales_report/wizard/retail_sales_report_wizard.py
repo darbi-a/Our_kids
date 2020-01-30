@@ -83,7 +83,8 @@ class RetailSalesWizard(models.TransientModel):
             products = products.filtered(lambda p: p.tag_ids in self.product_tag_ids)
 
         elif self.categ_ids:
-            products = products.filtered(lambda p: p.categ_id in self.categ_ids)
+            categories = self.env['product.category'].search([('id', 'child_of', self.categ_ids.ids)])
+            products = products.filtered(lambda p: p.categ_id in categories)
 
         if self.season_ids:
             products = products.filtered(lambda p: p.season_id in self.season_ids)
