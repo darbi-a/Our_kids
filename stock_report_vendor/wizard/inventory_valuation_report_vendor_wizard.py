@@ -99,8 +99,8 @@ class InventoryValuationReportVendor(models.TransientModel):
         elif self.season_ids:
             products = self.env['product.product'].search( products_domain + [('season_id','in',self.season_ids.ids)])
         else:
-            products = self.env['product.product'].search(products_domain)
-            # products = self.env['stock.move'].mapped('product_id')
+            # products = self.env['product.product'].search(products_domain)
+            products = self.env['stock.move'].search([]).mapped('product_id')
 
         if self.product_category_ids:
             categories = self.env['product.category'].search([('id','child_of',self.product_category_ids.ids)])
@@ -108,7 +108,7 @@ class InventoryValuationReportVendor(models.TransientModel):
 
         if self.vendor_color:
             products = products.filtered(lambda p: p.vendor_color == self.vendor_color)
-
+        i = 0
         for partner in partners:
             # partner_products = products.filtered(lambda p:p.vendor_num == partner.vendor_num)
             # supplier_info = self.env['product.supplierinfo'].search([('name','=',partner.id)])
@@ -118,6 +118,8 @@ class InventoryValuationReportVendor(models.TransientModel):
             data.setdefault(partner.name,{})
 
             for product in partner_products:
+                i += 1
+                print(i)
                 # data[partner].setdefault(product,{})
                 qty = product.with_context(to_date=start_date,company_owned=True).qty_available
                 cost = product.with_context(to_date=self.date).stock_value
