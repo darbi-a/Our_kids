@@ -99,7 +99,8 @@ class InventoryValuationReportVendor(models.TransientModel):
         elif self.season_ids:
             products = self.env['product.product'].search( products_domain + [('season_id','in',self.season_ids.ids)])
         else:
-            products = self.env['product.product'].search(products_domain)
+            # products = self.env['product.product'].search(products_domain)
+            products = self.env['stock.move'].mapped('product_id')
 
         if self.product_category_ids:
             categories = self.env['product.category'].search([('id','child_of',self.product_category_ids.ids)])
@@ -324,7 +325,8 @@ class InventoryValuationReportVendor(models.TransientModel):
                 col += 1
                 worksheet.write(row,col,product_data['total_cost'],STYLE_LINE_Data)
                 col += 1
-
+                if round(product_data['total_cost'],5) != round(product_data['cost'],5):
+                    worksheet.write(row, col, 'wrong amount line', STYLE_LINE_Data)
                 row += 1
 
         col = 10
