@@ -99,8 +99,8 @@ class InventoryValuationReportVendor(models.TransientModel):
         elif self.season_ids:
             products = self.env['product.product'].search( products_domain + [('season_id','in',self.season_ids.ids)])
         else:
-            # products = self.env['product.product'].search(products_domain)
-            products = self.env['stock.move'].mapped('product_id')
+            products = self.env['product.product'].search(products_domain)
+            # products = self.env['stock.move'].mapped('product_id')
 
         if self.product_category_ids:
             categories = self.env['product.category'].search([('id','child_of',self.product_category_ids.ids)])
@@ -111,9 +111,10 @@ class InventoryValuationReportVendor(models.TransientModel):
 
         for partner in partners:
             # partner_products = products.filtered(lambda p:p.vendor_num == partner.vendor_num)
-            supplier_info = self.env['product.supplierinfo'].search([('name','=',partner.id)])
+            # supplier_info = self.env['product.supplierinfo'].search([('name','=',partner.id)])
             # partner_products = products.filtered(lambda p:p.variant_seller_ids in supplier_info)
-            partner_products = products & supplier_info.mapped('product_id')
+            # partner_products = products & supplier_info.mapped('product_id')
+            partner_products = products & self.env['product.product'].search([('vendor_num','=',partner.ref)])
             data.setdefault(partner.name,{})
 
             for product in partner_products:
@@ -136,7 +137,7 @@ class InventoryValuationReportVendor(models.TransientModel):
                     'total_qty': 0,
                     'total_cost': 0,
                 }
-                totals['all_total']['all_products'] += qty * product.standard_price
+                totals['all_total']['all_products'] += cost
                 for warehouse in warehouses:
                     totals.setdefault(warehouse.name,0)
                     qty = product.with_context(warehouse=warehouse.id,to_date=start_date).qty_available
