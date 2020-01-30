@@ -56,10 +56,10 @@ class InventoryValuationReportVendor(models.TransientModel):
         return final_stock_ids
 
     @api.model
-    def get_valuation(self, product, warehouse):
+    def get_valuation(self, product, warehouse,start_date):
         value = 0.0
         locations = self.get_location(warehouse)
-        lst_moves = self.env['stock.move'].search([('product_id', '=', product.id),('state', '=', 'done'),'|',('location_id', 'in', locations),('location_dest_id', 'in', locations)])
+        lst_moves = self.env['stock.move'].search([('date', '<=', start_date),('product_id', '=', product.id),('state', '=', 'done'),'|',('location_id', 'in', locations),('location_dest_id', 'in', locations)])
         for mov in lst_moves:
             value += mov.value
         return value
@@ -102,7 +102,8 @@ class InventoryValuationReportVendor(models.TransientModel):
             products = self.env['product.product'].search(products_domain)
 
         if self.product_category_ids:
-            products = products.filtered(lambda p:p.categ_id in self.product_category_ids)
+            categories = self.env['product.category'].search([('id','child_of',self.product_category_ids.ids)])
+            products = products.filtered(lambda p:p.categ_id in categories)
 
         if self.vendor_color:
             products = products.filtered(lambda p: p.vendor_color == self.vendor_color)
@@ -117,6 +118,7 @@ class InventoryValuationReportVendor(models.TransientModel):
             for product in partner_products:
                 # data[partner].setdefault(product,{})
                 qty = product.with_context(to_date=start_date,company_owned=True).qty_available
+                cost = product.with_context(to_date=self.date).stock_value
                 data[partner.name][str(product.id)] = {
                     'vendor_type': partner.vendor_type,
                     'vendor_color': product.vendor_color,
@@ -127,8 +129,8 @@ class InventoryValuationReportVendor(models.TransientModel):
                     'categ': product.categ_id.name ,
                     'season': product.season_id.name,
                     'qty': qty,
-                    # 'cost': product.with_context(to_date=self.date).stock_value,
-                    'cost': qty * product.standard_price,
+                    'cost': cost,
+                    # 'cost': qty * product.standard_price,
                     'sale_price': product.list_price,
                     'total_qty': 0,
                     'total_cost': 0,
@@ -137,16 +139,19 @@ class InventoryValuationReportVendor(models.TransientModel):
                 for warehouse in warehouses:
                     totals.setdefault(warehouse.name,0)
                     qty = product.with_context(warehouse=warehouse.id,to_date=start_date).qty_available
-                    # evaluation = self.get_valuation(product,warehouse)
+                    evaluation = self.get_valuation(product,warehouse,start_date)
                     data[partner.name][str(product.id)][warehouse.name] = {
                         'qty':qty,
-                        # 'evaluation': evaluation,
-                        'evaluation': qty * product.standard_price,
+                        'evaluation': evaluation,
+                        # 'evaluation': qty * product.standard_price,
                     }
-                    totals[warehouse.name] += qty * product.standard_price
-                    totals['all_total']['warehouses'] += qty * product.standard_price
+                    # totals[warehouse.name] += qty * product.standard_price
+                    # totals['all_total']['warehouses'] += qty * product.standard_price
+                    totals[warehouse.name] += evaluation
+                    totals['all_total']['warehouses'] += evaluation
                     data[partner.name][str(product.id)]['total_qty'] += qty
-                    data[partner.name][str(product.id)]['total_cost'] += qty * product.standard_price
+                    # data[partner.name][str(product.id)]['total_cost'] += qty * product.standard_price
+                    data[partner.name][str(product.id)]['total_cost'] += evaluation
 
         return data,warehouses,totals
 
