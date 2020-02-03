@@ -33,7 +33,7 @@ class PosConfig(models.Model):
             for data in details:
                #print "#######################",data['currency']
                count += 1
-               size = (data['amount'] * 100) / total  if data['amount'] else 0
+               size = (data['amount'] * 100) / total if data['amount'] and total else 0
                body += """<tr>"""
                body += """<td style="text-align:left;width: 40%;/* font-size: 16px; */color: blue;">""" + data['payment'] + """</td>"""
                body += """<td style="text-align:left; width: 70%;">
