@@ -22,6 +22,8 @@ class product_pricelist_item(models.Model):
         help='Pricelist Item applicable on selected option')
 
     partner_id = fields.Many2one(comodel_name="res.partner", string="Vendor", required=False, )
+    vendor_num = fields.Char(string="Vendor Number", required=False,related='partner_id.ref',store=True, )
+
 
     @api.onchange('applied_on')
     def _onchange_applied_on(self):
@@ -171,6 +173,9 @@ class product_pricelist(models.Model):
                     if not cat:
                         continue
                 if rule.partner_id:
+                    print("rule.partner_id")
+                    print("Product == > ",product)
+                    print("Product == > ",product.seller_ids)
                     if product.seller_ids:
                         owners = product.seller_ids
                         flag=False

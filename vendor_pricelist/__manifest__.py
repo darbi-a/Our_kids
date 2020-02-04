@@ -3,11 +3,12 @@
 {
     "name": "Price List By Vendor",
     'version': '12.0.1.0.0',
-    "author" : "Ahmed Amin",
+    "author" : "Ahmed Amen",
 
-
+    'summary': """
+       This addon allow to make price-list for vendors  """,
     'category': 'Sales',
-    "depends": ['base',"product",'sale'],
+    "depends": ['base',"product",'sale','import_product_variant','point_of_sale'],
     "license": "LGPL-3",
     "data": [
         #'views/product_view.xml',

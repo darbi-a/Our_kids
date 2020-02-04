@@ -52,8 +52,18 @@
                                             </td>
                                 </tr>
                         </table>
+            <br />
+            <span>---------------------------------------------------------------------</span>
             <br/>
-<!--            <br/>-->
+            <table class='receipt-total'>
+                <tr>
+                    <td>Total Qty:</td>
+                    <td style='text-align:center'>
+                        <t t-esc="order.get_total_order_qty()"/>
+                    </td>
+                </tr>
+            </table>
+            <br/>
             <img id="barcode" style="width:230px;height:90px;display:block;margin:auto;margin-top:20px;"/>
             <br/>
 <!--            <br/>-->
