@@ -13,7 +13,7 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['product','stock','point_of_sale','stock_barcode'],
+    'depends': ['product','stock','point_of_sale','stock_barcode','stock_cost'],
 
     # always loaded
     'data': [

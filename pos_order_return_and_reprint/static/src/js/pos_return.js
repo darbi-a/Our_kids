@@ -1567,17 +1567,17 @@ screens.ClientListScreenWidget.include({
 		    var total = order.get_total_with_tax();
 
 
-         var due   = order.get_due();
-        var change   = order.get_change();
+            var due   = order.get_due();
+            var change   = order.get_change();
 
 		    if(total<0){
-		    $(".paymentmethod:first-child").siblings().css("display","none");
+		        $(".paymentmethod:first-child").siblings().css("display","none");
 
 		    }
 		    else{
-		    $(".paymentmethod:first-child").siblings().css("display","block");
+		        $(".paymentmethod:first-child").siblings().css("display","block");
 		    }
-		           this._super();
+            this._super();
 
 		},
 		watch_order_changes: function() {

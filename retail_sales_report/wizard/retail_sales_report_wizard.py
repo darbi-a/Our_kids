@@ -40,6 +40,13 @@ class RetailSalesWizard(models.TransientModel):
     vendor_type = fields.Selection(selection=[('consignment', 'Consignment'), ('cash', 'Cash'), ], required=False, )
     vendor_color = fields.Char()
 
+    def get_taxes_line(self,line):
+        fpos = line.order_id.fiscal_position_id
+        tax_ids_after_fiscal_position = fpos.map_tax(line.tax_ids, line.product_id, line.order_id.partner_id) if fpos else line.tax_ids
+        price = line.product_id.lst_price or line.product_id.standard_price
+        taxes = tax_ids_after_fiscal_position.compute_all(price, line.order_id.pricelist_id.currency_id, 1, product=line.product_id, partner=line.order_id.partner_id)
+        return taxes['total_excluded']
+
     def get_branch_id(self,key):
         return str(eval(key)[0])
 
@@ -119,7 +126,7 @@ class RetailSalesWizard(models.TransientModel):
             # key = (branch.id,user.id,product.id)
             key = (branch.id,ol.id,user.id)
             date_order = self.convert_date_to_local(ol.order_id.date_order,self.env.user.tz)
-            sale_price = product.sale_price or product.lst_price
+            sale_price = product.lst_price or product.sale_price
             product_data = {
                 'partner':partner.name or '',
                 'vendor_type':partner.vendor_type or '',

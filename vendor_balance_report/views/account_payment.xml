@@ -15,5 +15,31 @@
             
         </field>
     </record>
-    
+
+    <record id="view_account_payment_tree_inherit" model="ir.ui.view">
+        <field name="name">account.payment.tree.inherit</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='partner_id']" position="after">
+                 <field name="communication" />
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_account_payment_tree_inherit_supplier" model="ir.ui.view">
+        <field name="name">account.payment.tree.inherit</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_supplier_payment_tree"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='partner_id']" position="after">
+                 <field name="communication" />
+            </xpath>
+
+        </field>
+    </record>
+
 </odoo>
