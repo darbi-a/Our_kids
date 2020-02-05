@@ -13,7 +13,7 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['purchase','purchase_stock','import_product_variant'],
+    'depends': ['purchase','purchase_stock','import_product_variant','purchase_discount_rule'],
 
     # always loaded
     'data': [
