@@ -38,7 +38,8 @@ class stock_inventory_report(models.AbstractModel):
         locations = self.get_location(record,warehouse)
         for loc in locations:
             print("loc ** == ", loc)
-            list_product = self.env['product.product'].with_context({'location': loc}).search([('type', '=', 'product')])
+            # list_product = self.env['product.product'].with_context({'location': loc}).search([('type', '=', 'product')])
+            list_product = self.env['product.product'].search([('type', '=', 'product')])
             if list_product:
                 print("list_product ** == ", list_product)
                 product_ids = list(set(product_ids + list_product.ids))
