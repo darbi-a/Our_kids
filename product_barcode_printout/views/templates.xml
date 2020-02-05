@@ -54,7 +54,7 @@
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <strong>Price:</strong>
-                                        <strong t-field="product.list_price"
+                                        <strong t-field="product.lst_price"
                                                 t-options="{'widget': 'monetary', 'display_currency': product.company_id.currency_id}"/>
                                     </div>
                                 </div>
