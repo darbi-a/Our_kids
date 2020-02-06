@@ -52,54 +52,13 @@ class VendorBalanceWizard(models.TransientModel):
     @api.model
     def get_stock_valuation_partner(self,partner):
         total_eval = 0
-        stock_pickings = self.env['stock.picking'].search([
-            ('partner_id','=',partner.id),
-            ('state','in',['done']),
-            ('picking_type_id.code','in',['incoming']),
-        ])
+        vendor_num = partner.ref
+        products = self.env['product.product'].search([('vendor_num','=',vendor_num)])
         max_date = datetime.combine(self.date , datetime.max.time())
-        move_lines = stock_pickings.mapped('move_line_ids').filtered(lambda l:l.date <= max_date)
-        products = move_lines.mapped('product_id')
         if self.season_ids:
             products = products.filtered(lambda p:p.season_id in self.season_ids)
         for product in products:
-            # moves_other_vendors = self.env['stock.move'].search([
-            #     ('picking_id.partner_id','!=',partner.id),
-            #     ('picking_id.partner_id','!=',False),
-            #     ('state','in',['done']),
-            #     ('picking_type_id.code','in',['incoming']),
-            #     ('product_id','=',product.id),
-            #     ('date','<=',max_date),
-            # ])
             total_eval += product.with_context(to_date=str(max_date)).stock_value
-            # if moves_other_vendors:
-            #     eval_product_partner = 0.0
-            #     incoming_moves = []
-            #     remain_from_move = {}
-            #     product_move_lines = self.env['stock.move.line'].search([
-            #         ('state','in',['done']),
-            #         ('move_id.picking_type_id.code','in',['incoming','outgoing']),
-            #         ('product_id','=',product.id),
-            #         ('date','<=',max_date),
-            #     ],order='date')
-            #
-            #     for mvl in product_move_lines:
-            #         if mvl.move_id.picking_type_id.code == 'incoming':
-            #             incoming_moves.append(mvl)
-            #             remain_from_move[mvl] = mvl.qty_done
-            #         else:
-            #             self.remove_from_quantity(incoming_moves,remain_from_move,mvl.qty_done)
-            #
-            #     for ml in remain_from_move.keys():
-            #         if ml.move_id.picking_id.partner_id == partner:
-            #             qty = remain_from_move[ml]
-            #             cost = self.get_cost_from_entries(ml.move_id.account_move_ids)
-            #             eval_product_partner += qty * cost
-            #
-            #     total_eval += eval_product_partner
-            # else:
-            #     total_eval += product.with_context(to_date=str(max_date)).stock_value
-
         return total_eval
 
     @api.model
