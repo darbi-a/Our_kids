@@ -143,8 +143,9 @@ class VendorBalanceWizard(models.TransientModel):
 
         flds = ['debit', 'partner_id', 'credit']
         for partner in partners:
-            accounts = [partner.property_account_payable_id.id,partner.property_account_receivable_id.id]
-            domain = [('partner_id', '=', partner.id),('account_id', 'in', accounts), ('date', '<=', start)]
+            # accounts = [partner.property_account_payable_id.id,partner.property_account_receivable_id.id]
+            accounts = self.env['account.account'].search([('user_type_id.type','in',['payable','receivable'])]).ids
+            domain = [('state', '!=', 'draft'),('partner_id', '=', partner.id),('account_id', 'in', accounts), ('date', '<=', start)]
             stock_valuation_partner = self.get_stock_valuation_partner(partner)
             purchases = 0
             refunds = 0

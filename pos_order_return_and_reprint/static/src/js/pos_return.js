@@ -123,6 +123,12 @@ var field_utils = require('web.field_utils');
             if (this.barcode) {
                 json.barcode = this.barcode;
             }
+            if(this.bank_payment_journal_ids){
+                json.bank_payment_journal_ids = this.bank_payment_journal_ids;
+            }
+            if(this.cash_payment_journal_id){
+                json.cash_payment_journal_id = this.cash_payment_journal_id;
+            }
             if (!this.barcode && this.uid) { // init barcode and automatic create barcode for order
                 var barcode = '9';
                 var uid = this.uid;
@@ -149,8 +155,6 @@ var field_utils = require('web.field_utils');
                 }
                 this.barcode = sbarcode + this.generate_barcode(abarcode).toString()
             }
-//            console.log('export json');
-//            console.log(json);
             return json;
         },
         generate_barcode: function (code) {
@@ -174,6 +178,19 @@ var field_utils = require('web.field_utils');
             if (json.barcode) {
                 this.barcode = json.barcode;
             }
+            if(json.bank_payment_journal_ids){
+                this.bank_payment_journal_ids = json.bank_payment_journal_ids;
+                if(res){
+                    res.bank_payment_journal_ids = json.bank_payment_journal_ids;
+                }
+            }
+            if(json.cash_payment_journal_id){
+                this.cash_payment_journal_id = json.cash_payment_journal_id;
+                if(res){
+                    res.cash_payment_journal_id = json.cash_payment_journal_id;
+                }
+            }
+
             return res;
         },
 
@@ -231,7 +248,8 @@ myDate.setSeconds(0);
 
     models.load_models({
         model: 'pos.order',
-        fields: ['name', 'id', 'date_order', 'partner_id', 'pos_reference', 'lines', 'amount_total', 'session_id', 'state', 'company_id','barcode'],
+        fields: ['name', 'id', 'date_order', 'partner_id', 'pos_reference', 'lines', 'amount_total', 'session_id',
+                    'state', 'company_id','barcode','cash_payment_journal_id','bank_payment_journal_ids'],
         domain: function(self){ return [['date_order','>=',myDate],['amount_total','>',0.0],['state', 'not in', ['draft', 'cancel']]]; },
         loaded: function(self, orders){
         	self.db.all_orders_list = [];
@@ -239,14 +257,14 @@ myDate.setSeconds(0);
         	self.db.get_orders_by_id = {};
         	self.orders = [];
             orders.forEach(function(order) {
-            var order_date = new Date(order.date_order);
-            if(order.amount_total > 0.0 && order_date > myDate){
-                    var order_date_local = moment(order_date).add(2, 'hours');
-                    order.date_order = moment(order_date_local).format('YYYY-MM-DD HH:mm:ss');
-                    self.db.get_orders_by_id[order.id] = order;
-                    self.orders.push(order);
-                    self.db.all_orders_list.push(order);
-                }
+                var order_date = new Date(order.date_order);
+                if(order.amount_total > 0.0 && order_date > myDate){
+                        var order_date_local = moment(order_date).add(2, 'hours');
+                        order.date_order = moment(order_date_local).format('YYYY-MM-DD HH:mm:ss');
+                        self.db.get_orders_by_id[order.id] = order;
+                        self.orders.push(order);
+                        self.db.all_orders_list.push(order);
+                    }
             });
 //            self.orders = orders;
         },
@@ -1154,7 +1172,31 @@ myDate.setSeconds(0);
 		    var exact_return_qty = {};
             var exact_entered_qty = {};
             var orders = self.pos.db.all_orders_list;
-
+            if(order && order.cash_payment_journal_id && order.cash_payment_journal_id.length === 1){
+                var cash_payment_journal_id = order.cash_payment_journal_id[0][1];
+                var journals = self.pos.journals;
+                for(var i=0 ; i < journals.length ; i ++){
+                    var jour = journals[i];
+                    if(jour.type === 'cash'){
+                        selectedOrder.cash_payment_journal_id = jour;
+                        break;
+                    }
+                }
+            }
+            if(order && order.bank_payment_journal_ids && order.bank_payment_journal_ids.length > 0){
+                selectedOrder.bank_payment_journal_ids = []
+                for(var j=0 ; j < journals.length ; j++){
+                    var bank_payment_journal_id = order.bank_payment_journal_ids[j][1];
+                    var journals = self.pos.journals;
+                    for(var i=0 ; i < journals.length ; i++){
+                        var jour = journals[i];
+                        if(jour.type === 'bank' && bank_payment_journal_ids === jour.id){
+                            selectedOrder.bank_payment_journal_ids.push(jour);
+                            break;
+                        }
+                    }
+                }
+            }
 
             this.$('#apply_barcode_return_order').click(function() {
 
@@ -1227,7 +1269,31 @@ myDate.setSeconds(0);
             var selectedOrder = this.pos.get_order();
             var orderlines = self.options.orderlines;
             var order = self.options.order;
-
+            var journals = self.pos.journals;
+            if(order && order.cash_payment_journal_id && order.cash_payment_journal_id.length > 0){
+                var cash_payment_journal_id = order.cash_payment_journal_id[1];
+                for(var i=0 ; i < journals.length ; i ++){
+                    var jour = journals[i];
+                    if(jour.type === 'cash'){
+                        selectedOrder.cash_payment_journal_id = jour;
+                        break;
+                    }
+                }
+            }
+            if(order && order.bank_payment_journal_ids && order.bank_payment_journal_ids.length > 0){
+                selectedOrder.bank_payment_journal_ids = []
+                for(var j=0 ; j < journals.length ; j++){
+                    var bank_payment_journal_id = order.bank_payment_journal_ids[j];
+                    var journals = self.pos.journals;
+                    for(var i=0 ; i < journals.length ; i++){
+                        var jour = journals[i];
+                        if(jour.type === 'bank' && bank_payment_journal_id === jour.id){
+                            selectedOrder.bank_payment_journal_ids.push(jour);
+                            break;
+                        }
+                    }
+                }
+            }
             // When you click on apply button, Customer is selected automatically in that order
             var partner_id = false
             var client = false
@@ -1563,20 +1629,39 @@ screens.ClientListScreenWidget.include({
 		// Include auto_check_invoice boolean condition in watch_order_changes method
 		order_changes: function() {
 		    var self = this;
-		    var order = this.pos.get_order();
-		    var total = order.get_total_with_tax();
+//		    var order = this.pos.get_order();
+//		    var total = order.get_total_with_tax();
+//
+//
+//            var due   = order.get_due();
+//            var change   = order.get_change();
 
-
-            var due   = order.get_due();
-            var change   = order.get_change();
-
-		    if(total<0){
-		        $(".paymentmethod:first-child").siblings().css("display","none");
-
-		    }
-		    else{
-		        $(".paymentmethod:first-child").siblings().css("display","block");
-		    }
+//		    if(total<0){
+////		        $(".paymentmethod:first-child").siblings().css("display","none");
+//                var jour = [];
+//                if(order && order.cash_payment_journal_id && order.cash_payment_journal_id.id ){
+//                    jour.push(order.cash_payment_journal_id.id)
+//                }
+//                if(order && order.bank_payment_journal_ids && order.bank_payment_journal_ids.length > 0 ){
+//                    for(var i=0; i< order.bank_payment_journal_ids.length ; i++){
+//                        jour.push(order.bank_payment_journal_ids[i].id)
+//                    }
+//                }
+//                if(jour && jour.length === 1){
+//                    var selector = "[data-id=" + jour.toString() +"]";
+//                    var elem = $('.paymentmethod').filter(selector);
+//                    elem.siblings().css("display","none");
+//                    elem.addClass('highlight');
+////                    elem.click();
+//                }else{
+//
+//
+//                }
+//
+//		    }
+//		    else{
+//		        $(".paymentmethod:first-child").siblings().css("display","block");
+//		    }
             this._super();
 
 		},
@@ -1668,8 +1753,69 @@ screens.ClientListScreenWidget.include({
         }
     })
 
+screens.ActionpadWidget.include({
+    renderElement: function() {
+        var self = this;
+        this._super();
+        this.$('.pay').click(function(){
+            var order = self.pos.get_order();
+            var has_valid_product_lot = _.every(order.orderlines.models, function(line){
+                return line.has_valid_product_lot();
+            });
+            if(!has_valid_product_lot){
+                self.gui.show_popup('confirm',{
+                    'title': _t('Empty Serial/Lot Number'),
+                    'body':  _t('One or more product(s) required serial/lot number.'),
+                    confirm: function(){
+                        self.gui.show_screen('payment');
+                    },
+                });
+            }else{
+                var total = order.get_total_with_tax();
+                var due   = order.get_due();
+                var change   = order.get_change();
+
+                if(total<0){
+                    var jour = [];
+                    if(order && order.cash_payment_journal_id && order.cash_payment_journal_id.id ){
+                        jour.push(order.cash_payment_journal_id.id)
+                    }
+                    if(order && order.bank_payment_journal_ids && order.bank_payment_journal_ids.length > 0 ){
+                        for(var i=0; i< order.bank_payment_journal_ids.length ; i++){
+                            jour.push(order.bank_payment_journal_ids[i].id)
+                        }
+                    }
+                    if(jour && jour.length === 1){
+                        var selector = "[data-id=" + jour.toString() +"]";
+                        var elem = $('.paymentmethod').filter(selector);
+                        elem.siblings().css("display","none");
+                        elem.addClass('highlight');
+                        elem.click();
+                    }else if(jour && jour.length > 1){
+                        $(".paymentmethod").css("display","none")
+                        for(var k=0;k < jour.length ; k++){
+                            var jour_id = jour[k];
+                            var selector = "[data-id=" + jour_id.toString() +"]";
+                            var elem = $('.paymentmethod').filter(selector);
+                            elem.css("display","block");
+//                            elem.addClass('highlight');
+                        }
+                    }
+
+                }
+                else{
+                    $(".paymentmethod:first-child").siblings().css("display","block");
+                }
+                self.gui.show_screen('payment');
+            }
+        });
+        this.$('.set-customer').click(function(){
+            self.gui.show_screen('clientlist');
+        });
+    }
 
 
+});
 
 
 })

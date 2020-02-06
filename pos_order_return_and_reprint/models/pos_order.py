@@ -22,6 +22,16 @@ class pos_order(models.Model):
     _inherit = 'pos.order'
 
     barcode = fields.Char(string='Barcode')
+    cash_payment_journal_id = fields.Many2one(comodel_name="account.journal", compute='compute_payment_journals' )
+    bank_payment_journal_ids = fields.Many2many(comodel_name="account.journal", compute='compute_payment_journals' )
+
+    @api.depends('statement_ids','state')
+    def compute_payment_journals(self):
+        for rec in self:
+            cash_payment_journal_id = rec.statement_ids.mapped('journal_id').filtered(lambda j:j.type == 'cash')
+            rec.bank_payment_journal_ids = rec.statement_ids.mapped('journal_id').filtered(lambda j:j.type == 'bank')
+            if cash_payment_journal_id and len(cash_payment_journal_id):
+                rec.cash_payment_journal_id = cash_payment_journal_id[0].id
 
     @api.model
     def _order_fields(self, ui_order):
@@ -59,6 +69,8 @@ class pos_order(models.Model):
             'company_id': [self.company_id.id, self.company_id.name],
             'lines': lines,
             'barcode': self.barcode,
+            'cash_payment_journal_id': [self.cash_payment_journal_id.id,self.cash_payment_journal_id.type] if self.cash_payment_journal_id else [],
+            'bank_payment_journal_ids': self.bank_payment_journal_ids.ids,
         }
         return vals
 

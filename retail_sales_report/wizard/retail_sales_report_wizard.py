@@ -64,7 +64,9 @@ class RetailSalesWizard(models.TransientModel):
             'qty': 0,
             'total_sales': 0,
             'discount': 0,
-            'net': 0,
+            'price_subtotal_incl': 0,
+            'price_subtotal': 0,
+            'tax_amount': 0,
             'total_cost': 0,
         }
         totals.setdefault('all_total', totals_dic.copy())
@@ -143,32 +145,43 @@ class RetailSalesWizard(models.TransientModel):
                 'sales_price': sale_price,
                 'total_sales':0,
                 'discount':0,
-                'net':0,
+                'price_subtotal_incl':0,
+                'price_subtotal':0,
                 'cost':product.standard_price,
                 'total_cost':0,
+                'tax_amount':0,
                 'cashier':ol.order_id.user_id.name,
             }
 
             data.setdefault(key,product_data.copy())
             totals.setdefault(branch.id,totals_dic.copy())
             total_sales = sale_price * ol.qty
-            total_discount = total_sales - ol.price_subtotal
+            total_discount = total_sales - ol.price_subtotal_incl
+            tax_amount = ol.price_subtotal_incl - ol.price_subtotal
+            price_subtotal_incl = ol.price_subtotal_incl 
+            price_subtotal = ol.price_subtotal
             data[key]['qty'] += ol.qty
             data[key]['total_sales'] += total_sales
             data[key]['discount'] += total_discount
-            data[key]['net'] += ol.price_subtotal
+            data[key]['price_subtotal_incl'] += price_subtotal_incl
+            data[key]['price_subtotal'] += price_subtotal
+            data[key]['tax_amount'] += tax_amount
             data[key]['total_cost'] += product.standard_price * ol.qty
 
             totals[branch.id]['qty'] += ol.qty
             totals[branch.id]['total_sales'] += total_sales
             totals[branch.id]['discount'] += total_discount
-            totals[branch.id]['net'] += ol.price_subtotal
+            totals[branch.id]['price_subtotal_incl'] += price_subtotal_incl
+            totals[branch.id]['price_subtotal'] += price_subtotal
+            totals[branch.id]['tax_amount'] += tax_amount
             totals[branch.id]['total_cost'] += product.standard_price * ol.qty
 
             totals['all_total']['qty'] += ol.qty
             totals['all_total']['total_sales'] += total_sales
             totals['all_total']['discount'] += total_discount
-            totals['all_total']['net'] += ol.price_subtotal
+            totals['all_total']['price_subtotal_incl'] += price_subtotal_incl
+            totals['all_total']['price_subtotal'] += price_subtotal
+            totals['all_total']['tax_amount'] += tax_amount
             totals['all_total']['total_cost'] += product.standard_price * ol.qty
 
         return data,totals,branch_ids
@@ -292,7 +305,11 @@ class RetailSalesWizard(models.TransientModel):
         col += 1
         worksheet.write(row, col, _('التخفيضات'), header_format)
         col += 1
-        worksheet.write(row, col, _('صافي المبيعات'), header_format)
+        worksheet.write(row, col, _('صافي المبيعات (غير شامل الضرائب)'), header_format)
+        col += 1
+        worksheet.write(row, col, _('اجمالي قيمة الضرائب'), header_format)
+        col += 1
+        worksheet.write(row, col, _('صافي المبيعات (شامل الضرائب)'), header_format)
         col += 1
         worksheet.write(row, col, _('قيمة التكلفة'), header_format)
         col += 1
@@ -307,8 +324,10 @@ class RetailSalesWizard(models.TransientModel):
             if branch_id != previous_branch:
                 worksheet.write(row, 11, totals[previous_branch]['qty'], TABLE_data_tolal_line)
                 worksheet.write(row, 13, totals[previous_branch]['total_sales'], TABLE_data_tolal_line)
-                worksheet.write(row, 15, totals[previous_branch]['net'], TABLE_data_tolal_line)
-                worksheet.write(row, 17, totals[previous_branch]['total_cost'], TABLE_data_tolal_line)
+                worksheet.write(row, 15, totals[previous_branch]['price_subtotal'], TABLE_data_tolal_line)
+                worksheet.write(row, 16, totals[previous_branch]['tax_amount'], TABLE_data_tolal_line)
+                worksheet.write(row, 17, totals[previous_branch]['price_subtotal_incl'], TABLE_data_tolal_line)
+                worksheet.write(row, 19, totals[previous_branch]['total_cost'], TABLE_data_tolal_line)
                 row += 1
                 previous_branch = branch_id
 
@@ -343,7 +362,11 @@ class RetailSalesWizard(models.TransientModel):
             col += 1
             worksheet.write(row, col, data[key]['discount'], STYLE_LINE_Data)
             col += 1
-            worksheet.write(row, col, data[key]['net'], STYLE_LINE_Data)
+            worksheet.write(row, col, data[key]['price_subtotal'], STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, data[key]['tax_amount'], STYLE_LINE_Data)
+            col += 1
+            worksheet.write(row, col, data[key]['price_subtotal_incl'], STYLE_LINE_Data)
             col += 1
             worksheet.write(row, col, data[key]['cost'], STYLE_LINE_Data)
             col += 1
@@ -355,15 +378,19 @@ class RetailSalesWizard(models.TransientModel):
                 row += 1
                 worksheet.write(row, 11, totals[branch_id]['qty'], TABLE_data_tolal_line)
                 worksheet.write(row, 13, totals[branch_id]['total_sales'], TABLE_data_tolal_line)
-                worksheet.write(row, 15, totals[branch_id]['net'], TABLE_data_tolal_line)
-                worksheet.write(row, 17, totals[branch_id]['total_cost'], TABLE_data_tolal_line)
+                worksheet.write(row, 15, totals[branch_id]['price_subtotal'], TABLE_data_tolal_line)
+                worksheet.write(row, 16, totals[branch_id]['tax_amount'], TABLE_data_tolal_line)
+                worksheet.write(row, 17, totals[branch_id]['price_subtotal_incl'], TABLE_data_tolal_line)
+                worksheet.write(row, 19, totals[branch_id]['total_cost'], TABLE_data_tolal_line)
 
         row += 1
         worksheet.write_merge(row,row,0, 8, _('الاجمالي'), TABLE_data_tolal_line)
         worksheet.write(row,11, totals['all_total']['qty'], TABLE_data_tolal_line)
         worksheet.write(row, 13, totals['all_total']['total_sales'], TABLE_data_tolal_line)
-        worksheet.write(row, 15, totals['all_total']['net'], TABLE_data_tolal_line)
-        worksheet.write(row, 17, totals['all_total']['total_cost'], TABLE_data_tolal_line)
+        worksheet.write(row, 15, totals['all_total']['price_subtotal'], TABLE_data_tolal_line)
+        worksheet.write(row, 16, totals['all_total']['tax_amount'], TABLE_data_tolal_line)
+        worksheet.write(row, 17, totals['all_total']['price_subtotal_incl'], TABLE_data_tolal_line)
+        worksheet.write(row, 19, totals['all_total']['total_cost'], TABLE_data_tolal_line)
 
         output = BytesIO()
         if data:
