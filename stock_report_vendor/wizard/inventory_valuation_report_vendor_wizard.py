@@ -328,8 +328,8 @@ class InventoryValuationReportVendor(models.TransientModel):
                 col += 1
                 worksheet.write(row,col,product_data['total_cost'],STYLE_LINE_Data)
                 col += 1
-                if round(product_data['total_cost'],5) != round(product_data['cost'],5):
-                    worksheet.write(row, col, 'wrong amount line', STYLE_LINE_Data)
+                # if round(product_data['total_cost'],5) != round(product_data['cost'],5):
+                #     worksheet.write(row, col, 'wrong amount line', STYLE_LINE_Data)
                 row += 1
 
         col = 10
