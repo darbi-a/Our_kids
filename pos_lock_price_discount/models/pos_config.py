@@ -21,6 +21,9 @@ class PosConfig(models.Model):
     lock_inactive_orders = fields.Boolean(default=False)
     inactive_orders_pwd = fields.Char(string=u"Password")
 
+    lock_change_sign = fields.Boolean(default=False)
+    change_sign_pwd = fields.Char(string=u"Password")
+
     @api.constrains('price_password')
     def check_price_password(self):
         if self.lock_price is True:

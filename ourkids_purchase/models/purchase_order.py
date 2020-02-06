@@ -19,7 +19,10 @@ class PurchaseOrder(models.Model):
             discount = 0.0
             for line in rec.order_line:
                 qty += line.product_qty
-                discount += line.discount * line.price_subtotal / 100.0
+                total_without_discount = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id,
+                                                  line.product_qty, product=line.product_id,
+                                                  partner=line.order_id.partner_id)['total_included']
+                discount += total_without_discount - line.price_total
 
             rec.total_discount = discount
             rec.total_quantity = qty

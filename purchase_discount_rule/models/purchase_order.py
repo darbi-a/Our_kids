@@ -111,10 +111,12 @@ class PurchaseOrderLine(models.Model):
         store=True,
     )
 
-    @api.constrains('discount')
-    def _check_discount_percentage(self):
+    @api.constrains('discount','fixed_discount','price_total')
+    def _check_discount(self):
         if self.discount and self.discount >= 100.0:
             raise ValidationError(_("Discount percentage must be lower than or equal 100%."))
+        if self.fixed_discount < 0:
+            raise ValidationError(_('Discount for product %s exceeds its total value!' % self.product_id.display_name))
 
     @api.depends('fixed_discount', 'price_unit', 'discount_qty', 'discount')
     def _compute_discounted_unit_price(self):

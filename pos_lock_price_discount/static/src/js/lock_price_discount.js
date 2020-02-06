@@ -202,6 +202,29 @@ gui.define_popup({name:'passwordinput', widget: PasswordInputPopupWidget});
                 return self.state.changeMode(newMode);
             }
         },
+
+        clickSwitchSign: function() {
+            var self = this;
+
+            if (self.pos.config.lock_change_sign == true) {
+                self.gui.show_popup('passwordinput', {
+                    'title': _t('Password ?'),
+                    confirm: function (pw) {
+                        if (pw !== self.pos.config.change_sign_pwd) {
+                            self.gui.show_popup('error', {
+                                'title': _t('Error'),
+                                'body': _t('Incorrect password. Please try again'),
+                            });
+                        } else {
+                            return self.state.switchSign();
+                        }
+                    },
+                });
+            } else {
+                return self.state.switchSign();
+            }
+
+        },
     });
 
 
