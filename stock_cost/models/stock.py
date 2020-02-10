@@ -24,7 +24,7 @@ class stock_move(models.Model):
 
     subtotal = fields.Float(string="Total Sales Price",  required=False, compute='_compute_suptotal' )
     # unit_cost = fields.Float(string="Unit Cost",  required=False,related='product_id.unit_cost' )
-    sale_price = fields.Float(string="Sale Price",  required=False,related='product_id.list_price' )
+    sale_price = fields.Float(string="Sale Price",  required=False,related='product_id.lst_price' )
 
     @api.one
     @api.depends('product_id','quantity_done')

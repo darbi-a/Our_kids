@@ -27,8 +27,16 @@ class RetailSalesWizard(models.TransientModel):
     _name = 'retail.sales.report.wizard'
     _description = 'retail.sales.report.wizard'
 
-    date_from = fields.Date(required=True)
-    date_to = fields.Date(required=True)
+    def default_date_from(self):
+        today = fieldsDatetime.now()
+        return today.replace(hour=1,minute=0,second=0)
+
+    def default_date_to(self):
+        today = fieldsDatetime.now()
+        return today.replace(hour=1,minute=0,second=0)
+
+    date_from = fields.Datetime(required=True,default=lambda self:self.default_date_from())
+    date_to = fields.Datetime(required=True,default=lambda self:self.default_date_to())
     type = fields.Selection(string="Report Type",default="xls", selection=[('xls', 'XLS'), ('pdf', 'PDF'), ], required=True, )
     product_ids = fields.Many2many(comodel_name="product.product",string="Products")
     product_tag_ids = fields.Many2many(comodel_name="product.tag", string="Product Tags", )
@@ -73,8 +81,8 @@ class RetailSalesWizard(models.TransientModel):
         if self.date_from and self.date_to and self.date_from > self.date_to:
             raise ValidationError(_('Date from must be before date to!'))
         end_date = self.date_to
-        end_time = datetime.max.time()
-        end_date = datetime.combine(end_date, end_time)
+        # end_time = datetime.max.time()
+        # end_date = datetime.combine(end_date, end_time)
 
         products = self.env['product.product'].search(['|',('active','=',True),('active','=',False)])
         if self.vendor_ids:
