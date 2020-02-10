@@ -27,8 +27,16 @@ class PosCashierSales(models.TransientModel):
     _name = 'pos.cashier.sales'
     _description = 'pos.cashier.sales'
 
-    date_from = fields.Date(required=True)
-    date_to = fields.Date(required=True)
+    def default_date_from(self):
+        today = fieldsDatetime.now()
+        return today.replace(hour=1,minute=0,second=0)
+
+    def default_date_to(self):
+        today = fieldsDatetime.now()
+        return today.replace(hour=1,minute=0,second=0)
+
+    date_from = fields.Datetime(required=True,default=lambda self:self.default_date_from())
+    date_to = fields.Datetime(required=True,default=lambda self:self.default_date_to())
     branches_ids = fields.Many2many(comodel_name="pos.branch")
     type = fields.Selection(string="Report Type", default="xls", selection=[('xls', 'XLS'), ('pdf', 'PDF'), ],
                             required=True, )
@@ -69,8 +77,8 @@ class PosCashierSales(models.TransientModel):
             raise ValidationError(_('Date from must be before date to!'))
         branch_ids = self.branches_ids.ids or self.env['pos.branch'].search([]).ids
         end_date = self.date_to
-        end_time = datetime.max.time()
-        end_date = datetime.combine(end_date, end_time)
+        # end_time = datetime.max.time()
+        # end_date = datetime.combine(end_date, end_time)
         _sql_query = """
          select c.pos_branch_id as branch_id,s.user_id,date_trunc('day',stop_at) as stop ,
          sum(CASE when stl.amount < 0 THEN -1*stl.amount END) as loss,
@@ -98,8 +106,8 @@ class PosCashierSales(models.TransientModel):
             raise ValidationError(_('Date from must be before date to!'))
         branch_ids = self.branches_ids.ids or self.env['pos.branch'].search([]).ids
         end_date = self.date_to
-        end_time = datetime.max.time()
-        end_date = datetime.combine(end_date, end_time)
+        # end_time = datetime.max.time()
+        # end_date = datetime.combine(end_date, end_time)
         _sql_query = """
         select c.pos_branch_id as branch_id,st.journal_id,s.user_id,sum(stl.amount) as amount,date_trunc('day',stop_at) as stop 
             from pos_session s
