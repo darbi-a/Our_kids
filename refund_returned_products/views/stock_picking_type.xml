@@ -10,7 +10,7 @@
              <field name="arch" type="xml">
                  
                  <xpath expr="//field[@name='show_reserved']" position="after">
-                      <field name="use_in_returning" attrs="{'invisible':[('code','!=','outgoing')]}"/>
+                      <field name="use_in_returning" attrs="{'invisible':[('code','not in',['outgoing','incoming'])]}"/>
                  </xpath>
                  
              </field>

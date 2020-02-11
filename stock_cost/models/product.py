@@ -18,7 +18,12 @@ class product(models.Model):
                 if rec.categ_id.property_cost_method != 'fifo':
                     rec.unit_cost = rec.standard_price
                 else:
-                    moves=self.env['stock.move'].search([('product_id','=',rec.id)],order='date desc',limit=1 )
+                    moves=self.env['stock.move'].search([
+                        ('product_id','=',rec.id),
+                        ('state','=','done'),
+                        ('quantity_done','>',0),
+                        ('picking_id.picking_type.code','=','incoming'),
+                    ],order='date desc',limit=1 )
                     cost=0.0
                     if moves:
                         cost = moves.value/moves.product_uom_qty
