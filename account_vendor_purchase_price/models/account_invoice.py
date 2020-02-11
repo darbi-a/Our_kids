@@ -23,7 +23,7 @@ class Invoice(models.Model):
                    [('invoice_id.partner_id', '=', line.partner_id.id),
                            ('product_id', '=', line.product_id.id),
                            ('invoice_id.state', 'in', ['open', 'paid'])],
-                   limit=1, order='create_date')
+                   limit=1, order='create_date desc')
                 if last_purchase_line:
                     line.last_purchase_price = last_purchase_line.price_unit
                     line.last_purchase_invoice = last_purchase_line.invoice_id.id

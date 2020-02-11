@@ -62,7 +62,7 @@ class ProductCardReportWizard(models.TransientModel):
                     total_amount += line.debit - line.credit
                     total_qty += line.quantity
 
-        return abs(total_amount)
+        return abs(total_amount),total_qty
 
     def get_data_from_line(self,line,qty,cost,amount,inc,out,qty_balance,cost_balance,amount_balance):
         picking = line.picking_id
@@ -118,7 +118,9 @@ class ProductCardReportWizard(models.TransientModel):
             if self.product_id.cost_method == 'fifo':
                 for ml in stock_move_lines:
                     # balance += ml.move_id.remaining_value
-                    balance += self.get_amount_from_entries(ml)
+                    amount, qty = self.get_amount_from_entries(ml)
+                    if ml.qty_done and qty:
+                        balance += ml.qty_done * amount / qty
                 return balance
             else:
                 for ml in stock_move_lines:
@@ -132,7 +134,9 @@ class ProductCardReportWizard(models.TransientModel):
             amount = line.qty_done * line.product_id.get_history_price(self.env.user.company_id.id, date=line.date)
         else:
             # amount = line.move_id.remaining_value
-            amount = self.get_amount_from_entries(line)
+            amount, qty = self.get_amount_from_entries(line)
+            if line.qty_done and qty:
+                amount = line.qty_done * amount / qty
 
         return amount
 
