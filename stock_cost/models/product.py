@@ -22,7 +22,7 @@ class product(models.Model):
                         ('product_id','=',rec.id),
                         ('state','=','done'),
                         ('quantity_done','>',0),
-                        ('picking_id.picking_type.code','=','incoming'),
+                        ('picking_id.picking_type_id.code','=','incoming'),
                     ],order='date desc',limit=1 )
                     cost=0.0
                     if moves:
