@@ -32,6 +32,7 @@
                  <field name="vendor_num" />
                  <field name="vendor_color" />
                  <field name="categ_num" />
+                 <field name="categ_name" />
             </xpath>
 
         </field>
@@ -67,37 +68,37 @@
             </field>
         </record>
     <!-- Inherit Form View to Modify it -->
-    <record id="custom_variant_product_template_only_form_view" model="ir.ui.view">
-        <field name="name">product.template</field>
-        <field name="model">product.template</field>
-        <field name="inherit_id" ref="product.product_template_only_form_view"/>
-        <field name="arch" type="xml">
+<!--    <record id="custom_variant_product_template_only_form_view" model="ir.ui.view">-->
+<!--        <field name="name">product.template</field>-->
+<!--        <field name="model">product.template</field>-->
+<!--        <field name="inherit_id" ref="product.product_template_only_form_view"/>-->
+<!--        <field name="arch" type="xml">-->
 
-<!--            <xpath expr="//field[@name='name']" position='after'>-->
-<!--&lt;!&ndash;                    <attribute name="invisible">1</attribute>&ndash;&gt;-->
-<!--                <field name="attribute_line_ids" widget="one2many_list" context="{'show_attribute': False}"/>-->
+<!--&lt;!&ndash;            <xpath expr="//field[@name='name']" position='after'>&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                    <attribute name="invisible">1</attribute>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;                <field name="attribute_line_ids" widget="one2many_list" context="{'show_attribute': False}"/>&ndash;&gt;-->
 
+<!--&lt;!&ndash;            </xpath>&ndash;&gt;-->
+<!--            <xpath expr="//page[@name='general_information']" position="after">-->
+<!--                <page name="custom_variants" string="Custom Variants" invisible="0">-->
+<!--                    <field name="custom_attribute_lines" widget="one2many_list" context="{'show_attribute': False}">-->
+<!--                        <tree string="Variants" editable="bottom">-->
+<!--                            <field name="attribute_id"/>-->
+<!--                            <field name="value_ids" widget="many2many_tags" options="{'no_create_edit': True}" domain="[('attribute_id', '=', attribute_id)]" context="{'default_attribute_id': attribute_id}"/>-->
+<!--                        </tree>-->
+<!--                    </field>-->
+
+<!--                        <p class="oe_grey">-->
+<!--                        <strong>Warning</strong>: adding or deleting attributes-->
+<!--                        will delete and recreate existing variants and lead-->
+<!--                        to the loss of their possible customizations.-->
+<!--                    </p>-->
+<!--                </page>-->
 <!--            </xpath>-->
-            <xpath expr="//page[@name='general_information']" position="after">
-                <page name="custom_variants" string="Custom Variants" invisible="1">
-                    <field name="custom_attribute_lines" widget="one2many_list" context="{'show_attribute': False}">
-                        <tree string="Variants" editable="bottom">
-                            <field name="attribute_id"/>
-                            <field name="value_ids" widget="many2many_tags" options="{'no_create_edit': True}" domain="[('attribute_id', '=', attribute_id)]" context="{'default_attribute_id': attribute_id}"/>
-                        </tree>
-                    </field>
-
-                        <p class="oe_grey">
-                        <strong>Warning</strong>: adding or deleting attributes
-                        will delete and recreate existing variants and lead
-                        to the loss of their possible customizations.
-                    </p>
-                </page>
-            </xpath>
 
 
-        </field>
-    </record>
+<!--        </field>-->
+<!--    </record>-->
 
 
     
