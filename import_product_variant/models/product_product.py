@@ -11,6 +11,7 @@ class ProductProduct(models.Model):
     _inherit = 'product.product'
 
     vendor_num = fields.Char(string="Vendor Number", required=False, )
+    categ_name = fields.Char(string="Category Name", required=False, )
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
     sale_price =fields.Float("Sales Price2")
@@ -141,59 +142,28 @@ class ProductTemplate(models.Model):
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
     sale_price =fields.Float("Sales Price2")
-    custom_attribute_lines = fields.Many2many(comodel_name='product.template.attribute.line', string='Product Attributes',compute='_get_attributes')
+    # custom_attribute_lines = fields.Many2many(comodel_name='product.template.attribute.line', string='Product Attributes')
+    # attribute_line_ids = fields.One2many()
 
     @api.multi
     def create_variant_ids(self):
 
         return True
 
-    @api.one
-    @api.depends('product_variant_count')
-    def _get_attributes(self):
-        att={}
-        if self.product_variant_count>1:
-            variants = self.with_prefetch().product_variant_ids
-            for vart in variants:
-                for line in vart.attribute_value_ids:
-                    if line.attribute_id.id not in att:
-                        att[line.attribute_id.id] = []
-                        att[line.attribute_id.id].append(line.id)
-                    else:
-                        if line.id not in att[line.attribute_id.id]:
-                            att[line.attribute_id.id].append(line.id)
 
-            lst_vart=[]
-            for v in att:
-                val = {'attribute_id':v,'value_ids':[]}
-                for vt in att[v]:
-                    val['value_ids'].append((4,vt))
-                vart = self.env['product.template.attribute.line'].sudo().create(val)
-                lst_vart.append(vart.id)
-
-            self.custom_attribute_lines = [(6, 0, lst_vart)]
-
-            # self.write({'attribute_line_ids': self.custom_attribute_lines})
-            # self.attribute_line_ids = self.custom_attribute_lines
-
-
-        else:
-            self.custom_attribute_lines=False
-        self.assign_attribute_lines()
-
-    def assign_attribute_lines(self):
-        for rec  in self:
-            rec.write({'attribute_line_ids' : rec.custom_attribute_lines})
-
-            if rec.custom_attribute_lines and not rec.attribute_line_ids:
-                ids =rec.custom_attribute_lines.ids
-                rec.write({'attribute_line_ids': [(6,0,ids)]})
+    # @api.depends('product_variant_count')
+    # @api.multi
 
 
 
+    # def assign_attribute_lines(self):
+    #         self.write({'attribute_line_ids' : self.custom_attribute_lines})
+    #
+    #         if self.custom_attribute_lines and not self.attribute_line_ids:
+    #             ids =self.custom_attribute_lines.ids
+    #             self.write({'attribute_line_ids': [(6,0,ids)]})
 
-
-class product_att(models.Model):
+class productAtt(models.Model):
     _inherit = 'product.template.attribute.line'
 
     product_tmpl_id = fields.Many2one('product.template', string='Product Template', ondelete='cascade', required=False, index=True)

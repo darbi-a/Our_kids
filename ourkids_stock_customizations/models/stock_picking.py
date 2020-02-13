@@ -21,6 +21,6 @@ class StockPicking(models.Model):
     def check_internal_transfer(self):
         if self.picking_type_id.code == 'internal':
             for move in self.move_ids_without_package:
-                if move.product_uom_qty != move.quantity_done :
+                if move.product_uom_qty < move.quantity_done :
                     raise ValidationError(_('Initial demand can not be less than quantity done'))
 
