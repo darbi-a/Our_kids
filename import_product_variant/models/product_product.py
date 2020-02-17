@@ -31,20 +31,27 @@ class ProductProduct(models.Model):
             else:
                 self.un_edit = False
 
-    @api.depends('list_price', 'price_extra', 'sale_price')
-    def _compute_product_lst_price(self):
-        to_uom = None
-        if 'uom' in self._context:
-            to_uom = self.env['uom.uom'].browse([self._context['uom']])
+    # @api.depends('list_price', 'price_extra', 'sale_price')
+    # def _compute_product_lst_price(self):
+    #     to_uom = None
+    #     if 'uom' in self._context:
+    #         to_uom = self.env['uom.uom'].browse([self._context['uom']])
+    #     for product in self:
+    #         if product.sale_price:
+    #             product.list_price = product.sale_price
+    #             product.lst_price = product.sale_price
+    #         if to_uom:
+    #             list_price = product.uom_id._compute_price(product.list_price, to_uom)
+    #         else:
+    #             list_price = product.list_price
+    #         product.lst_price = list_price + product.price_extra
+
+    # @api.depends('product_template_attribute_value_ids.price_extra')
+
+    @api.depends('sale_price')
+    def _compute_product_price_extra(self):
         for product in self:
-            if product.sale_price:
-                product.list_price = product.sale_price
-                product.lst_price = product.sale_price
-            if to_uom:
-                list_price = product.uom_id._compute_price(product.list_price, to_uom)
-            else:
-                list_price = product.list_price
-            product.lst_price = list_price + product.price_extra
+            product.price_extra = product.sale_price
 
     def _assin_seller(self):
         seller_id = []
@@ -144,16 +151,27 @@ class ProductTemplate(models.Model):
     sale_price =fields.Float("Sales Price2")
     # custom_attribute_lines = fields.Many2many(comodel_name='product.template.attribute.line', string='Product Attributes')
     # attribute_line_ids = fields.One2many()
+    variant_price = fields.Float(string="Sale Price", compute='compute_variant_price' )
 
     @api.multi
     def create_variant_ids(self):
 
         return True
 
+    @api.depends('product_variant_ids','product_variant_ids.sale_price')
+    def compute_variant_price(self):
+        for rec in self:
+            if len(rec.product_variant_ids) > 1:
+                rec.variant_price = 0
+            elif len(rec.product_variant_ids) == 1:
+                rec.variant_price = rec.product_variant_ids[0].sale_price
 
-    # @api.depends('product_variant_count')
-    # @api.multi
-
+    @api.model
+    def clear_list_price(self):
+        self._cr.execute("update product_template set list_price = 0")
+        # products = self.search([])
+        # for p in products:
+        #     p.write({'list_price': 0.0})
 
 
     # def assign_attribute_lines(self):
