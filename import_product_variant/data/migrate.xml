@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <function model="product.template" name="clear_list_price"/>
+
+    </data>
+</odoo>

@@ -53,6 +53,10 @@ class AccountInvoice(models.Model):
                      ('product_id', '=', move.product_id.id),
                      ('invoice_id.state', 'in', ['open', 'paid'])],
                     limit=1, order='create_date')
+                fpos = self.fiscal_position_id
+                company = self.company_id
+                type = self.type
+                account = self.get_invoice_line_account(type, move.product_id, fpos, company)
 
                 new_invoice_lines.append((0,0,{
                     'product_id': move.product_id.id,
@@ -60,7 +64,8 @@ class AccountInvoice(models.Model):
                     'quantity': move.quantity_done or 1,
                     'price_unit': last_purchase_line.price_unit,
                     'name': move.product_id.name,
-                    'account_id': last_purchase_line.account_id.id,
+                    # 'account_id': last_purchase_line.account_id.id,
+                    'account_id': account.id,
                     'invoice_line_tax_ids': [(6, 0, tuple(last_purchase_line.invoice_line_tax_ids.ids))],
                     'uom_id': last_purchase_line.uom_id.id,
                     'discount': last_purchase_line.discount,

@@ -17,7 +17,7 @@ class StockPicking(models.Model):
                     if product_vendor_num and vendor_num != product_vendor_num:
                         raise ValidationError(_('The product %s is not belong to this partner' %self.product_id.display_name))
 
-    @api.constrains('picking_type_id','move_ids_without_package')
+    @api.constrains('picking_type_id','move_ids_without_package','state')
     def check_internal_transfer(self):
         if self.picking_type_id.code == 'internal':
             for move in self.move_ids_without_package:
