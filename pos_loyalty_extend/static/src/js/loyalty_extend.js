@@ -87,10 +87,7 @@ models.Order = models.Order.extend({
                 total_sold   += line.get_price_with_tax();
             }
         }
-
-        total_points += round_pr( total_sold * this.pos.loyalty.pp_currency, rounding );
-        total_points += round_pr( product_sold * this.pos.loyalty.pp_product, rounding );
-        total_points += round_pr( this.pos.loyalty.pp_order, rounding );
+        var payment_method_factor = 1;
         if(this.finalized){
             var visa = false;
             var cash = false;
@@ -105,17 +102,21 @@ models.Order = models.Order.extend({
             }
 
             if (visa && cash){
-                total_points += round_pr( this.pos.loyalty.pp_payment_cash_visa, rounding );
+                payment_method_factor = round_pr( this.pos.loyalty.pp_payment_cash_visa, rounding );
             }
 
             else if (visa){
-                total_points += round_pr( this.pos.loyalty.pp_payment_visa, rounding );
+                payment_method_factor = round_pr( this.pos.loyalty.pp_payment_visa, rounding );
             }
 
             else if (cash){
-                total_points += round_pr( this.pos.loyalty.pp_payment_cash, rounding );
+                payment_method_factor = round_pr( this.pos.loyalty.pp_payment_cash, rounding );
             }
         }
+
+        total_points += round_pr( total_sold* payment_method_factor * this.pos.loyalty.pp_currency, rounding );
+        total_points += round_pr( product_sold * this.pos.loyalty.pp_product, rounding );
+        total_points += round_pr( this.pos.loyalty.pp_order, rounding );
 
         return total_points;
     },
