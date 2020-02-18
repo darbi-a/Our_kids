@@ -226,8 +226,7 @@ class product_pricelist(models.Model):
             # Final price conversion into pricelist currency
             if suitable_rule and suitable_rule.compute_price != 'fixed' and suitable_rule.base != 'pricelist':
                 if suitable_rule.base == 'standard_price':
-                    # cur = product.cost_currency_id
-                    cur = product.currency_id
+                    cur = product.cost_currency_id
                 else:
                     cur = product.currency_id
                 price = cur._convert(price, self.currency_id, self.env.user.company_id, date, round=False)
