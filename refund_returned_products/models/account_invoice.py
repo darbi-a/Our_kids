@@ -56,7 +56,7 @@ class AccountInvoice(models.Model):
                 fpos = self.fiscal_position_id
                 company = self.company_id
                 type = self.type
-                account = self.get_invoice_line_account(type, move.product_id, fpos, company)
+                account = self.env['account.invoice.line'].get_invoice_line_account(type, move.product_id, fpos, company)
 
                 new_invoice_lines.append((0,0,{
                     'product_id': move.product_id.id,
