@@ -26,6 +26,13 @@
                 <xpath expr="//div[@name='standard_price_uom']" position="attributes">
                     <attribute name="groups">!ourkids_access_rights.group_inventory_valuation,!ourkids_access_rights.group_all_warehouse_manager</attribute>
                 </xpath>
+                <xpath expr="//notebook" position="attributes">
+                    <attribute name="groups">!ourkids_access_rights.group_inventory_valuation,!ourkids_access_rights.group_all_warehouse_manager</attribute>
+                </xpath>
+
+                <xpath expr="//div[@name='options']" position="attributes">
+                    <attribute name="groups">!ourkids_access_rights.group_inventory_valuation,!ourkids_access_rights.group_all_warehouse_manager</attribute>
+                </xpath>
 
             </field>
         </record>

@@ -56,12 +56,15 @@ class InventoryValuationReportVendor(models.TransientModel):
         return final_stock_ids
 
     @api.model
-    def get_valuation(self, product, warehouse,start_date):
+    def get_valuation(self, product, warehouse,start_date,qty):
         value = 0.0
-        locations = self.get_location(warehouse)
-        lst_moves = self.env['stock.move'].search([('date', '<=', start_date),('product_id', '=', product.id),('state', '=', 'done'),'|',('location_id', 'in', locations),('location_dest_id', 'in', locations)])
-        for mov in lst_moves:
-            value += mov.value
+        # locations = self.get_location(warehouse)
+        # lst_moves = self.env['stock.move'].search([('date', '<=', start_date),('product_id', '=', product.id),('state', '=', 'done'),'|',('location_id', 'in', locations),('location_dest_id', 'in', locations)])
+        # for mov in lst_moves:
+        #     value += mov.value
+        company_id = self.env.user.company_id.id
+        cost = product.get_history_price(company_id,start_date)
+        value = qty * cost
         return value
 
     def get_report_data(self):
@@ -143,7 +146,7 @@ class InventoryValuationReportVendor(models.TransientModel):
                 for warehouse in warehouses:
                     totals.setdefault(warehouse.name,0)
                     qty = product.with_context(warehouse=warehouse.id,to_date=start_date).qty_available
-                    evaluation = self.get_valuation(product,warehouse,start_date)
+                    evaluation = self.get_valuation(product,warehouse,start_date,qty)
                     data[partner.name][str(product.id)][warehouse.name] = {
                         'qty':qty,
                         'evaluation': evaluation,

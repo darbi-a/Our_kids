@@ -16,6 +16,23 @@
                     <attribute name="decoration-warning">state in ['confirmed','partially_available'] and product_uom_qty > reserved_availability</attribute>
                 </xpath>
 
+                <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='product_id']" position="after">
+                    <field name="product_barcode" />
+                </xpath>
+
+            </field>
+        </record>
+        
+        <record id="view_stock_picking_tree_inherit" model="ir.ui.view">
+            <field name="name">stock.picking.tree.inherit</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.vpicktree"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='origin']" position="after">
+                     <field name="note" />
+                </xpath>
+
             </field>
         </record>
     
