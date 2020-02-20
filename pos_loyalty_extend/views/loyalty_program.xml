@@ -9,7 +9,7 @@
             <xpath expr="//field[@name='pp_order']" position="after">
                 <field name="pp_payment_visa" />
                 <field name="pp_payment_cash" />
-                <field name="pp_payment_cash_visa" />
+<!--                <field name="pp_payment_cash_visa" />-->
             </xpath>
         </field>
     </record>

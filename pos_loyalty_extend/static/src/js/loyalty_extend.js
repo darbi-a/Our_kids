@@ -16,7 +16,7 @@ var _t = core._t;
 
         initialize: function (session, attributes) {
             var product_model = _.find(this.models, function(model){ return model.model === 'loyalty.program'; });
-            product_model.fields.push('pp_payment_visa','pp_payment_cash','pp_payment_cash_visa');
+            product_model.fields.push('pp_payment_visa','pp_payment_cash');
 
             return _super_posmodel.initialize.call(this, session, attributes);
         },
@@ -87,34 +87,22 @@ models.Order = models.Order.extend({
                 total_sold   += line.get_price_with_tax();
             }
         }
-        var payment_method_factor = 1;
+//        var payment_method_factor = 1;
         if(this.finalized){
-            var visa = false;
-            var cash = false;
             var payments = this.paymentlines.models;
+            var total_visa_payments = 0;
             for(var i = 0; i < payments.length ; i++){
                 if(payments[i].cashregister.journal.type === 'bank'){
-                    visa = true;
-                }
-                else if(payments[i].cashregister.journal.type === 'cash'){
-                    cash = true;
+                    total_visa_payments = total_visa_payments + payments[i].cashregister.amount;
                 }
             }
-
-            if (visa && cash){
-                payment_method_factor = round_pr( this.pos.loyalty.pp_payment_cash_visa, rounding );
-            }
-
-            else if (visa){
-                payment_method_factor = round_pr( this.pos.loyalty.pp_payment_visa, rounding );
-            }
-
-            else if (cash){
-                payment_method_factor = round_pr( this.pos.loyalty.pp_payment_cash, rounding );
-            }
+            var visa_factor = this.pos.loyalty.pp_payment_visa;
+            var cash_factor = this.pos.loyalty.pp_payment_cash;
+            var total_payment_points = this.pos.loyalty.pp_currency * (total_visa_payments * visa_factor + (total_sold - total_visa_payments) * cash_factor);
+            total_points += round_pr( total_payment_points, rounding );
         }
 
-        total_points += round_pr( total_sold* payment_method_factor * this.pos.loyalty.pp_currency, rounding );
+//        total_points += round_pr( total_sold*payment_method_factor * this.pos.loyalty.pp_currency, rounding );
         total_points += round_pr( product_sold * this.pos.loyalty.pp_product, rounding );
         total_points += round_pr( this.pos.loyalty.pp_order, rounding );
 

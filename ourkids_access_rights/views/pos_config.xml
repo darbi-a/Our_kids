@@ -16,8 +16,22 @@
                     <attribute name="groups">point_of_sale.group_pos_user</attribute>
                 </xpath>
 
+                <xpath expr="//div[@t-if='record.last_session_closing_date.value'][2]" position="attributes">
+                    <attribute name="groups">!ourkids_access_rights.group_point_of_sale_cashier</attribute>
+                </xpath>
+
             </field>
         </record>
+
+<!--        <record id="view_pos_config_kanaban_dashboard_inherit" model="ir.ui.view">-->
+<!--            <field name="name">pos.config.kanban.inherit</field>-->
+<!--            <field name="model">pos.config</field>-->
+<!--            <field name="inherit_id" ref="pos_extend.view_pos_config_kanban_inherit"/>-->
+<!--            <field name="arch" type="xml">-->
+
+
+<!--            </field>-->
+<!--        </record>-->
 
     </data>
 </odoo>
