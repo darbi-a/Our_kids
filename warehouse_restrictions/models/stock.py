@@ -79,3 +79,14 @@ class StockPickingType(models.Model):
             action['display_name'] = self.display_name
         return action
 
+
+class StockLocation(models.Model):
+    _inherit = 'stock.location'
+
+    user_ids = fields.Many2many(
+        'res.users',
+        'location_security_stock_location_users',
+        'location_id',
+        'user_id',
+        'Allowed Users')
+
