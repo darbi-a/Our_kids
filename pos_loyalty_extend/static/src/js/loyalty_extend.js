@@ -93,7 +93,7 @@ models.Order = models.Order.extend({
             var total_visa_payments = 0;
             for(var i = 0; i < payments.length ; i++){
                 if(payments[i].cashregister.journal.type === 'bank'){
-                    total_visa_payments = total_visa_payments + payments[i].cashregister.amount;
+                    total_visa_payments = total_visa_payments + payments[i].amount;
                 }
             }
             var visa_factor = this.pos.loyalty.pp_payment_visa;
