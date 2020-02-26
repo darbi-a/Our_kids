@@ -1254,12 +1254,25 @@ myDate.setSeconds(0);
             this._super(parent, args);
             this.options = {};
         },
+
+        barcode_return_product_action:function(code){
+            console.log('barcode read');
+            console.log(this);
+            console.log(code);
+            var product = this.db.get_product_by_barcode(parsed_code.base_code);
+            var product_id = product.id;
+        },
         //
         show: function(options) {
         	options = options || {};
             var self = this;
             this._super(options);
             this.orderlines = options.orderlines || [];
+            if (this.pos.barcode_reader) {
+                this.pos.barcode_reader.set_action_callback({
+                    'product': _.bind(self.barcode_return_product_action, self),
+                });
+            }
 
         },
         //

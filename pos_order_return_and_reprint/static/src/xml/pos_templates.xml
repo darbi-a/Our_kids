@@ -400,7 +400,7 @@
 				                        	<td><t t-esc='item.product_id[1]' /></td>
                                             <!--<td><t t-esc=" widget.options.orderlines" /></td>-->
 		                                     <td class="entered_item_qty">
-		                                     	<input id="entered_item_qty" t-att-line-id='item.id' t-att-qty-id='item.qty' t-att-nqty='item.return_qty' type="text" class="input-field" name="code"></input>
+		                                     	<input id="entered_item_qty" t-att-line-id='item.id' t-att-product-id='item.product_id[0]' t-att-qty-id='item.qty' t-att-nqty='item.return_qty' type="text" class="input-field" name="code"></input>
 		                                     </td>
 
 
