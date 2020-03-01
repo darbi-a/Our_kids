@@ -22,6 +22,7 @@
         'wizard/vendor_balance_report_wizard.xml',
         'report/report_vendor_balance.xml',
         'views/account_move.xml',
+        'views/account_journal.xml',
     ],
 
 
