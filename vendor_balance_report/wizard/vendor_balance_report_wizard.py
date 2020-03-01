@@ -34,6 +34,22 @@ class VendorBalanceWizard(models.TransientModel):
     season_ids = fields.Many2many(comodel_name="product.season" )
     vendor_type = fields.Selection(selection=[('consignment', 'Consignment'), ('cash', 'Cash'), ])
 
+    def get_partner_inital_balance(self,partner):
+        if self.season_ids:
+            journal_items = self.env['account.move.line'].search([
+                ('season_id', 'in', self.season_ids.ids),
+                ('partner_id', '=', partner.id),
+                ('move_id.journal_id.use_in_initial_balance', '=', True),
+            ])
+            balance = sum(l.debit - l.credit for l in journal_items)
+            return balance
+        else:
+            journal_items = self.env['account.move.line'].search([
+                ('partner_id', '=', partner.id),
+                ('move_id.journal_id.use_in_initial_balance', '=', True),
+            ])
+            balance = sum(l.debit - l.credit for l in journal_items)
+            return balance
 
     @api.model
     def get_cost_from_entries(self,account_moves):
@@ -78,6 +94,7 @@ class VendorBalanceWizard(models.TransientModel):
         data = []
         total_deserved = 0
         totals = {
+            'initial_balance':0,
             'purchases':0,
             'refunds':0,
             'pay_amount':0,
@@ -109,6 +126,7 @@ class VendorBalanceWizard(models.TransientModel):
             purchases = 0
             refunds = 0
             pay_amount = 0
+            initial_balance = self.get_partner_inital_balance(partner)
             if not self.season_ids:
                 entries_by_partner = self.env['account.move.line'].read_group(domain, fields=flds, groupby=['partner_id'])
 
@@ -152,10 +170,12 @@ class VendorBalanceWizard(models.TransientModel):
 
             due = balance - stock_valuation_partner if balance >= 0 else (balance + stock_valuation_partner)
             tags = partner.category_id.mapped('name')
+            totals['initial_balance'] += initial_balance
             totals['balance'] += balance
             totals['stock_evaluation'] += stock_valuation_partner
             totals['due'] += due
             data.append({
+                'initial_balance': initial_balance,
                 'purchases': purchases,
                 'refunds': refunds,
                 'pay_amount': pay_amount,
@@ -265,6 +285,8 @@ class VendorBalanceWizard(models.TransientModel):
         col += 1
         worksheet.write(row,col,_('رقم المورد'),header_format)
         col += 1
+        worksheet.write(row,col,_('رصيد اول المدة'),header_format)
+        col += 1
         if self.season_ids:
             worksheet.write(row, col, _('مشتريات السيزون'), header_format)
             col += 1
@@ -291,6 +313,8 @@ class VendorBalanceWizard(models.TransientModel):
             col += 1
             worksheet.write(row, col, record['vendor_num'], STYLE_LINE_Data)
             col += 1
+            worksheet.write(row, col, record['initial_balance'], STYLE_LINE_Data)
+            col += 1
             if self.season_ids:
                 worksheet.write(row, col, record['purchases'], STYLE_LINE_Data)
                 col += 1
@@ -312,6 +336,8 @@ class VendorBalanceWizard(models.TransientModel):
         col = 0
         worksheet.write_merge(row, row, col, col + 2, _('الاجمالي'), header_format)
         col += 3
+        worksheet.write(row, col, totals['initial_balance'], header_format)
+        col += 1
         if self.season_ids:
             worksheet.write(row, col, totals['purchases'], header_format)
             col += 1

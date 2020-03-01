@@ -6,4 +6,4 @@ from odoo import fields, models, api, _
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
-    season_id = fields.Many2one(comodel_name="product.season" )
+    season_id = fields.Many2one(comodel_name="product.season",index=True )

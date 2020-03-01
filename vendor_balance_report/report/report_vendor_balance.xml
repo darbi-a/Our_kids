@@ -36,6 +36,7 @@
                                 <th>تسلسل</th>
                                 <th>اسم المورد</th>
                                 <th>رقم المورد</th>
+                                <th>رصيد اول المدة</th>
                                 <t t-if="season">
                                     <th>مشتريات السيزون</th>
                                     <th>مرتجعات السيزون</th>
@@ -62,6 +63,9 @@
                                     </td>
                                     <td>
                                         <t t-esc="d['vendor_num']"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="d['initial_balance']"/>
                                     </td>
                                     <t t-if="season">
                                         <td>
@@ -90,6 +94,9 @@
                             </t>
                             <tr style="background-color:#d4d4d4">
                                 <td  colspan="3">الاجمالي</td>
+                                <td>
+                                    <t t-esc="round(totals['initial_balance'],2)"/>
+                                </td>
                                 <t t-if="season">
                                     <td>
                                         <t t-esc="round(totals['purchases'],2)"/>

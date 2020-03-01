@@ -16,6 +16,19 @@
                     <attribute name="groups">stock.group_stock_user,ourkids_access_rights.group_inventory_valuation</attribute>
                 </xpath>
 
+                <field name="location_id" position="attributes">
+                    <attribute name="groups">stock.group_stock_multi_locations,!ourkids_access_rights.group_inventory_valuation,!ourkids_access_rights.group_all_warehouse_manager</attribute>
+                </field>
+
+                <field name="location_dest_id" position="attributes">
+                    <attribute name="groups">stock.group_stock_multi_locations,!ourkids_access_rights.group_inventory_valuation,!ourkids_access_rights.group_all_warehouse_manager</attribute>
+                </field>
+
+                <field name="location_id" position="after">
+                    <field name="location_rel_id" groups="ourkids_access_rights.group_inventory_valuation,ourkids_access_rights.group_all_warehouse_manager" />
+                    <field name="location_rel_dest_id" groups="ourkids_access_rights.group_inventory_valuation,ourkids_access_rights.group_all_warehouse_manager" />
+                </field>
+
             </field>
         </record>
         
