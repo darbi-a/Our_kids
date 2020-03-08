@@ -132,7 +132,7 @@ odoo.define('pos_speed_up.change_detector', function (require) {
                     return a.concat(b)
                 }, []);
 
-                self.pos.on_stock_notification(flat_stock_quant);
+//                self.pos.on_stock_notification(flat_stock_quant);
 
             });
 //            this.call('bus_service', 'stopPolling', this, this.test_notify2);
