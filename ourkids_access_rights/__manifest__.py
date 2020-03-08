@@ -25,6 +25,7 @@
         'views/templates.xml',
         'views/product_product.xml',
         'views/account_move.xml',
+        'views/stock_location.xml',
 
     ],
 

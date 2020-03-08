@@ -49,7 +49,7 @@ class VendorBalanceWizard(models.TransientModel):
                 ('move_id.journal_id.use_in_initial_balance', '=', True),
             ])
             balance = sum(l.debit - l.credit for l in journal_items)
-            return balance
+            return -1*balance
 
     @api.model
     def get_cost_from_entries(self,account_moves):
@@ -163,7 +163,7 @@ class VendorBalanceWizard(models.TransientModel):
 
                 in_refund_lines = in_refunds.mapped('invoice_line_ids').filtered(lambda l:l.product_id.season_id in self.season_ids)
                 refunds = sum([ l.price_total for l in in_refund_lines ])
-                balance = purchases - (pay_amount + refunds)
+                balance = initial_balance + purchases - (pay_amount + refunds)
                 totals['purchases'] += purchases
                 totals['refunds'] += refunds
                 totals['pay_amount'] += pay_amount

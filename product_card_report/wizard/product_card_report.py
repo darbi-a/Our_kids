@@ -64,6 +64,29 @@ class ProductCardReportWizard(models.TransientModel):
 
         return abs(total_amount),total_qty
 
+    def add_cost_adjust(self,price_hist,qty_balance):
+        return {
+            'date': str(self.convert_date_to_local(fields.Datetime.from_string(price_hist.datetime), self.env.user.tz)),
+            'ref': 'Update Price',
+            'order_ref': '',
+            'picking_origin': '',
+            'url_ref': '',
+            'url_order_ref': '',
+            'partner': '',
+            'from': '',
+            'to': '',
+            'qty_in': '',
+            'cost_in': '',
+            'amount_in': '',
+            'qty_out': '',
+            'cost_out': '',
+            'amount_out': '',
+            'qty_balance': qty_balance,
+            'cost_balance': price_hist.cost ,
+            'amount_balance': price_hist.cost * qty_balance,
+        }
+
+
     def get_data_from_line(self,line,qty,cost,amount,inc,out,qty_balance,cost_balance,amount_balance):
         picking = line.picking_id
         order_ref = ''
@@ -147,6 +170,7 @@ class ProductCardReportWizard(models.TransientModel):
         date_from_utc = fields.Datetime.from_string(self.date_from) if self.date_from else None
         domain = [('product_id','=',product.id),('state','=','done')]
         company_id = self.env.user.company_id.id
+        qty_balance = 0
         if self.location_id:
             internal_locations = self.location_id
         else:
@@ -186,8 +210,23 @@ class ProductCardReportWizard(models.TransientModel):
         #     domain.append(('move_id.warehouse_id', '=', self.warehouse.id))
 
         stock_move_lines = self.env['stock.move.line'].search(domain,order='date asc,id asc')
+        product_history = self.env['product.price.history'].search([('product_id', '=', self.product_id.id)], order='datetime')
+        current_price_hist = product_history[0]
+        hist_index = 0
+        prev_line = None
+        hist_count = len(product_history)
         for line in stock_move_lines:
+            while line.date > current_price_hist.datetime and hist_index < hist_count:
+                current_price_hist = product_history[hist_index]
+                hist_index += 1
 
+            if prev_line and prev_line.date < current_price_hist.datetime < line.date :
+                cost_adjust = self.add_cost_adjust(current_price_hist,qty_balance)
+                data.append(cost_adjust)
+                # hist_index += 1
+                # current_price_hist = product_history[hist_index]
+
+            prev_line = line
             inc = True if line.location_dest_id in internal_locations else False
             out = True if line.location_id in internal_locations else False
             qty = line.qty_done
