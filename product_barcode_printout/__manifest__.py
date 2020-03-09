@@ -12,12 +12,14 @@
     'version': '1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['product'],
+    'depends': ['product','purchase'],
 
     # always loaded
     'data': [
+        'wizard/po_barcode_wizard.xml',
         'views/templates.xml',
         'views/templates_first_label.xml',
+        'views/purchase_order.xml',
 
     ],
 

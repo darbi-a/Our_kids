@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_po_barcode_wizard_form" model="ir.ui.view">
+            <field name="name">po.barcode.wizard.form</field>
+            <field name="model">po.barcode.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <field name="line_ids" readonly="True">
+                            <tree>
+                                <field name="file_name" invisible="True"/>
+                                <field name="binary_field" filename="file_name" widget="binary" readonly="True"/>
+                            </tree>
+                        </field>
+                    </sheet>
+                    <footer>
+                        <!--                        <button name="action_action"   string="Action" type="object" class="oe_highlight"/>-->
+                        <button string="Cancel" special="cancel" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

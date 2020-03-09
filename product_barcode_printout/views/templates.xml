@@ -101,6 +101,7 @@
             string="Purchase Order Labels(3.8x1.25)"
             name="product_barcode_printout.temp_purchase_order_product_label_report_2"
             file="product_barcode_printout.temp_purchase_order_product_label_report_2"
+            menu="False"
     />
 
 
@@ -113,8 +114,8 @@
         <t t-call="web.basic_layout">
             <div class="page">
                 <t t-set="page_break" t-value="True"/>
-                <t t-foreach="docs" t-as="o">
-                    <t t-foreach="o.order_line" t-as="line">
+<!--                <t t-foreach="docs" t-as="o">-->
+                    <t t-foreach="order_lines" t-as="line">
                         <t t-set="qty" t-value="int(line.product_qty)"/>
                         <t t-set="product" t-value="line.product_id"/>
                         <t t-foreach="range(qty)" t-as="i">
@@ -124,7 +125,7 @@
                             </t>
                         </t>
                     </t>
-                </t>
+<!--                </t>-->
             </div>
 
         </t>
