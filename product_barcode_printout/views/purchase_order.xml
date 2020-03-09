@@ -8,8 +8,9 @@
             <field name="inherit_id" ref="purchase.purchase_order_form"/>
             <field name="arch" type="xml">
                 
-                <xpath expr="//button[@name='name']" position="after">
-                    <!-- <field name="FNAME" /> -->
+                <xpath expr="//button[@name='button_done']" position="after">
+                    <button name="print_large_label" string="Print 50x25 Label" type="object" />
+                    <button name="print_small_label" string="Print 38x12 Label" type="object" />
                 </xpath>
                 
             </field>
