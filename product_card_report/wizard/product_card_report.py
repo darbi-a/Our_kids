@@ -133,8 +133,8 @@ class ProductCardReportWizard(models.TransientModel):
 
     def get_amount_balance(self,date_from_utc):
         if self.location_id:
-            domain = [('product_id','=',self.product_id.id),('state','=','done'),('date', '<', str(date_from_utc)), '|', ('location_id', 'child_of', self.location_id.id),
-                      ('location_dest_id', 'child_of', self.location_id.id)]
+            domain = [('product_id','=',self.product_id.id),('state','=','done'),('date', '<', str(date_from_utc)), '|', ('location_id', '=', self.location_id.id),
+                      ('location_dest_id', '=', self.location_id.id)]
 
             stock_move_lines = self.env['stock.move.line'].search(domain)
             balance = 0
@@ -146,8 +146,10 @@ class ProductCardReportWizard(models.TransientModel):
                         balance += ml.qty_done * amount / qty
                 return balance
             else:
+
                 for ml in stock_move_lines:
-                    balance += ml.qty_done * ml.product_id.get_history_price(self.env.user.company_id.id,date=date_from_utc)
+                    sign = 1 if ml.location_dest_id == self.location_id else -1
+                    balance += sign * ml.qty_done * ml.product_id.get_history_price(self.env.user.company_id.id,date=date_from_utc)
                 return balance
         else:
             return self.product_id.with_context(to_date=str(date_from_utc)).stock_value

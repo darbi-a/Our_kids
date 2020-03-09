@@ -42,7 +42,7 @@ class VendorBalanceWizard(models.TransientModel):
                 ('move_id.journal_id.use_in_initial_balance', '=', True),
             ])
             balance = sum(l.debit - l.credit for l in journal_items)
-            return balance
+            return -1*balance
         else:
             journal_items = self.env['account.move.line'].search([
                 ('partner_id', '=', partner.id),
