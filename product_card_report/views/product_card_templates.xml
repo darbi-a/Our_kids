@@ -170,7 +170,7 @@
                                 <t t-if="o['cost_balance']">
                                     <t t-esc="round(o['cost_balance'] or 0,2)"/>
                                 </t>
-                                <t t-esle="">
+                                <t t-elif="not o['cost_balance']">
                                     -
                                 </t>
                             </td>
