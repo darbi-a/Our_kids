@@ -227,12 +227,7 @@ class ImportProductVariant(models.TransientModel):
 
 
         x = 0
-
         temp_barcode=''
-        print('import_data  == > ',import_data)
-        print('lst_field  == > ',lst_field)
-        print('xl_values  == > ',xl_values)
-
         if not template_attributes:
             for code in lst_field:
                 x += 1
@@ -269,14 +264,11 @@ class ImportProductVariant(models.TransientModel):
                     # if product.id not in count_variant:
                     #     count_variant.append(product.id)
         else:
-            print('template_attributes ==> ',template_attributes)
+            new_value=False
             for line in import_data:
-                print('line ==> ', line)
                 product_templ = self.env['product.product']
                 vals = {}
-                print('import_data[line]  == > ', import_data[line])
                 for code in import_data[line]:
-                    print('code ==> ', code)
                     x += 1
                     fld = import_data[line][code]
                     default_code =fld.get('default_code')
@@ -290,6 +282,8 @@ class ImportProductVariant(models.TransientModel):
                     product = self.env['product.product'].search([('default_code', '=', default_code)],limit=1)
                     product_templ = product.product_tmpl_id
                     product_by_barcode = self.env['product.product'].search([('barcode', '=', barcode)])
+                    if not product_by_barcode and product_templ:
+                        new_value=True
                     if product_by_barcode:
                         product_templ = product_by_barcode.product_tmpl_id
                         field_vals['product_tmpl_id']= product_templ.id
@@ -301,7 +295,6 @@ class ImportProductVariant(models.TransientModel):
                         continue
 
                     if not product_templ:
-                        print('field_vals ==> ',field_vals)
                         product = self.env['product.product'].create(field_vals)
                         product_templ = product.product_tmpl_id
                         product_templ.default_code = default_code
@@ -314,31 +307,70 @@ class ImportProductVariant(models.TransientModel):
                         field_vals['product_tmpl_id'] = product_templ.id
 
                         product = self.env['product.product'].create(field_vals)
-                        # if product_templ.id not in item_edit:
-                        #     item_edit.append(product_templ.id)
+                        if product_templ.id not in item_edit and new_value:
+                            item_edit.append(product_templ.id)
 
                         if product.id not in count_variant:
                             count_variant.append(product.id)
                         continue
-                print("has product_templ ***", product_templ)
-                if product_templ.attribute_line_ids:
-                    print("has temp ***",product_templ.attribute_line_ids)
-                    # for l in product_templ.attribute_line_ids:
-                    #     l.sudo().unlink()
+
+
+                if product_templ and product_templ.product_variant_count > 1:
                     product_templ.attribute_line_ids = False
-                for att in template_attributes[line]:
-                    print("att == ",att)
-                    vals['attribute_line_ids'] = []
-                    vals['attribute_line_ids'].append(
-                        (0, 0, {'attribute_id':att, 'value_ids': [], })
-                    )
-                    for att_val in template_attributes[line][att]:
-                        print("att_val == ", att_val)
-                        vals['attribute_line_ids'][-1][2]['value_ids'].append((4, att_val))
-                    print("vals == ", vals)
-                    if product_templ:
-                        print("*** att == ", att)
+                    att = {}
+                    variants = product_templ.with_prefetch().product_variant_ids
+                    for vart in variants:
+                        for line in vart.attribute_value_ids:
+                            if line.attribute_id.id not in att:
+                                att[line.attribute_id.id] = []
+                                att[line.attribute_id.id].append(line.id)
+                            else:
+                                if line.id not in att[line.attribute_id.id]:
+                                    att[line.attribute_id.id].append(line.id)
+                    vals = {}
+                    for v in att:
+                        vals['attribute_line_ids'] = []
+                        vals['attribute_line_ids'].append(
+                            (0, 0, {'attribute_id': v, 'value_ids': [], })
+                        )
+                        for att_val in att[v]:
+                            vals['attribute_line_ids'][-1][2]['value_ids'].append((4, att_val))
                         product_templ.sudo().write(vals)
+
+
+                # if product_templ.attribute_line_ids:
+                #     exist_val={}
+                #     # if new_value:
+                #     for lin in product_templ.attribute_line_ids:
+                #         exist_val[lin.attribute_id.id]=[]
+                #         for v in lin.value_ids:
+                #             exist_val[lin.attribute_id.id].append(v.id)
+                #
+                #
+                #     print("has temp ***",product_templ.attribute_line_ids)
+                #     print("exist_val ***",exist_val)
+                #     product_templ.attribute_line_ids = False
+                #     if exist_val:
+                #         temp_att=template_attributes[line]
+                #         for ex in exist_val:
+                #             for l in temp_att:
+                #                 if ex == l:
+                #                     x = list(set(exist_val[ex] +temp_att[l]))
+                #                     template_attributes[line][l]=x
+                # print("New line ***", template_attributes[line])
+                # for att in template_attributes[line]:
+                #     print("att == ",att)
+                #     vals['attribute_line_ids'] = []
+                #     vals['attribute_line_ids'].append(
+                #         (0, 0, {'attribute_id':att, 'value_ids': [], })
+                #     )
+                #     for att_val in template_attributes[line][att]:
+                #         print("att_val == ", att_val)
+                #         vals['attribute_line_ids'][-1][2]['value_ids'].append((4, att_val))
+                #     print("vals == ", vals)
+                #     if product_templ:
+                #         print("*** att == ", att)
+                #         product_templ.sudo().write(vals)
 
         context = dict(self._context) or {}
         context['default_count_variant'] = len(count_variant)
@@ -394,6 +426,5 @@ class ImportProductVariant(models.TransientModel):
                         vals['attribute_line_ids'][-1][2]['value_ids'].append((4, att_val))
                     rec.sudo().write(vals)
 
-                print("attribute_line_ids == ",rec.attribute_line_ids)
 
 
