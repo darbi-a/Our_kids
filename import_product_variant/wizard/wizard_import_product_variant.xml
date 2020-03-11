@@ -18,7 +18,7 @@
                     </group>
                     <footer>
                         <button string="Import" name="import_button" type="object" class="btn-primary"/>
-                        <button string="Assign Attributes" name="get_attributes" type="object" class="btn-primary"/>
+<!--                        <button string="Assign git " name="get_attributes" type="object" class="btn-primary"/>-->
                         <button string="Cancel" class="oe_link" special="cancel"/>
                     </footer>
                 </form>
