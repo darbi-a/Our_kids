@@ -56,14 +56,14 @@ class InventoryValuationReportVendor(models.TransientModel):
         return final_stock_ids
 
     @api.model
-    def get_valuation(self, product, warehouse,start_date,qty):
-        value = 0.0
+    def get_valuation(self, cost,qty):
+        # value = 0.0
         # locations = self.get_location(warehouse)
         # lst_moves = self.env['stock.move'].search([('date', '<=', start_date),('product_id', '=', product.id),('state', '=', 'done'),'|',('location_id', 'in', locations),('location_dest_id', 'in', locations)])
         # for mov in lst_moves:
         #     value += mov.value
-        company_id = self.env.user.company_id.id
-        cost = product.get_history_price(company_id,start_date)
+        # company_id = self.env.user.company_id.id
+        # cost = product.get_history_price(company_id,start_date)
         value = qty * cost
         return value
 
@@ -125,12 +125,13 @@ class InventoryValuationReportVendor(models.TransientModel):
                 print(i)
                 # data[partner].setdefault(product,{})
                 qty = product.with_context(to_date=start_date,company_owned=True).qty_available
-                cost = product.with_context(to_date=self.date).stock_value
+                unit_cost = product.get_history_price(self.company_id.id,start_date)
+                cost = unit_cost * qty
                 data[partner.name][str(product.id)] = {
                     'vendor_type': partner.vendor_type,
                     'vendor_color': product.vendor_color,
                     'product_ref': product.default_code,
-                    'unit_cost': product.standard_price,
+                    'unit_cost': unit_cost,
                     'barcode': product.barcode,
                     'product_name': product.display_name,
                     'categ': product.categ_id.name ,
@@ -138,7 +139,7 @@ class InventoryValuationReportVendor(models.TransientModel):
                     'qty': qty,
                     'cost': cost,
                     # 'cost': qty * product.standard_price,
-                    'sale_price': product.list_price,
+                    'sale_price': product.sale_price,
                     'total_qty': 0,
                     'total_cost': 0,
                 }
@@ -146,7 +147,7 @@ class InventoryValuationReportVendor(models.TransientModel):
                 for warehouse in warehouses:
                     totals.setdefault(warehouse.name,0)
                     qty = product.with_context(warehouse=warehouse.id,to_date=start_date).qty_available
-                    evaluation = self.get_valuation(product,warehouse,start_date,qty)
+                    evaluation = qty * unit_cost
                     data[partner.name][str(product.id)][warehouse.name] = {
                         'qty':qty,
                         'evaluation': evaluation,
