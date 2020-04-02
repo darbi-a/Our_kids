@@ -54,10 +54,12 @@ class PosConfig(models.Model):
 
 
     def session_total_count(self):
-        session_list = self.env['pos.session'].search([('state','=','opened')])
+        config_ids = self.env['pos.config'].search([])
+        session_list = self.env['pos.session'].search([('state','=','opened'),('config_id','in',config_ids.ids)])
        
         for sessions in session_list:
-           # config_ids = self.env['pos.config'].search[('id','in',sessions.config_id)]
+
+            # config_ids = self.env['pos.config'].search[('id','in',sessions.config_id)]
            
             for each1 in sessions.config_id:
                     each1.total_sesstion = len(sessions)
