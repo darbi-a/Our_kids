@@ -122,8 +122,11 @@ class ImportStockPicking(models.TransientModel):
             return view_action
 
         else:
+            # i = 0
             for vals in vals_list:
+                # print(i)
                 stock_move_obj.create(vals)
+                # i += 1
             return {'type': 'ir.actions.act_window_close'}
         
     @api.model
