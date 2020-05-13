@@ -42,7 +42,7 @@
                             <td style="text-align: center; vertical-align: middle;" colspan="2">
                                 <strong style="font-family:Droid Arabic Kufi,Roboto !important;font-size:22px !important">
 
-                                    <span t-esc="product.display_name[:34]  if product.display_name and len(product.display_name) &gt; 34 else product.display_name"
+                                    <span t-esc="product['display_name'][:34]  if product['display_name'] and len(product['display_name']) &gt; 34 else product['display_name']"
                                           style="font-family:Arial,Helvetica,sans-serif;font-size: 25px;margin-top: 3px;"/>
 
                                 </strong>
@@ -54,8 +54,8 @@
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <strong>Price:</strong>
-                                        <strong t-field="product.lst_price"
-                                                t-options="{'widget': 'monetary', 'display_currency': product.company_id.currency_id}"/>
+                                        <strong t-esc="product['price']"
+                                                t-options="{'widget': 'monetary', 'display_currency': product['currency_id']}"/>
                                     </div>
                                 </div>
                             </td>
@@ -68,13 +68,13 @@
                                 <!--                                     t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', product.barcode, 5000, 700)"-->
 
                                 <!--                                     style="margin-top: 1px;margin-left: -120px;margin-bottom: 1px;width:140%;height:10%;"/>-->
-                                <img t-if="product.barcode"
-                                     t-att-src="'data:image/jpg;base64,%s' % to_text(product.barcode_image)"
+                                <img t-if="product['barcode']-"
+                                     t-att-src="'data:image/jpg;base64,%s' % to_text(product['barcode_image'])"
                                      style="width:100%;height:28%;margin-bottom:-32px;overflow:hidden;"/>
                                 <!--                                     style="margin-top: 1px;margin-left: -80px;margin-bottom: 1px;width:140%;height:7%;"/>-->
                                 <div style="background-color:white">
                                     <strong >
-                                        <span t-field="product.barcode" style="font-size: 32px;background-color:white;"/>
+                                        <span t-esc="product['barcode']" style="font-size: 32px;background-color:white;"/>
                                     </strong>
                                 </div>
                                 <!--                                <span t-field="product.barcode" style="font-size: 12px;"/>-->
@@ -117,7 +117,7 @@
 <!--                <t t-foreach="docs" t-as="o">-->
                     <t t-foreach="order_lines" t-as="line">
                         <t t-set="qty" t-value="int(line.product_qty)"/>
-                        <t t-set="product" t-value="line.product_id"/>
+                        <t t-set="product" t-value="line.product_id.get_product_print_data()"/>
                         <t t-foreach="range(qty)" t-as="i">
                             <t t-set="page_break" t-value="not page_break"/>
                             <t t-call="product.report_simple_label">
@@ -153,7 +153,7 @@
                 <t t-foreach="docs" t-as="o">
                     <t t-foreach="o.move_ids_without_package" t-as="move">
                         <t t-set="qty" t-value="int(move.product_uom_qty)"/>
-                        <t t-set="product" t-value="move.product_id"/>
+                        <t t-set="product" t-value="move.product_id.get_product_print_data()"/>
                         <t t-foreach="range(qty)" t-as="i">
                             <t t-set="page_break" t-value="not page_break"/>
                             <t t-call="product.report_simple_label">

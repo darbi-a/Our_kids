@@ -73,5 +73,5 @@ class AccountBankStatementLine(models.Model):
             account_move = self.env['account.move'].browse(move.id)
             account_move._amount_compute()
             account_move.post()
-            # record the move name on the statement line to be able to retrieve it in case of unreconciliation
+            # record the move name on the statement line to be able  rettorieve it in case of unreconciliation
             st_line.write({'move_name': move.name})
