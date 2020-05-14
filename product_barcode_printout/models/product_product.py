@@ -33,8 +33,8 @@ class ProductProduct(models.Model):
             if rec.barcode:
                 CODE = barcode.get_barcode_class('code128')
                 result_barcode = CODE(rec.barcode,writer=ImageWriter())
-                # file_path = tempfile.gettempdir() + '/' + rec.barcode + '.png'
-                file_path = tempfile.gettempdir() + '\\' + rec.barcode + '.png'
+                file_path = tempfile.gettempdir() + '/' + rec.barcode + '.png'
+                # file_path = tempfile.gettempdir() + '\\' + rec.barcode + '.png'
                 f = open(file_path,'wb')
                 result_barcode.write(f)
                 f.close()
