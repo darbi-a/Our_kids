@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """ init object """
 from odoo import fields, models, api
+from odoo.exceptions import UserError
+
 
 
 import logging
@@ -15,8 +17,9 @@ class ProductProduct(models.Model):
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
     sale_price =fields.Float("Sales Price2")
-    seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', string='Vendors',compute='_onchange_seller', help="Define vendor pricelists.")
-    variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id',compute='_onchange_vendor_num',)
+    has_seller = fields.Boolean('Has seller' , compute='_get_seller',)
+    # seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', string='Vendors',compute='_get_seller',store=True, help="Define vendor pricelists.")
+    # variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id',compute='_onchange_vendor_num',store=True,)
 
     un_edit = fields.Boolean(string="UN Edit",compute='_compute_un_edit' )
 
@@ -31,27 +34,33 @@ class ProductProduct(models.Model):
             else:
                 self.un_edit = False
 
-    # @api.depends('list_price', 'price_extra', 'sale_price')
-    # def _compute_product_lst_price(self):
-    #     to_uom = None
-    #     if 'uom' in self._context:
-    #         to_uom = self.env['uom.uom'].browse([self._context['uom']])
-    #     for product in self:
-    #         if product.sale_price:
-    #             product.list_price = product.sale_price
-    #             product.lst_price = product.sale_price
-    #         if to_uom:
-    #             list_price = product.uom_id._compute_price(product.list_price, to_uom)
-    #         else:
-    #             list_price = product.list_price
-    #         product.lst_price = list_price + product.price_extra
-
-    # @api.depends('product_template_attribute_value_ids.price_extra')
 
     @api.depends('sale_price')
     def _compute_product_price_extra(self):
         for product in self:
             product.price_extra = product.sale_price
+
+    @api.multi
+    @api.depends('vendor_num')
+    def _get_seller(self):
+        print(" ** has_seller **")
+        for rec in self:
+            seller_id = []
+            temp = rec.product_tmpl_id
+            if rec.vendor_num:
+                vendor = self.env['res.partner'].search([('ref', '=', rec.vendor_num)], limit=1)
+                if vendor:
+                    seller_obj = self.env['product.supplierinfo']
+                    seller = self.env['product.supplierinfo'].create({
+                        'product_tmpl_id': temp.id,
+                        'product_id': rec.id,
+                        'name': vendor.id,
+                    })
+                    rec.seller_ids= [(6,0,seller.ids)]
+                    rec.has_seller =True
+                else:raise UserError('This Number not belong to any vendor')
+            else:rec.has_seller=False
+
 
     def _assin_seller(self):
         seller_id = []
@@ -77,20 +86,17 @@ class ProductProduct(models.Model):
         else: return False
 
 
-    @api.one
+    @api.multi
     @api.depends('vendor_num')
     def _onchange_vendor_num(self):
-        try:
-            seller = self._assin_seller()
-            # for rec in self:
-            #     if rec.product_tmpl_id:
-            #         rec.product_tmpl_id.variant_seller_ids = seller
-            #         rec.product_tmpl_id.seller_ids = seller
-            #
-                # rec.variant_seller_ids = seller
-            self.variant_seller_ids = seller
-        except:
-            return True
+        for rec in self:
+            try:
+
+                seller = rec._assin_seller()
+                print('seller ==',seller)
+                rec.variant_seller_ids = seller
+            except:
+                return True
 
     @api.one
     @api.depends('variant_seller_ids')
