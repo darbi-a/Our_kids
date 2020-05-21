@@ -21,10 +21,11 @@ class StockPicking(models.Model):
 
     @api.constrains('picking_type_id','move_ids_without_package','state')
     def check_internal_transfer(self):
-        if self.picking_type_id.code == 'internal':
-            for move in self.move_ids_without_package:
-                if move.product_uom_qty < move.quantity_done :
-                    raise ValidationError(_('Initial demand can not be less than quantity done'))
+        for pick in self:
+            if pick.picking_type_id.code == 'internal':
+                for move in pick.move_ids_without_package:
+                    if move.product_uom_qty < move.quantity_done :
+                        raise ValidationError(_('Initial demand can not be less than quantity done'))
 
     @api.multi
     def action_confirm(self):
@@ -69,7 +70,7 @@ class StockPicking(models.Model):
                     new_date = fields.Datetime.to_string(move.date_expected + relativedelta(days=rule.delay))
                     if insert_values:
                         separator = ' , '
-                    insert_values += separator + " (nextval('stock_move_id_seq'), %s, (now() at time zone 'UTC'), %s, (now() at time zone 'UTC'), %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', '%s', '%s', %s, %s, %s, %s, %s, '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', %s, %s, %s)" %(
+                    insert_values += separator + " (nextval('stock_move_id_seq'), %s, (now() at time zone 'UTC'), %s, (now() at time zone 'UTC'), %s, %s, '%s', '%s', %s, %s, %s, %s, '%s', '%s', '%s', %s, %s, %s, %s, %s, '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, '%s', %s, %s, %s, '%s')" %(
                         self.env.uid,
                         self.env.uid,
                         move.additional,
@@ -101,9 +102,10 @@ class StockPicking(models.Model):
                         'draft',
                         rule.warehouse_id.id or 'NULL',
                         move.id or 'NULL',
-                        move.product_qty
+                        move.product_qty,
+                        new_picking.name or ''
                     )
-                    sql_query = "INSERT INTO stock_move (id, create_uid, create_date, write_uid, write_date, additional, company_id, date, date_expected, group_id, inventory_id, location_dest_id, location_id, name, note, origin, package_level_id, partner_id, picking_id, picking_type_id, priority, procure_method, product_id, product_packaging, product_uom, product_uom_qty, propagate, restrict_partner_id, rule_id, scrapped, sequence, state, warehouse_id, push_move_id, product_qty) VALUES %s RETURNING id " %(insert_values)
+                    sql_query = "INSERT INTO stock_move (id, create_uid, create_date, write_uid, write_date, additional, company_id, date, date_expected, group_id, inventory_id, location_dest_id, location_id, name, note, origin, package_level_id, partner_id, picking_id, picking_type_id, priority, procure_method, product_id, product_packaging, product_uom, product_uom_qty, propagate, restrict_partner_id, rule_id, scrapped, sequence, state, warehouse_id, push_move_id, product_qty, reference) VALUES %s RETURNING id " %(insert_values)
                 self._cr.execute(sql_query)
                 new_move_ids = []
                 for l in self._cr.fetchall():
