@@ -107,7 +107,7 @@
                             <!--                                 style="margin-top: 1px;margin-left: -45px;margin-bottom: 1px;width:150%;height:70%;"/>-->
                             <img t-if="product['barcode']"
                                  t-att-src="'data:image/jpg;base64,%s' % to_text(product['barcode_image'])"
-                                 style="width:100%;height:50%;margin-bottom:-55px;overflow:hidden;"/>
+                                 style="width:100%;height:50%;"/>
                             <!--                                     style="margin-top: 1px;margin-left: -80px;margin-bottom: 1px;width:140%;height:7%;"/>-->
                             <div style="background-color:white">
                                 <strong>
