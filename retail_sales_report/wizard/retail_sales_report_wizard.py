@@ -51,7 +51,7 @@ class RetailSalesWizard(models.TransientModel):
     def get_taxes_line(self,line):
         fpos = line.order_id.fiscal_position_id
         tax_ids_after_fiscal_position = fpos.map_tax(line.tax_ids, line.product_id, line.order_id.partner_id) if fpos else line.tax_ids
-        price = line.product_id.lst_price or line.product_id.standard_price
+        price = line.product_id.lst_price or line.product_id.sale_price
         taxes = tax_ids_after_fiscal_position.compute_all(price, line.order_id.pricelist_id.currency_id, 1, product=line.product_id, partner=line.order_id.partner_id)
         return taxes['total_excluded']
 
@@ -86,12 +86,20 @@ class RetailSalesWizard(models.TransientModel):
 
         products = self.env['product.product'].search(['|',('active','=',True),('active','=',False)])
         if self.vendor_ids:
-            vendor_product_info = self.env['product.supplierinfo'].search([('name','in',self.vendor_ids.ids)])
-            products = products.filtered(lambda p:p.variant_seller_ids in vendor_product_info)
+            # vendor_product_info = self.env['product.supplierinfo'].search([('name','in',self.vendor_ids.ids)])
+            # products = products.filtered(lambda p:p.variant_seller_ids in vendor_product_info)
+            vendor_nums = self.vendor_ids.mapped('ref')
+            if type(vendor_nums) is not list:
+                vendor_nums = list(vendor_nums)
+            products = products.filtered(lambda p:p.vendor_num in vendor_nums)
 
         elif self.vendor_type:
-            vendor_product_info = self.env['product.supplierinfo'].search([('name.vendor_type','=',self.vendor_type)])
-            products = products.filtered(lambda p:p.variant_seller_ids in vendor_product_info)
+            # vendor_product_info = self.env['product.supplierinfo'].search([('name.vendor_type','=',self.vendor_type)])
+            # products = products.filtered(lambda p:p.variant_seller_ids in vendor_product_info)
+            vendor_nums = self.env['res.partner'].search([('vendor_type','=',self.vendor_type)]).mapped('ref')
+            if type(vendor_nums) is not list:
+                vendor_nums = list(vendor_nums)
+            products = products.filtered(lambda p:p.vendor_num in vendor_nums)
 
         if self.product_ids:
             products = products & self.product_ids
@@ -127,11 +135,17 @@ class RetailSalesWizard(models.TransientModel):
             ('order_id','in',pos_orders.ids),
             ('product_id','in',products.ids),
         ])
+        ref_partner_dict = {}
         for ol in order_lines:
             branch = ol.order_id.session_id.config_id.pos_branch_id
             product = ol.product_id
-            variant_seller_id = product.variant_seller_ids and product.variant_seller_ids[0] or self.env['product.supplierinfo']
-            partner = variant_seller_id.name
+            # variant_seller_id = product.variant_seller_ids and product.variant_seller_ids[0] or self.env['product.supplierinfo']
+            # partner = variant_seller_id.name
+
+            if product.vendor_num not in ref_partner_dict:
+                partner = self.env['res.partner'].search([('ref','=',product.vendor_num)],limit=1)
+                ref_partner_dict[product.vendor_num] = partner
+            partner = ref_partner_dict[product.vendor_num]
             user = ol.order_id.user_id
             # key = (branch.id,user.id,product.id)
             key = (branch.id,ol.id,user.id)

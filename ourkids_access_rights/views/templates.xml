@@ -6,7 +6,9 @@
         <template id="assets_backend" name="Stock Barcode" inherit_id="web.assets_backend">
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/ourkids_access_rights/static/src/js/abstract_client_action.js"/>
+                <script type="text/javascript" src="/ourkids_access_rights/static/src/js/main_menu.js"/>
                 <script type="text/javascript" src="/ourkids_access_rights/static/src/js/lines_widget.js"/>
+                <script type="text/javascript" src="/ourkids_access_rights/static/src/js/header_widget.js"/>
             </xpath>
         </template>
 

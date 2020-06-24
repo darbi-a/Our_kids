@@ -18,8 +18,8 @@ class ProductProduct(models.Model):
     categ_num = fields.Char(string="Category Number", required=False, )
     sale_price =fields.Float("Sales Price2")
     has_seller = fields.Boolean('Has seller' , compute='_get_seller',)
-    # seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id', string='Vendors',compute='_get_seller',store=True, help="Define vendor pricelists.")
-    # variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id',compute='_onchange_vendor_num',store=True,)
+    seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id',compute='_get_seller', string='Vendors',readonly=True, help="Define vendor pricelists.")
+    # variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id',readonly=True,)
 
     un_edit = fields.Boolean(string="UN Edit",compute='_compute_un_edit' )
 
@@ -47,56 +47,61 @@ class ProductProduct(models.Model):
         for rec in self:
             seller_id = []
             temp = rec.product_tmpl_id
+            print(" ** temp **", temp)
             if rec.vendor_num:
                 vendor = self.env['res.partner'].search([('ref', '=', rec.vendor_num)], limit=1)
+                print(" ** vendor **",vendor.ref)
+                print(" ** vendor_num **",rec.vendor_num)
                 if vendor:
-                    seller_obj = self.env['product.supplierinfo']
+                    rec.seller_ids=False
                     seller = self.env['product.supplierinfo'].create({
                         'product_tmpl_id': temp.id,
                         'product_id': rec.id,
                         'name': vendor.id,
                     })
-                    rec.seller_ids= [(6,0,seller.ids)]
+                    rec.seller_ids= seller
+                    # rec.write({'seller_ids':[(6,0,seller.ids)]})
                     rec.has_seller =True
                 else:raise UserError('This Number not belong to any vendor')
-            else:rec.has_seller=False
+            else:
+                rec.has_seller=False
 
 
-    def _assin_seller(self):
-        seller_id = []
-        temp = self.product_tmpl_id
-        if self.vendor_num and temp:
-            vendor = self.env['res.partner'].search([('ref', '=', self.vendor_num)], limit=1)
-            if vendor:
-                seller_obj = self.env['product.supplierinfo']
-                seller = seller_obj.search([('product_id', '=', self.id), ('name', '=', vendor.id)], limit=1)
-                if not seller:
-                    seller = self.env['product.supplierinfo'].create({
-                        'product_tmpl_id': temp.id,
-                        'product_id': self.id,
-                        'name': vendor.id,
-                    })
-                    seller_id= [(6,0,seller.ids)]
-                else:
-                    seller_id= [(6,0,seller.ids)]
-            else:return False
+    # def _assin_seller(self):
+    #     seller_id = []
+    #     temp = self.product_tmpl_id
+    #     if self.vendor_num and temp:
+    #         vendor = self.env['res.partner'].search([('ref', '=', self.vendor_num)], limit=1)
+    #         if vendor:
+    #             seller_obj = self.env['product.supplierinfo']
+    #             seller = seller_obj.search([('product_id', '=', self.id), ('name', '=', vendor.id)], limit=1)
+    #             if not seller:
+    #                 seller = self.env['product.supplierinfo'].create({
+    #                     'product_tmpl_id': temp.id,
+    #                     'product_id': self.id,
+    #                     'name': vendor.id,
+    #                 })
+    #                 seller_id= [(6,0,seller.ids)]
+    #             else:
+    #                 seller_id= [(6,0,seller.ids)]
+    #         else:return False
+    #
+    #     if seller_id:
+    #         return seller_id
+    #     else: return False
 
-        if seller_id:
-            return seller_id
-        else: return False
 
-
-    @api.multi
-    @api.depends('vendor_num')
-    def _onchange_vendor_num(self):
-        for rec in self:
-            try:
-
-                seller = rec._assin_seller()
-                print('seller ==',seller)
-                rec.variant_seller_ids = seller
-            except:
-                return True
+    # @api.multi
+    # @api.depends('vendor_num')
+    # def _onchange_vendor_num(self):
+    #     for rec in self:
+    #         try:
+    #
+    #             seller = rec._assin_seller()
+    #             print('seller ==',seller)
+    #             rec.variant_seller_ids = seller
+    #         except:
+    #             return True
 
     @api.one
     @api.depends('variant_seller_ids')
@@ -105,17 +110,17 @@ class ProductProduct(models.Model):
             if rec.variant_seller_ids:
                 rec.seller_ids = rec.variant_seller_ids
 
-    @api.multi
-    def write(self,vals):
-        if 'vendor_num' in vals:
-            seller = self._assin_seller()
-            self.product_tmpl_id.variant_seller_ids = seller
-            self.product_tmpl_id.seller_ids = seller
-            self.variant_seller_ids = seller
-            self.seller_ids = seller
-
-        super(ProductProduct, self).write(vals)
-        return True
+    # @api.multi
+    # def write(self,vals):
+    #     if 'vendor_num' in vals:
+    #         seller = self._assin_seller()
+    #         self.product_tmpl_id.variant_seller_ids = seller
+    #         self.product_tmpl_id.seller_ids = seller
+    #         self.variant_seller_ids = seller
+    #         self.seller_ids = seller
+    #
+    #     super(ProductProduct, self).write(vals)
+    #     return True
 
 
     # @api.model

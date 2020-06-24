@@ -17,6 +17,7 @@
 
     # always loaded
     'data': [
+        'report/report_pos_by_categ.xml',
         'report/report_pos_totals.xml',
         'report/report_pos_loss_gain.xml',
         'report/report_pos_cashier_return.xml',
@@ -25,6 +26,7 @@
         'wizard/pos_los_gain.xml',
         'wizard/pos_cashier_return.xml',
         'wizard/pos_cashier_sales.xml',
+        'wizard/totals_pos_categ_wizard.xml',
     ],
 
 
