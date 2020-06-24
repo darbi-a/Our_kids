@@ -1,3 +1,2 @@
 python-barcode==0.10.0
-treepoem==3.3.1
 

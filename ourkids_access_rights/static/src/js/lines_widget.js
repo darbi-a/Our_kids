@@ -10,6 +10,15 @@ LinesWidget.include({
 
     template: 'stock_barcode_lines_widget_modified',
 
+    events: {
+        'click .o_add_line': '_onClickAddLine',
+        'click .o_validate_page': '_onClickValidatePage',
+        'click .o_next_page': '_onClickNextPage',
+        'click .o_previous_page': '_onClickPreviousPage',
+        'click .o_put_in_pack': '_onPutInPack',
+//        'click .o_save_page': '_onClickSavePage',
+    },
+
     addProduct: function (lineDescription, model, doNotClearLineHighlight) {
         var $body = this.$el.filter('.o_barcode_lines');
         var $line = $(QWeb.render('stock_barcode_lines_template_modified', {
@@ -116,6 +125,12 @@ LinesWidget.include({
              $summary_src.toggleClass('o_barcode_summary_location_highlight', true);
          }
      },
+
+//     _onClickSavePage:function(ev){
+//         ev.stopPropagation();
+////         this.trigger_up('validate');
+//
+//     },
 
 
 

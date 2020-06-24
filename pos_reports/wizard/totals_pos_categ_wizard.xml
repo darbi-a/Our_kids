@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <record id="view_totals_sales_categ_report_wizard_form" model="ir.ui.view">
+            <field name="name">totals.sale_categ.wizard.form</field>
+            <field name="model">totals.sale_categ.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="date_from" />
+                            <field name="date_to"/>
+                            <field name="branches_ids"  widget="many2many_tags" />
+                            <field name="categ_ids"  widget="many2many_tags" />
+                            <field name="season_ids"  widget="many2many_tags"/>
+                            <field name="type" widget="radio"/>
+                        </group>
+                    </sheet>
+                    <footer>
+                        <button name="action_print"   string="Print" type="object" class="oe_highlight"/>
+                        <button string="Cancel" special="cancel" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        
+        <record id="view_totals_sales_categ_report_wizard_action" model="ir.actions.act_window">
+            <field name="name">Sales Totals Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">totals.sale_categ.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_type">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <menuitem id="menuitem_pos_sale_categ_total_report" name="Sales Totals By Category" parent="point_of_sale.menu_point_rep" action="view_totals_sales_categ_report_wizard_action" sequence="10"/>
+    
+    </data>
+</odoo>

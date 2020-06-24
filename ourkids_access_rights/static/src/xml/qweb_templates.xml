@@ -11,13 +11,24 @@
 <!--        </t>-->
 <!--    </t>-->
 
+    <!--<t t-extend="stock_barcode_header_widget">-->
+        <!--<t t-jquery="a.o_show_settings" t-operation="replace">-->
+            <!--<t t-raw="widget" />-->
+            <!--&lt;!&ndash;<a tabindex="" t-if="!widget.groups.group_inventory_valuation" class="nav-link o_show_settings"><i class="fa fa-bars"/></a>&ndash;&gt;-->
+            <!--<a tabindex="" class="nav-link o_show_settings"><i class="fa fa-bars"/></a>-->
+        <!--</t>-->
+    <!--</t>-->
+
     <t t-name="stock_barcode_lines_template_modified">
         <t t-if="lines">
             <t t-foreach="lines" t-as="line">
                 <div class="o_barcode_line list-group-item d-flex flex-row flex-nowrap" t-if="model == 'stock.picking'" t-att-data-id="line.virtual_id || line.id" t-att-data-barcode="line.product_barcode">
                     <div class="o_barcode_line_details flex-grow-1 flex-column flex-nowrap">
-                        <div class="o_barcode_line_title pb-1"><i class="fa fa-fw fa-tags"/> <span class="product-label"><t t-esc="line.display_name"></t></span></div>
-                        <div>
+                        <div class="row">
+                            <div class="col-6 o_barcode_line_title pb-1"><i class="fa fa-fw fa-tags"/> <span class="product-label"><t t-esc="line.display_name"></t></span></div>
+                            <div class="col-6"><span><t t-esc="line.product_barcode"></t></span></div>
+                        </div>
+                            <div>
                             <i class="fa fa-fw fa-cube"/>
                             <span t-attf-class="o_barcode_scanner_qty text-monospace badge #{' '}"> <!-- @SLE: Eventually add contextual classes: "badge-warning", "badge-danger", "badge-success"  -->
                                 <span class="qty-done d-inline-block text-left" t-esc="line.qty_done"/>
@@ -112,7 +123,8 @@
         <div t-if="widget.mode !== 'done' &amp;&amp; widget.mode !== 'cancel'" class="o_barcode_control d-flex">
             <button t-if="widget.groups.group_stock_multi_locations" class="btn btn-secondary text-uppercase o_previous_page"><i class="fa fa-angle-left mr-3"/>Previous</button>
             <button t-if="widget.groups.group_stock_multi_locations" class="btn btn-secondary text-uppercase o_next_page">Next<i class="fa fa-angle-right ml-3"/></button>
-            <button t-if="!widget.groups.group_inventory_valuation" class="btn btn-secondary text-uppercase o_validate_page"><i class="fa fa-check mr-1"/> Validate</button>
+            <button t-if="widget.groups.group_stock_manager" class="btn btn-secondary text-uppercase o_validate_page"><i class="fa fa-check mr-1"/> Validate</button>
+            <!--<button class="btn btn-secondary text-uppercase o_save_page"><i class="fa fa-check mr-1"/> Save</button>-->
         </div>
     </t>
 

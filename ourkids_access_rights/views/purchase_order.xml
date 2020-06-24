@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_purchase_order_form_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.form.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//button[@id='bid_confirm']" position="attributes">
+                    <attribute name="groups">
+                        !ourkids_access_rights.group_data_entry_purchase
+                    </attribute>
+                </xpath>
+
+                <xpath expr="//button[@id='draft_confirm']" position="attributes">
+                    <attribute name="groups">
+                        !ourkids_access_rights.group_data_entry_purchase
+                    </attribute>
+                </xpath>
+
+                <xpath expr="//button[@name='button_cancel']" position="attributes">
+
+                    <attribute name="groups">
+                        !ourkids_access_rights.group_data_entry_purchase
+                    </attribute>
+
+                </xpath>
+
+                <xpath expr="//button[@name='action_view_invoice'][1]" position="attributes">
+
+                    <attribute name="groups">
+                        !ourkids_access_rights.group_data_entry_purchase
+                    </attribute>
+
+                </xpath>
+
+                <xpath expr="//button[@name='action_view_invoice'][2]" position="attributes">
+
+                    <attribute name="groups">
+                        !ourkids_access_rights.group_data_entry_purchase
+                    </attribute>
+
+                </xpath>
+
+
+            </field>
+        </record>
+
+        <record id="view_purchase_order_form_stock_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.form.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase_stock.purchase_order_view_form_inherit"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//header/button[@name='action_view_picking']" position="attributes">
+
+                    <attribute name="groups">
+                        !ourkids_access_rights.group_data_entry_purchase
+                    </attribute>
+
+                </xpath>
+
+                <xpath expr="//div/button[@name='action_view_picking']" position="attributes">
+
+                    <attribute name="groups">
+                        !ourkids_access_rights.group_data_entry_purchase
+                    </attribute>
+
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="view_purchase_order_form_discount_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.form.inherit</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase_discount_rule.purchase_order_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//button[@name='action_apply_discount_rules']" position="attributes">
+
+                    <attribute name="groups">
+                        !ourkids_access_rights.group_data_entry_purchase
+                    </attribute>
+
+                </xpath>
+
+            </field>
+        </record>
+
+    </data>
+</odoo>

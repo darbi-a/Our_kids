@@ -19,13 +19,13 @@ class StockPicking(models.Model):
                     if product_vendor_num and vendor_num != product_vendor_num:
                         raise ValidationError(_('The product %s is not belong to this partner' %self.product_id.display_name))
 
-    @api.constrains('picking_type_id','move_ids_without_package','state')
-    def check_internal_transfer(self):
-        for pick in self:
-            if pick.picking_type_id.code == 'internal':
-                for move in pick.move_ids_without_package:
-                    if move.product_uom_qty < move.quantity_done :
-                        raise ValidationError(_('Initial demand can not be less than quantity done'))
+    # @api.constrains('picking_type_id','move_ids_without_package','state')
+    # def check_internal_transfer(self):
+    #     for pick in self:
+    #         if pick.picking_type_id.code == 'internal':
+    #             for move in pick.move_ids_without_package:
+    #                 if move.product_uom_qty < move.quantity_done :
+    #                     raise ValidationError(_('Initial demand can not be less than quantity done'))
 
     @api.multi
     def action_confirm(self):

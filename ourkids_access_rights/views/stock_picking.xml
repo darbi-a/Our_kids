@@ -45,5 +45,17 @@
             </field>
         </record>
 
+        <record id="stock_picking_type_action_kanban" model="ir.actions.act_window">
+            <field name="name">Operations</field>
+            <field name="res_model">stock.picking.type</field>
+            <field name="view_mode">kanban,form</field>
+            <field name="domain">[('code', 'in', ('incoming', 'outgoing', 'internal')),('allowed_users','in',[uid])]</field>
+            <field name="view_id" ref="stock_barcode.stock_picking_type_kanban"/>
+            <field name="context">{
+                'form_view_initial_mode': 'edit',
+                'force_detailed_view': True,
+            }</field>
+        </record>
+
     </data>
 </odoo>

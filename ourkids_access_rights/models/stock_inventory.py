@@ -26,4 +26,5 @@ class StockInventory(models.Model):
         inventories = super(StockInventory,self).get_barcode_view_state()
         for inventory in inventories:
             inventory['group_inventory_valuation'] = self.env.user.has_group('ourkids_access_rights.group_inventory_valuation')
+            inventory['group_stock_manager'] = self.env.user.has_group('stock.group_stock_manager')
         return inventories

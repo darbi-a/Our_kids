@@ -13,7 +13,7 @@
     'version': '1.3',
 
     # any module necessary for this one to work correctly
-    'depends': ['product','stock','point_of_sale','stock_barcode','stock_cost'],
+    'depends': ['product','stock','point_of_sale','stock_barcode','stock_cost','purchase_discount_rule'],
 
     # always loaded
     'data': [
@@ -26,6 +26,8 @@
         'views/product_product.xml',
         'views/account_move.xml',
         'views/stock_location.xml',
+        'views/purchase_order.xml',
+        'views/res_partner.xml',
 
     ],
 

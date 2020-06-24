@@ -31,6 +31,7 @@ ClientAction.include({
                 'group_tracking_lot': self.currentState.group_tracking_lot,
                 'group_production_lot': self.currentState.group_production_lot,
                 'group_inventory_valuation': self.currentState.group_inventory_valuation,
+                'group_stock_manager': self.currentState.group_stock_manager,
                 'group_uom': self.currentState.group_uom,
             };
             self.show_entire_packs = self.currentState.show_entire_packs;

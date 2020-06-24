@@ -1,0 +1,37 @@
+<odoo>
+    <record id="view_model_name_form" model="ir.ui.view">
+        <field name="name">stock.products.adjustment.view.form</field>
+        <field name="model">stock.products.adjustment</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="start_date"/>
+                        <field name="partner_ids" widget="many2many_tags"/>
+                        <field name="season_ids" widget="many2many_tags"/>
+                        <field name="category_ids" widget="many2many_tags"/>
+                        <field name="stock_location_ids" widget="many2many_tags"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_print_report" string="Print" type="object" class="oe_highlight"/>
+                    <button string="Cancel" special="cancel" class="oe_link"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="stock_products_adjustment_action" model="ir.actions.act_window">
+        <field name="name">Stock Products Adjustment</field>
+        <field name="res_model">stock.products.adjustment</field>
+        <field name="view_mode">form</field>
+        <field name="view_type">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_stock_products_adjustment"
+              name="Stock Adjustment"
+              parent="stock.menu_warehouse_report"
+              action="stock_products_adjustment_action"/>
+
+</odoo>

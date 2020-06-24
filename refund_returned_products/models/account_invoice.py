@@ -15,7 +15,7 @@ class AccountInvoice(models.Model):
         used_pickings = self.search([]).mapped('return_picking_ids')
         available_pickings = self.env['stock.picking'].search([
             ('id','not in',used_pickings.ids),
-            ('picking_type_id.code','=',['outgoing','incoming']),
+            ('picking_type_id.code','in',['outgoing','incoming']),
             ('picking_type_id.use_in_returning','=',True),
             ('state','=','done'),
             # '|',
