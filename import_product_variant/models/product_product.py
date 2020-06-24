@@ -62,7 +62,7 @@ class ProductProduct(models.Model):
                     rec.seller_ids= seller
                     # rec.write({'seller_ids':[(6,0,seller.ids)]})
                     rec.has_seller =True
-                else:raise UserError('This Number not belong to any vendor')
+                # else:raise UserError('This Number not belong to any vendor')
             else:
                 rec.has_seller=False
 
