@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+
+        <report
+                id="pos_totals_by_categ_report"
+                model="totals.sale_categ.wizard"
+                report_type="qweb-pdf"
+                string="Pos Totals By Category Report"
+                name="pos_reports.pos_totals_by_categ"
+                file="pos_reports.pos_totals_by_categ"
+        />
+
+
+        <template id="pos_totals_by_categ">
+            <t t-call="web.html_container">
+                    <t t-call="web.external_layout">
+                        <div class="page" dir="rtl">
+                            <h2 class="text-center">إجمالي مبيعات الاقسام الرئيسية</h2>
+                            <div class="row mt32 mb32">
+                                <div class="col-4">
+                                    <strong>التاريخ من:</strong>
+                                    <p t-esc="date_from"/>
+                                </div>
+                                <div class="col-4">
+                                    <strong>التاريخ الى:</strong>
+                                    <p t-esc="date_to"/>
+                                </div>
+                            </div>
+                            <table style="text-align:right;" class="table table-bordered">
+                                <tr>
+                                    <th>الفرع</th>
+                                    <th>القسم</th>
+                                    <th>الكمية</th>
+                                    <th>اجمالي التكلفة بعد المرتجع</th>
+                                    <th>اجمالي المستهلك بعد الخصم</th>
+                                </tr>
+
+                                <t t-foreach="branches" t-as="brn">
+                                    <tr>
+
+                                        <td colspan="5">
+                                            <t t-raw="brn"/>
+                                        </td>
+                                    </tr>
+                                    <t t-set="total_qty" t-value="0"/>
+                                    <t t-set="total_cost" t-value="0"/>
+                                    <t t-set="total_sale" t-value="0"/>
+                                    <t t-foreach="branches[brn]" t-as="cat">
+                                        <t t-set="total_qty" t-value="total_qty + branches[brn][cat]['total_qty']"/>
+                                         <t t-set="total_cost" t-value="total_cost + branches[brn][cat]['total_cost']"/>
+                                         <t t-set="total_sale" t-value="total_sale + branches[brn][cat]['total_sale']"/>
+
+                                        <tr>
+                                            <td> </td>
+                                            <td><t t-raw="cat"/></td>
+                                            <td><t t-raw="branches[brn][cat]['total_qty']"/></td>
+                                            <td><t t-raw="branches[brn][cat]['total_cost']"/></td>
+                                            <td><t t-raw="branches[brn][cat]['total_sale']"/></td>
+                                        </tr>
+                                     </t>
+
+                                    <tr>
+                                            <td colspan="2">الاجمالي </td>
+                                            <td><t t-raw="total_qty"/></td>
+                                            <td><t t-raw="total_cost"/></td>
+                                            <td><t t-raw="total_sale"/></td>
+                                        </tr>
+                                </t>
+                            </table>
+                        </div>
+
+                    </t>
+            </t>
+        </template>
+
+
+    </data>
+</odoo>
