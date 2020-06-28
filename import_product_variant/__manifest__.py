@@ -6,8 +6,8 @@
 
 {
     'name': 'Import product Variants',
-    'version': '12.3.5',
-    'author': 'Ahmed Amin ,Mahmoud Naguib',
+    'version': '12.4.7',
+    'author': 'Ahmed Amen ,Mahmoud Naguib',
     'maintainer': 'ITSS',
     'license': 'AGPL-3',
     'category': 'Stock',
