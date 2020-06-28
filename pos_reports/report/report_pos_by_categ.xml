@@ -55,17 +55,17 @@
                                         <tr>
                                             <td> </td>
                                             <td><t t-raw="cat"/></td>
-                                            <td><t t-raw="branches[brn][cat]['total_qty']"/></td>
-                                            <td><t t-raw="branches[brn][cat]['total_cost']"/></td>
-                                            <td><t t-raw="branches[brn][cat]['total_sale']"/></td>
+                                            <td><t t-raw="round(branches[brn][cat]['total_qty'],2)"/></td>
+                                            <td><t t-raw="round(branches[brn][cat]['total_cost'],2)"/></td>
+                                            <td><t t-raw="round(branches[brn][cat]['total_sale'],2)"/></td>
                                         </tr>
                                      </t>
 
                                     <tr>
                                             <td colspan="2">الاجمالي </td>
-                                            <td><t t-raw="total_qty"/></td>
-                                            <td><t t-raw="total_cost"/></td>
-                                            <td><t t-raw="total_sale"/></td>
+                                            <td><t t-raw="round(total_qty,2)"/></td>
+                                            <td><t t-raw="round(total_cost,2)"/></td>
+                                            <td><t t-raw="round(total_sale,2)"/></td>
                                         </tr>
                                 </t>
                             </table>

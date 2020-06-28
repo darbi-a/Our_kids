@@ -17,7 +17,6 @@ class ProductProduct(models.Model):
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
     sale_price =fields.Float("Sales Price2")
-    has_seller = fields.Boolean('Has seller' , compute='_get_seller',)
     seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id',compute='_get_seller', string='Vendors',readonly=True, help="Define vendor pricelists.")
     # variant_seller_ids = fields.One2many('product.supplierinfo', 'product_tmpl_id',readonly=True,)
 
@@ -45,9 +44,9 @@ class ProductProduct(models.Model):
     def _get_seller(self):
         print(" ** has_seller **")
         for rec in self:
+            rec.seller_ids= False
             seller_id = []
             temp = rec.product_tmpl_id
-            print(" ** temp **", temp)
             if rec.vendor_num:
                 vendor = self.env['res.partner'].search([('ref', '=', rec.vendor_num)], limit=1)
                 print(" ** vendor **",vendor.ref)
@@ -60,11 +59,8 @@ class ProductProduct(models.Model):
                         'name': vendor.id,
                     })
                     rec.seller_ids= seller
-                    # rec.write({'seller_ids':[(6,0,seller.ids)]})
-                    rec.has_seller =True
-                # else:raise UserError('This Number not belong to any vendor')
             else:
-                rec.has_seller=False
+                rec.seller_ids = False
 
 
     # def _assin_seller(self):
