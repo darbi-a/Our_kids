@@ -426,5 +426,21 @@ class ImportProductVariant(models.TransientModel):
                         vals['attribute_line_ids'][-1][2]['value_ids'].append((4, att_val))
                     rec.sudo().write(vals)
 
+    def assin_seller(self):
+        temp_ids = self.env['product.product'].search([('vendor_num','!=',False)])
+        for rec in temp_ids:
 
-
+            if rec.vendor_num:
+                vendor = self.env['res.partner'].search([('ref', '=', rec.vendor_num)], limit=1)
+                if vendor:
+                    seller = self.env['product.supplierinfo'].create({
+                        'product_tmpl_id': rec.product_tmpl_id.id,
+                        'name': vendor.id,
+                    })
+                    print("seller ==> ", seller)
+    def delete_all_sellers(self):
+        sellers = self.env['product.supplierinfo'].search([])
+        print("sellers == ",len(sellers))
+        for rec in sellers:
+            print("rec ==> ",rec)
+            rec.unlink()
