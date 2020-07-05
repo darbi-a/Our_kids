@@ -36,11 +36,9 @@ class TotalsSaleCategWizard(models.TransientModel):
 
     def get_categ(self):
         categ_ids = self.env['product.category'].search([('parent_path', '!=', False)])
-        print("categ_ids == ", categ_ids)
         categ_lst = []
         for cat in categ_ids:
             lst = cat.parent_path.split('/')
-            print("lst == ", lst)
             if len(lst) > 1:
                 if lst[1] != '' and int(lst[1]) not in categ_lst:
                     categ_lst.append(int(lst[1]))
@@ -99,35 +97,38 @@ class TotalsSaleCategWizard(models.TransientModel):
         else:
             lst_ids = self.get_categ()
             categ_ids= self.env['product.category'].browse(lst_ids)
-            print('categ_ids 88=',categ_ids)
         for branch in branches:
             branch_names.append(branch.name)
             data.setdefault('branches',{})
             data['branches'].setdefault(branch.name,{})
-            print('Branch1 ==> ',branch.name)
-            print('Branch 2==> ',branch)
             pos_lines = self.env['pos.order.line'].search([
                 ('order_id.config_id.pos_branch_id', '=', branch.id),
                 ])
-            print('pos_lines ==> ', pos_lines)
             for cat in categ_ids:
                 total_qty=0
                 total_cost=0
                 total_sale=0
                 for line in pos_lines:
-                    print("cat ** ",line.product_id.categ_id)
                     if line.product_id.categ_id.id == cat.id and line.product_id.season_id.id in seasons:
-                        total_qty += line.qty
-                        total_sale += line.price_subtotal
-                        total_cost += line.qty*line.product_id.standard_price
+                        total_qty += self.get_rounding(line.qty)
+                        total_sale += self.get_rounding(line.price_subtotal)
+                        total_cost += self.get_rounding(line.qty*line.product_id.standard_price)
                 data['branches'][branch.name][cat.name] = {
-                    'total_qty': total_qty,
-                    'total_sale': total_sale,
-                    'total_cost': total_cost,
+                    'total_qty': round(total_qty,2),
+                    'total_sale': round(total_sale,2),
+                    'total_cost': round(total_cost,2),
                 }
 
         return data
 
+    def get_rounding(self,num):
+
+        lst = str(float(num)).split('.')
+        num1 = lst[0]
+        num2 = (lst[1])
+        num3 = num2[0:2]
+        number = num1 + '.' + num3
+        return float(number)
     @api.multi
     def action_print_pdf(self):
         data = self.get_report_data()
@@ -137,7 +138,6 @@ class TotalsSaleCategWizard(models.TransientModel):
     def action_print_excel_file(self):
         self.ensure_one()
         data = self.get_report_data()
-        print('// data// ',data)
         workbook = xlwt.Workbook()
         TABLE_HEADER = xlwt.easyxf(
             'font: bold 1, name Tahoma, color-index black,height 160;'
@@ -242,7 +242,6 @@ class TotalsSaleCategWizard(models.TransientModel):
         worksheet.write(row, col, _('اجمالي المستهلك بعد الخصم'), header_format)
         col += 1
         branch_data = data['branches']
-        print("branch_data ==> ",branch_data)
 
         for branch in branch_data:
             # month_sart = month[0]
@@ -258,7 +257,6 @@ class TotalsSaleCategWizard(models.TransientModel):
             for cat in branch_data[branch]:
                 row += 1
                 col = 1
-                print()
                 worksheet.write(row, col, cat, STYLE_LINE_Data)
                 col += 1
                 total_qty +=branch_data[branch][cat]['total_qty']
@@ -273,7 +271,6 @@ class TotalsSaleCategWizard(models.TransientModel):
 
             row += 1
             col = 1
-            print()
             worksheet.write(row, col, 'Total', TABLE_HEADER_batch)
             col += 1
             worksheet.write(row, col, total_qty, TABLE_HEADER_batch)
