@@ -6,7 +6,7 @@
         <report
                 id="pos_totals_by_categ_report"
                 model="totals.sale_categ.wizard"
-                report_type="qweb-pdf"
+                report_type="qweb-html"
                 string="Pos Totals By Category Report"
                 name="pos_reports.pos_totals_by_categ"
                 file="pos_reports.pos_totals_by_categ"
@@ -55,9 +55,9 @@
                                         <tr>
                                             <td> </td>
                                             <td><t t-raw="cat"/></td>
-                                            <td><t t-raw="round(branches[brn][cat]['total_qty'],2)"/></td>
-                                            <td><t t-raw="round(branches[brn][cat]['total_cost'],2)"/></td>
-                                            <td><t t-raw="round(branches[brn][cat]['total_sale'],2)"/></td>
+                                            <td><t t-raw="branches[brn][cat]['total_qty']"/></td>
+                                            <td><t t-raw="branches[brn][cat]['total_cost']"/></td>
+                                            <td><t t-raw="branches[brn][cat]['total_sale']"/></td>
                                         </tr>
                                      </t>
 
