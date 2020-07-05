@@ -84,14 +84,20 @@ odoo.define('pos_speed_up.change_detector', function (require) {
 
             if (msg) {
                 var self = this;
-                this.$('.jane_msg').removeClass('oe_hidden').text(msg);
-                this.gui.show_popup('confirm',{
-                    'title': _t('Sync Products & Customers'),
-                    'body': _t('click confirm to update recent changes in products and customers.'),
-                    confirm: function(){
-                        self.pos.synch_without_reload(self);
-                    },
-                });
+//                this.$('.jane_msg').removeClass('oe_hidden').text(msg);
+//                this.gui.show_popup('confirm',{
+//                    'title': _t('Sync Products & Customers'),
+//                    'body': _t('click confirm to update recent changes in products and customers.'),
+//                    confirm: function(){
+//                        self.pos.synch_without_reload(self);
+//                    },
+//                });
+                var delay = 1;
+                var mes_int = parseInt(msg || 0);
+                var total_delay = mes_int * delay;
+                console.log('total_delay');
+                console.log(total_delay);
+                setTimeout(function() { self.$('.jane_msg').click(); }, total_delay);
             } else {
                 this.$('.jane_msg').addClass('oe_hidden').html('');
             }

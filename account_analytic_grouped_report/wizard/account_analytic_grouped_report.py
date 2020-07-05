@@ -29,6 +29,7 @@ class AccountAnalyticGroupedReport(models.TransientModel):
             'credit': 0,
             'balance': 0,
             'accounts': {},
+            'start_balance': 0,
             'child_groups': {},
             'analytic_account': {},
         }
@@ -41,17 +42,24 @@ class AccountAnalyticGroupedReport(models.TransientModel):
             debit = r and r[1] or 0
             credit = r and r[2] or 0
             balance = r and (debit - credit) or 0
-
+            start_balance = 0.0
+            if self.date_from:
+                sql_query = "SELECT account_id, sum(debit - credit) as balance from account_move_line where account_id = %s AND date < '%s' group by account_id " % (
+                    account.id, self.date_from)
+                self._cr.execute(sql_query)
+                start_balance = sum(r[1] for r in self._cr.fetchall())
             current_dict['accounts'][account.id] = {
                 'account': account,
                 'debit': debit,
                 'credit': credit,
-                'balance': balance ,
+                'balance': balance + start_balance,
+                'start_balance': start_balance,
                 'analytic_account': {},
             }
             current_dict['debit'] += debit
             current_dict['credit'] += credit
-            current_dict['balance'] += balance
+            current_dict['balance'] += balance + start_balance
+            current_dict['start_balance'] += start_balance
 
             for anl_account in self.analytic_account_ids:
                 anl_account_id = anl_account.id
@@ -75,6 +83,7 @@ class AccountAnalyticGroupedReport(models.TransientModel):
             current_dict['debit'] += child_dict['debit']
             current_dict['credit'] += child_dict['credit']
             current_dict['balance'] += child_dict['balance']
+            current_dict['start_balance'] += child_dict['start_balance']
             for anl_account in self.analytic_account_ids:
                 anl_account_id = anl_account.id
                 if anl_account_id not in current_dict['analytic_account']:
@@ -185,10 +194,11 @@ class AccountAnalyticGroupedReport(models.TransientModel):
         worksheet.write(row, 0, _('نوع الحساب'), header_format)
         worksheet.write(row, 1, _('اسم الحساب'), header_format)
         worksheet.write(row, 2, _('كود الحساب'), header_format)
-        worksheet.write(row, 3, _('اجمالي مدين'), header_format)
-        worksheet.write(row, 4, _('اجمالي دائن'), header_format)
-        worksheet.write(row, 5, _('الرصيد'), header_format)
-        col = 6
+        worksheet.write(row, 3,_('رصيد أول المدة'), header_format)
+        worksheet.write(row, 4,  _('اجمالي مدين'), header_format)
+        worksheet.write(row, 5, _('اجمالي دائن'), header_format)
+        worksheet.write(row, 6, _('الرصيد'), header_format)
+        col = 7
         for anl_account in self.analytic_account_ids:
             worksheet.write(row, col, anl_account.name, header_format)
             col += 1
@@ -209,6 +219,8 @@ class AccountAnalyticGroupedReport(models.TransientModel):
         col += 1
         worksheet.write(row , col, group.code_prefix, header_format)
         col += 1
+        worksheet.write(row , col, dict_data['start_balance'], header_format)
+        col += 1
         worksheet.write(row , col, dict_data['debit'], header_format)
         col += 1
         worksheet.write(row , col, dict_data['credit'], header_format)
@@ -227,6 +239,8 @@ class AccountAnalyticGroupedReport(models.TransientModel):
             worksheet.write(row, col, dict_data['accounts'][account_id]['account'].name, TABLE_data)
             col += 1
             worksheet.write(row, col, dict_data['accounts'][account_id]['account'].code, TABLE_data)
+            col += 1
+            worksheet.write(row, col, dict_data['accounts'][account_id]['start_balance'], TABLE_data)
             col += 1
             worksheet.write(row, col, dict_data['accounts'][account_id]['debit'], TABLE_data)
             col += 1
