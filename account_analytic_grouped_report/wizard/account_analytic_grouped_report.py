@@ -38,10 +38,11 @@ class AccountAnalyticGroupedReport(models.TransientModel):
             sql_query = "SELECT account_id, sum(debit) as debit, sum(credit) as credit from account_move_line where account_id = %s %s group by account_id " % (
             account.id, _where)
             self._cr.execute(sql_query)
-            r = self._cr.fetchone()
-            debit = r and r[1] or 0
-            credit = r and r[2] or 0
-            balance = r and (debit - credit) or 0
+            debit = credit = balance = 0
+            for r in self._cr.fetchall():
+                debit += r and r[1] or 0
+                credit += r and r[2] or 0
+            balance += debit - credit
             start_balance = 0.0
             if self.date_from:
                 sql_query = "SELECT account_id, sum(debit - credit) as balance from account_move_line where account_id = %s AND date < '%s' group by account_id " % (
@@ -66,10 +67,13 @@ class AccountAnalyticGroupedReport(models.TransientModel):
                 sql_query = "SELECT sum(debit) as debit, sum(credit) as credit from account_move_line where account_id = %s AND analytic_account_id = %s %s group by account_id,analytic_account_id " % (
                     account.id,anl_account_id, _where)
                 self._cr.execute(sql_query)
-                r = self._cr.fetchone()
-                debit = r and r[0] or 0
-                credit = r and r[1] or 0
-                balance = r and (debit - credit) or 0
+                debit = 0
+                credit = 0
+                balance = 0
+                for r in self._cr.fetchall():
+                    debit += r and r[0] or 0
+                    credit += r and r[1] or 0
+                balance += debit - credit
                 current_dict['accounts'][account.id]['analytic_account'][anl_account_id] = balance
                 if anl_account_id not in current_dict['analytic_account']:
                     current_dict['analytic_account'][anl_account_id] = 0
@@ -99,9 +103,9 @@ class AccountAnalyticGroupedReport(models.TransientModel):
         group_data = {}
         _where = ''
         if self.date_from:
-            _where = " AND date >= '%s'" %(self.date_from)
+            _where += " AND date >= '%s'" %(self.date_from)
         if self.date_to:
-            _where = " AND date <= '%s'" % (self.date_to)
+            _where += " AND date <= '%s'" % (self.date_to)
         groups = self.env['account.group'].search([('id', 'child_of', self.account_group_ids.ids)])
         parent_groups = groups.filtered(lambda g: not g.parent_id or g.parent_id.id not in groups.ids)
         for p_group in parent_groups:
