@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <odoo>
+        
+        <record id="form_wizard_import_stock_inventory" model="ir.ui.view">
+            <field name="name">form.wizard.import.stock.inventory.form</field>
+            <field name="model">wizard.import.stock.inventory</field>
+            <field name="arch" type="xml">
+                <form string="Import Quotation (code, quantity, price) .CSV">
+                    <group>
+                        <group>
+                            <field name="file_data" filename="file_name" widget="binary" required="1" class="oe_inline"/>
+                        </group>
+                        <field name="file_name" invisible="1"/>
+                    </group>
+                    <field name="result" readonly="True"/>
+                    <footer>
+                        <button string="Import" name="import_button" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_wizard_import_stock_inventory" model="ir.actions.act_window">
+            <field name="name">Import Stock Inventory</field>
+            <field name="res_model">wizard.import.stock.inventory</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    
+
+    </odoo>
