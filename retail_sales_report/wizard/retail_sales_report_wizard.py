@@ -84,9 +84,9 @@ class RetailSalesWizard(models.TransientModel):
         # end_time = datetime.max.time()
         # end_date = datetime.combine(end_date, end_time)
 
-        products = self.env['product.product'].search(['|',('active','=',True),('active','=',False)])
+        products = self.env['product.product'].sudo().search(['|',('active','=',True),('active','=',False)])
         if self.vendor_ids:
-            # vendor_product_info = self.env['product.supplierinfo'].search([('name','in',self.vendor_ids.ids)])
+            # vendor_product_info = self.env['product.supplierinfo'].sudo().search([('name','in',self.vendor_ids.ids)])
             # products = products.filtered(lambda p:p.variant_seller_ids in vendor_product_info)
             vendor_nums = self.vendor_ids.mapped('ref')
             if type(vendor_nums) is not list:
@@ -94,9 +94,9 @@ class RetailSalesWizard(models.TransientModel):
             products = products.filtered(lambda p:p.vendor_num in vendor_nums)
 
         elif self.vendor_type:
-            # vendor_product_info = self.env['product.supplierinfo'].search([('name.vendor_type','=',self.vendor_type)])
+            # vendor_product_info = self.env['product.supplierinfo'].sudo().search([('name.vendor_type','=',self.vendor_type)])
             # products = products.filtered(lambda p:p.variant_seller_ids in vendor_product_info)
-            vendor_nums = self.env['res.partner'].search([('vendor_type','=',self.vendor_type)]).mapped('ref')
+            vendor_nums = self.env['res.partner'].sudo().search([('vendor_type','=',self.vendor_type)]).mapped('ref')
             if type(vendor_nums) is not list:
                 vendor_nums = list(vendor_nums)
             products = products.filtered(lambda p:p.vendor_num in vendor_nums)
@@ -108,7 +108,7 @@ class RetailSalesWizard(models.TransientModel):
             products = products.filtered(lambda p: p.tag_ids in self.product_tag_ids)
 
         elif self.categ_ids:
-            categories = self.env['product.category'].search([('id', 'child_of', self.categ_ids.ids)])
+            categories = self.env['product.category'].sudo().search([('id', 'child_of', self.categ_ids.ids)])
             products = products.filtered(lambda p: p.categ_id in categories)
 
         if self.season_ids:
@@ -117,7 +117,7 @@ class RetailSalesWizard(models.TransientModel):
         if self.vendor_color:
             products = products.filtered(lambda p: p.vendor_color == self.vendor_color)
 
-        branch_ids = self.env['pos.branch'].search([]).ids
+        branch_ids = self.env['pos.branch'].sudo().search([]).ids
         if self.branch_ids:
             branch_ids = self.branch_ids.ids
 
@@ -130,8 +130,8 @@ class RetailSalesWizard(models.TransientModel):
         if self.user_ids:
             order_domain.append(('user_id','in',self.user_ids.ids))
 
-        pos_orders = self.env['pos.order'].search(order_domain)
-        order_lines = self.env['pos.order.line'].search([
+        pos_orders = self.env['pos.order'].sudo().search(order_domain)
+        order_lines = self.env['pos.order.line'].sudo().search([
             ('order_id','in',pos_orders.ids),
             ('product_id','in',products.ids),
         ])
@@ -143,7 +143,7 @@ class RetailSalesWizard(models.TransientModel):
             # partner = variant_seller_id.name
 
             if product.vendor_num not in ref_partner_dict:
-                partner = self.env['res.partner'].search([('ref','=',product.vendor_num)],limit=1)
+                partner = self.env['res.partner'].sudo().search([('ref','=',product.vendor_num)],limit=1)
                 ref_partner_dict[product.vendor_num] = partner
             partner = ref_partner_dict[product.vendor_num]
             user = ol.order_id.user_id
@@ -419,7 +419,7 @@ class RetailSalesWizard(models.TransientModel):
             workbook.save(output)
             xls_file_path = (_('تقرير مبيعات مورد.xls'))
             attachment_model = self.env['ir.attachment']
-            attachment_model.search([('res_model', '=', 'retail.sales.report.wizard'), ('res_id', '=', self.id)]).unlink()
+            attachment_model.sudo().search([('res_model', '=', 'retail.sales.report.wizard'), ('res_id', '=', self.id)]).unlink()
             attachment_obj = attachment_model.create({
                 'name': xls_file_path,
                 'res_model': 'retail.sales.report.wizard',

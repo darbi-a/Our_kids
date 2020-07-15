@@ -12,7 +12,7 @@ LOGGER = logging.getLogger(__name__)
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
-    vendor_num = fields.Char(string="Vendor Number", required=False, )
+    vendor_num = fields.Char(string="Vendor Number", required=True, )
     categ_name = fields.Char(string="Category Name", required=False, )
     vendor_color = fields.Char(string="Vendor Color", required=False, )
     categ_num = fields.Char(string="Category Number", required=False, )
