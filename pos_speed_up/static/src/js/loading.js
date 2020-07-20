@@ -7,7 +7,6 @@ odoo.define('pos_speed_up.loading', function (require) {
 
     var chrome = require('point_of_sale.chrome');
     var indexedDB = require('pos_speed_up.indexedDB');
-    var session = require('web.session');
 
     chrome.Chrome.include({
         loading_progress: function(fac){
@@ -16,7 +15,7 @@ odoo.define('pos_speed_up.loading', function (require) {
         },
         renderElement: function () {
             this._super();
-            if (indexedDB.is_cached(session.db + '_products')) {
+            if (indexedDB.is_cached('products')) {
                 this.$('.loader .loader-feedback .my-message').hide();
             } else {
                 this.$('.loader .loader-feedback .message').hide();

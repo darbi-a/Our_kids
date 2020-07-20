@@ -8,7 +8,6 @@ odoo.define('pos_speed_up.optimize_load_customers', function (require) {
     var models = require('point_of_sale.models');
     var indexedDB = require('pos_speed_up.indexedDB');
     var rpc = require('web.rpc');
-    var session = require('web.session');
 
     require('pos_speed_up.pos_model');
 
@@ -26,7 +25,7 @@ odoo.define('pos_speed_up.optimize_load_customers', function (require) {
             if (!model) {
                 def.reject();
             }
-            if (indexedDB.is_cached(session.db + '_customers')) {
+            if (indexedDB.is_cached('customers')) {
                 this.c_sync(model).then(function () {
                     def.resolve();
                 }).fail(function () {
@@ -42,7 +41,7 @@ odoo.define('pos_speed_up.optimize_load_customers', function (require) {
             var def = $.Deferred();
             var pos = this;
 
-            var client_version = localStorage.getItem(session.db + '_customer_index_version');
+            var client_version = localStorage.getItem('customer_index_version');
             if (!/^\d+$/.test(client_version)) {
                 client_version = 0;
             }
@@ -53,7 +52,7 @@ odoo.define('pos_speed_up.optimize_load_customers', function (require) {
                 args: [client_version]
             }).then(function (res) {
                 // update version
-                localStorage.setItem(session.db + '_customer_index_version', res['latest_version']);
+                localStorage.setItem('customer_index_version', res['latest_version']);
 
                 // create and delete
                 var data_change = indexedDB.optimize_data_change(res['create'], res['delete'], res['disable']);
@@ -65,7 +64,7 @@ odoo.define('pos_speed_up.optimize_load_customers', function (require) {
                 model.loaded = function (self, new_customers) {
                     var done = new $.Deferred();
 
-                    indexedDB.get(session.db + '_customers').then(function (customers) {
+                    indexedDB.get('customers').then(function (customers) {
                         customers = customers.concat(new_customers).filter(function (value) {
                             return data_change['delete'].indexOf(value.id) === -1;
                         });
@@ -76,28 +75,28 @@ odoo.define('pos_speed_up.optimize_load_customers', function (require) {
                         done.resolve();
                     }).fail(function (error) {
                         console.log(error);
-                        localStorage.setItem(session.db + '_customer_index_version', client_version);
+                        localStorage.setItem('customer_index_version', client_version);
                         done.reject();
                     });
 
 
                     // put and delete customer - indexedDB
-                    indexedDB.get_object_store(session.db + '_customers').then(function (store) {
+                    indexedDB.get_object_store('customers').then(function (store) {
                         _.each(new_customers, function (customer) {
                             store.put(customer).onerror = function (ev) {
                                 console.log(ev);
-                                localStorage.setItem(session.db + '_customer_index_version', client_version);
+                                localStorage.setItem('customer_index_version', client_version);
                             }
                         });
                         _.each(data_change['delete'], function (id) {
                             store.delete(id).onerror = function (ev) {
                                 console.log(ev);
-                                localStorage.setItem(session.db + '_customer_index_version', client_version);
+                                localStorage.setItem('customer_index_version', client_version);
                             };
                         });
                     }).fail(function (error) {
                         console.log(error);
-                        localStorage.setItem(session.db + '_customer_index_version', client_version);
+                        localStorage.setItem('customer_index_version', client_version);
                     });
 
                     return done;
@@ -114,13 +113,13 @@ odoo.define('pos_speed_up.optimize_load_customers', function (require) {
         c_save: function (model) {
             this.c_super_loaded = model.loaded;
             model.loaded = function (self, customers) {
-                indexedDB.save(session.db + '_customers', customers);
+                indexedDB.save('customers', customers);
                 self.c_super_loaded(self, customers);
             };
             this.c_update_version();
         },
         c_update_version: function () {
-            var old_version = localStorage.getItem(session.db + '_customer_index_version');
+            var old_version = localStorage.getItem('customer_index_version');
             if (!/^\d+$/.test(old_version)) {
                 old_version = 0;
             }
@@ -129,7 +128,7 @@ odoo.define('pos_speed_up.optimize_load_customers', function (require) {
                 method: 'get_latest_version',
                 args: [old_version]
             }).then(function (res) {
-                localStorage.setItem(session.db + '_customer_index_version', res);
+                localStorage.setItem('customer_index_version', res);
             });
         }
     });

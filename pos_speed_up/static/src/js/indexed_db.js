@@ -4,7 +4,6 @@
 */
 odoo.define('pos_speed_up.indexedDB', function (require) {
     "use strict";
-    var session = require('web.session');
 
     var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB || window.shimIndexedDB;
 
@@ -12,7 +11,7 @@ odoo.define('pos_speed_up.indexedDB', function (require) {
         window.alert("Your browser doesn't support a stable version of IndexedDB.")
     }
 
-    var db_name = session.db + '_pos';
+    var db_name = 'pos';
 
     var exports = {
         get_object_store: function (_name) {
@@ -26,8 +25,8 @@ odoo.define('pos_speed_up.indexedDB', function (require) {
 
             request.onupgradeneeded = function (ev) {
                 var db = ev.target.result;
-                db.createObjectStore(session.db + '_customers', {keyPath: "id"});
-                db.createObjectStore(session.db + '_products', {keyPath: "id"});
+                db.createObjectStore('customers', {keyPath: "id"});
+                db.createObjectStore('products', {keyPath: "id"});
             };
 
             request.onsuccess = function (ev) {
@@ -57,12 +56,10 @@ odoo.define('pos_speed_up.indexedDB', function (require) {
         save: function (_name, items) {
             $.when(this.get_object_store(_name))
                 .done(function (store) {
-//                    localStorage.setItem(session.db+ '_' + _name, 'cached');
                     localStorage.setItem(_name, 'cached');
 
                     _.each(items, function (item) {
                         store.put(item).onerror = function () {
-//                            localStorage.setItem(session.db+ '_' + _name, null);
                             localStorage.setItem(_name, null);
                         }
                     });

@@ -32,7 +32,7 @@ odoo.define('pos_speed_up.change_detector', function (require) {
 
             var self = this;
 
-            $.when(indexedDB.get(session.db + '_products'), indexedDB.get(session.db + '_customers')).then(function (products, customers) {
+            $.when(indexedDB.get('products'), indexedDB.get('customers')).then(function (products, customers) {
                 // order_by product
                 indexedDB.order_by_in_place(products, ['sequence', 'default_code', 'name'], 'esc');
 
@@ -84,20 +84,14 @@ odoo.define('pos_speed_up.change_detector', function (require) {
 
             if (msg) {
                 var self = this;
-//                this.$('.jane_msg').removeClass('oe_hidden').text(msg);
-//                this.gui.show_popup('confirm',{
-//                    'title': _t('Sync Products & Customers'),
-//                    'body': _t('click confirm to update recent changes in products and customers.'),
-//                    confirm: function(){
-//                        self.pos.synch_without_reload(self);
-//                    },
-//                });
-                var delay = 10;
-                var mes_int = parseInt(msg || 0);
-                var total_delay = mes_int * delay;
-                console.log('total_delay');
-                console.log(total_delay);
-                setTimeout(function() { self.$('.jane_msg').click(); }, total_delay);
+                this.$('.jane_msg').removeClass('oe_hidden').text(msg);
+                this.gui.show_popup('confirm',{
+                    'title': _t('Sync Products & Customers'),
+                    'body': _t('click confirm to update recent changes in products and customers.'),
+                    confirm: function(){
+                        self.pos.synch_without_reload(self);
+                    },
+                });
             } else {
                 this.$('.jane_msg').addClass('oe_hidden').html('');
             }
@@ -178,7 +172,7 @@ odoo.define('pos_speed_up.change_detector', function (require) {
 
             var model = self.pos.get_model('product.product');
 
-            var client_version = localStorage.getItem(session.db + '_product_index_version');
+            var client_version = localStorage.getItem('product_index_version');
             if (!/^\d+$/.test(client_version)) {
                 client_version = 0;
             }
@@ -193,7 +187,7 @@ odoo.define('pos_speed_up.change_detector', function (require) {
                 context: {location:self.pos.config.stock_location_id[0]},
                 args: [client_version, model.fields]
             }).then(function (res) {
-                localStorage.setItem(session.db + '_product_index_version', res['latest_version']);
+                localStorage.setItem('product_index_version', res['latest_version']);
 
                 // increase count
                 self.pos.count_sync += res['create'].length + res['delete'].length;
@@ -203,22 +197,22 @@ odoo.define('pos_speed_up.change_detector', function (require) {
 //                    self.pos.synch_without_reload(self);
                 }
 
-                indexedDB.get_object_store(session.db + '_products').then(function (store) {
+                indexedDB.get_object_store('products').then(function (store) {
                     _.each(res['create'], function (record) {
                         store.put(record).onerror = function (e) {
                             console.log(e);
-                            localStorage.setItem(session.db + '_product_index_version', client_version);
+                            localStorage.setItem('product_index_version', client_version);
                         }
                     });
                     _.each(res['delete'], function (id) {
                         store.delete(id).onerror = function (e) {
                             console.log(e);
-                            localStorage.setItem(session.db + '_product_index_version', client_version);
+                            localStorage.setItem('product_index_version', client_version);
                         };
                     });
                 }).fail(function (error){
                     console.log(error);
-                    localStorage.setItem(session.db + '_product_index_version', client_version);
+                    localStorage.setItem('product_index_version', client_version);
                 });
             });
         },
@@ -227,7 +221,7 @@ odoo.define('pos_speed_up.change_detector', function (require) {
 
             var model = self.pos.get_model('res.partner');
 
-            var client_version = localStorage.getItem(session.db + '_customer_index_version');
+            var client_version = localStorage.getItem('customer_index_version');
             if (!/^\d+$/.test(client_version)) {
                 client_version = 0;
             }
@@ -241,7 +235,7 @@ odoo.define('pos_speed_up.change_detector', function (require) {
                 method: 'sync_not_reload',
                 args: [client_version, model.fields]
             }).then(function (res) {
-                localStorage.setItem(session.db + '_customer_index_version', res['latest_version']);
+                localStorage.setItem('customer_index_version', res['latest_version']);
 
                 self.pos.count_sync += res['create'].length + res['delete'].length;
 
@@ -250,22 +244,22 @@ odoo.define('pos_speed_up.change_detector', function (require) {
 //                    self.pos.synch_without_reload(self);
                 }
 
-                indexedDB.get_object_store(session.db + '_customers').then(function (store) {
+                indexedDB.get_object_store('customers').then(function (store) {
                     _.each(res['create'], function (record) {
                         store.put(record).onerror = function (e) {
                             console.log(e);
-                            localStorage.setItem(session.db + '_customer_index_version', client_version);
+                            localStorage.setItem('customer_index_version', client_version);
                         }
                     });
                     _.each(res['delete'], function (id) {
                         store.delete(id).onerror = function (e) {
                             console.log(e);
-                            localStorage.setItem(session.db + '_customer_index_version', client_version);
+                            localStorage.setItem('customer_index_version', client_version);
                         };
                     });
                 }).fail(function (error) {
                     console.log(error);
-                    localStorage.setItem(session.db + '_customer_index_version', client_version);
+                    localStorage.setItem('customer_index_version', client_version);
                 });
 
                 // clear dom cache for re-render customers

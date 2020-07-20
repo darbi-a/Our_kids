@@ -7,7 +7,6 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
     var models = require('point_of_sale.models');
     var indexedDB = require('pos_speed_up.indexedDB');
     var rpc = require('web.rpc');
-    var session = require('web.session');
 
     require('pos_speed_up.pos_model');
 
@@ -21,7 +20,7 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
             if (!model) {
                 return;
             }
-            if (indexedDB.is_cached(session.db + '_products')) {
+            if (indexedDB.is_cached('products')) {
                 this.p_sync(model);
             } else {
                 this.p_save(model);
@@ -30,7 +29,7 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
         p_sync: function (model) {
             var pos = this;
 
-            var client_version = localStorage.getItem(session.db + '_product_index_version');
+            var client_version = localStorage.getItem('product_index_version');
             if (!/^\d+$/.test(client_version)) {
                 client_version = 0;
             }
@@ -42,7 +41,7 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
                 args: [client_version]
             }).then(function (res) {
                 // update version
-                localStorage.setItem(session.db + '_product_index_version', res['latest_version']);
+                localStorage.setItem('product_index_version', res['latest_version']);
 
                 // create and delete
                 var data_change = indexedDB.optimize_data_change(res['create'], res['delete'], res['disable']);
@@ -54,7 +53,7 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
                 model.loaded = function (self, new_products) {
                     var done = new $.Deferred();
 
-                    indexedDB.get(session.db + '_products').then(function (products) {
+                    indexedDB.get('products').then(function (products) {
 
                         products = products.concat(new_products).filter(function (value) {
                             return data_change['delete'].indexOf(value.id) === -1;
@@ -73,22 +72,22 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
                     });
 
                     // put and delete product - indexedDB
-                    indexedDB.get_object_store(session.db + '_products').then(function (store) {
+                    indexedDB.get_object_store('products').then(function (store) {
                         _.each(new_products, function (product) {
                             store.put(product).onerror = function (ev) {
                                 console.log(ev);
-                                localStorage.setItem(session.db + '_product_index_version', client_version);
+                                localStorage.setItem('product_index_version', client_version);
                             }
                         });
                         _.each(data_change['delete'], function (id) {
                             store.delete(id).onerror = function (ev) {
                                 console.log(ev);
-                                localStorage.setItem(session.db + '_product_index_version', client_version);
+                                localStorage.setItem('product_index_version', client_version);
                             };
                         });
                     }).fail(function (error) {
                         console.log(error);
-                        localStorage.setItem(session.db + '_product_index_version', client_version);
+                        localStorage.setItem('product_index_version', client_version);
                     });
 
                     return done;
@@ -98,13 +97,13 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
         p_save: function (model) {
             this.p_super_loaded = model.loaded;
             model.loaded = function (self, products) {
-                indexedDB.save(session.db + '_products', products);
+                indexedDB.save('products', products);
                 self.p_super_loaded(self, products);
             };
             this.p_update_version();
         },
         p_update_version: function () {
-            var old_version = localStorage.getItem(session.db + '_product_index_version');
+            var old_version = localStorage.getItem('product_index_version');
             var self = this;
             if (!/^\d+$/.test(old_version)) {
                 old_version = 0;
@@ -115,7 +114,7 @@ odoo.define('pos_speed_up.optimize_load_products', function (require) {
                 context: {location:self.config && self.config.stock_location_id && self.config.stock_location_id[0] || []},
                 args: [old_version]
             }).then(function (res) {
-                localStorage.setItem(session.db + '_product_index_version', res);
+                localStorage.setItem('product_index_version', res);
             });
         }
     });
