@@ -254,10 +254,10 @@ class ProductTemplate(models.Model):
 
     @api.model
     def clear_list_price(self):
-        self._cr.execute("update product_template set list_price = 0")
-        # products = self.search([])
-        # for p in products:
-        #     p.write({'list_price': 0.0})
+        # self._cr.execute("update product_template set list_price = 0")
+        products = self.search([('list_price','!=',0)])
+        for p in products:
+            p.write({'list_price': 0.0})
 
 
     # def assign_attribute_lines(self):
