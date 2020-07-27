@@ -104,20 +104,31 @@ class TotalsSaleCategWizard(models.TransientModel):
             pos_lines = self.env['pos.order.line'].search([
                 ('order_id.config_id.pos_branch_id', '=', branch.id),
                 ])
+            print(" pos_lines == > ",pos_lines)
             for cat in categ_ids:
                 total_qty=0
                 total_cost=0
                 total_sale=0
                 for line in pos_lines:
-                    if line.product_id.categ_id.id == cat.id and line.product_id.season_id.id in seasons:
-                        total_qty += self.get_rounding(line.qty)
-                        total_sale += self.get_rounding(line.price_subtotal)
-                        total_cost += self.get_rounding(line.qty*line.product_id.standard_price)
+                    if line.product_id.categ_id.id == cat.id :
+                        if line.product_id.season_id:
+                            if  line.product_id.season_id.id in seasons:
+                                print("**** vvvvv **")
+                                total_qty += self.get_rounding(line.qty)
+                                total_sale += self.get_rounding(line.price_subtotal)
+                                total_cost += self.get_rounding(line.qty * line.product_id.standard_price)
+                        else:
+                            print("**** vvvvv **")
+                            total_qty += self.get_rounding(line.qty)
+                            total_sale += self.get_rounding(line.price_subtotal)
+                            total_cost += self.get_rounding(line.qty * line.product_id.standard_price)
+
                 data['branches'][branch.name][cat.name] = {
                     'total_qty': round(total_qty,2),
                     'total_sale': round(total_sale,2),
                     'total_cost': round(total_cost,2),
                 }
+                print("data ==> ",data)
 
         return data
 
@@ -138,6 +149,7 @@ class TotalsSaleCategWizard(models.TransientModel):
     def action_print_excel_file(self):
         self.ensure_one()
         data = self.get_report_data()
+        print("Final Data => ",date)
         workbook = xlwt.Workbook()
         TABLE_HEADER = xlwt.easyxf(
             'font: bold 1, name Tahoma, color-index black,height 160;'
@@ -243,7 +255,9 @@ class TotalsSaleCategWizard(models.TransientModel):
         col += 1
         branch_data = data['branches']
 
+
         for branch in branch_data:
+            print("branch ==> ",branch)
             # month_sart = month[0]
             # # month_name = month_sart.strftime('%Y-%B')
             # month_name = format_date(date=month_sart, format='MMMM-y',locale='ar')
@@ -255,6 +269,7 @@ class TotalsSaleCategWizard(models.TransientModel):
             worksheet.write(row, col, branch, STYLE_LINE_Data)
 
             for cat in branch_data[branch]:
+                print("cat ==> ",cat)
                 row += 1
                 col = 1
                 worksheet.write(row, col, cat, STYLE_LINE_Data)
