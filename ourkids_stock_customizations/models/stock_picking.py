@@ -81,7 +81,7 @@ class StockPicking(models.Model):
                         move.inventory_id.id or 'NULL',
                         rule.location_id.id or 'NULL',
                         move.location_dest_id.id or 'NULL',
-                        move.name,
+                        move.name.replace("'","''"),
                         move.note or '',
                         move.origin or '',
                         move.package_level_id.id or 'NULL',
