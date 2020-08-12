@@ -38,4 +38,7 @@
               parent="purchase.purchase_report"
               action="wizard_vendor_transaction_details_action"/>
 
+    <menuitem id="purchase_report" name="Purchase Reports" parent="purchase.purchase_report" sequence="1"
+        groups="purchase.group_purchase_manager" action="purchase.action_purchase_order_report_all"/>
+
 </odoo>

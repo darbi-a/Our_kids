@@ -66,22 +66,23 @@ class VendorTransactions(models.TransientModel):
         categories = self.category_ids and \
                      self.env['product.category'].search([('id', 'child_of', self.category_ids.ids)])
         warehouses = self.warehouse_ids or self.env['stock.warehouse'].search([])
-        partners_refs = vendors and filter(None, vendors.mapped('ref'))
+        partners_refs = vendors and list(set(vendors.mapped('ref')))
         locations = self.get_warehouse_locations(warehouses)
         query = """
            select p.id  As product_id, m.id from 
            product_product p join product_template t on (p.product_tmpl_id=t.id)
            join stock_move m on (p.id = m.product_id)
-           WHERE m.date between %s and %s and m.state = 'done' and
-           m.location_id in %s or m.location_dest_id in %s
+           WHERE m.date between %s and %s and m.state = 'done'
         """
         query += seasons and " and p.season_id in %s" or ""
         query += categories and " and t.categ_id in %s" or ""
         query += partners_refs and " and p.vendor_num in %s" or ""
-        args = [start_date, end_date, tuple(locations.ids), tuple(locations.ids)]
+        query += " and (m.location_id in %s or m.location_dest_id in %s)"
+        args = [start_date, end_date, ]
         args += seasons and [tuple(seasons.ids)]
         args += categories and [tuple(categories.ids)]
         args += partners_refs and [tuple(partners_refs)]
+        args += [tuple(locations.ids), tuple(locations.ids)]
         self.env.cr.execute(query, args)
         product_ids = [x[0] for x in self.env.cr.fetchall()]
         product_ids = list(set(product_ids))
