@@ -64,10 +64,6 @@ models.Product = models.Product.extend({
         }
 
         var pricelist_items = _.filter(pricelist.items, function (item) {
-            console.log('item == > ',item)
-            console.log('item.product_id  == > ',item.product_id )
-            console.log('item.vendor_num  == > ',item.vendor_num)
-            console.log('self.vendor_num  == > ',self.vendor_num)
             return (! item.product_tmpl_id || item.product_tmpl_id[0] === self.product_tmpl_id) &&
                    (! item.product_id || item.product_id[0] === self.id) &&
                    (! item.vendor_num || item.vendor_num === self.vendor_num) &&
