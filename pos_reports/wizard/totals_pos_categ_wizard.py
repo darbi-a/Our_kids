@@ -69,6 +69,8 @@ class TotalsSaleCategWizard(models.TransientModel):
 
         return dates
 
+
+
     def get_report_data(self):
         if self.date_from and self.date_to and self.date_from > self.date_to:
             raise ValidationError(_('Date from must be before date to!'))
@@ -84,6 +86,8 @@ class TotalsSaleCategWizard(models.TransientModel):
         data['date_from'] = self.date_from
         data['date_to'] = self.date_to
         monthes = self.get_dates()
+        products = self.env['product.product'].sudo().search(['|', ('active', '=', True), ('active', '=', False)])
+
         if self.branches_ids:
             branches = self.branches_ids
         else:
@@ -93,42 +97,52 @@ class TotalsSaleCategWizard(models.TransientModel):
         else:
             seasons = self.env['product.season'].search([]).ids
         if self.categ_ids:
-            categ_ids = self.categ_ids
+            categ_ids =self.categ_ids
+            categories = self.env['product.category'].sudo().search([('id', 'child_of', self.categ_ids.ids)])
         else:
             lst_ids = self.get_categ()
-            categ_ids= self.env['product.category'].browse(lst_ids)
+            if lst_ids:
+                categ_ids = self.env['product.category'].sudo().browse(lst_ids[0][2])
+                print("categ_ids",categ_ids)
+                categories = self.env['product.category'].sudo().search([('id', 'child_of', categ_ids.ids)])
+            else:
+               lst_ids= self.env['product.category'].search([])
+               categ_ids= lst_ids
+               categories = self.env['product.category'].sudo().search([('id', 'child_of', categ_ids.ids)])
+
         for branch in branches:
             branch_names.append(branch.name)
             data.setdefault('branches',{})
             data['branches'].setdefault(branch.name,{})
             pos_lines = self.env['pos.order.line'].search([
                 ('order_id.config_id.pos_branch_id', '=', branch.id),
+                ('order_id.date_order', '>=', self.date_from),
+                ('order_id.date_order', '<=', self.date_to),
                 ])
-            print(" pos_lines == > ",pos_lines)
             for cat in categ_ids:
+
                 total_qty=0
                 total_cost=0
                 total_sale=0
                 for line in pos_lines:
-                    if line.product_id.categ_id.id == cat.id :
+                    if line.product_id.categ_id.id in categories.ids :
                         if line.product_id.season_id:
                             if  line.product_id.season_id.id in seasons:
-                                print("**** vvvvv **")
                                 total_qty += self.get_rounding(line.qty)
                                 total_sale += self.get_rounding(line.price_subtotal)
                                 total_cost += self.get_rounding(line.qty * line.product_id.standard_price)
                         else:
-                            print("**** vvvvv **")
                             total_qty += self.get_rounding(line.qty)
                             total_sale += self.get_rounding(line.price_subtotal)
                             total_cost += self.get_rounding(line.qty * line.product_id.standard_price)
-
+                        print("line.product_id ",line.product_id.name)
+                        print("product_id ",line.qty)
+                        print("*****************",)
                 data['branches'][branch.name][cat.name] = {
                     'total_qty': round(total_qty,2),
                     'total_sale': round(total_sale,2),
                     'total_cost': round(total_cost,2),
                 }
-                print("data ==> ",data)
 
         return data
 
@@ -257,7 +271,6 @@ class TotalsSaleCategWizard(models.TransientModel):
 
 
         for branch in branch_data:
-            print("branch ==> ",branch)
             # month_sart = month[0]
             # # month_name = month_sart.strftime('%Y-%B')
             # month_name = format_date(date=month_sart, format='MMMM-y',locale='ar')
@@ -269,7 +282,6 @@ class TotalsSaleCategWizard(models.TransientModel):
             worksheet.write(row, col, branch, STYLE_LINE_Data)
 
             for cat in branch_data[branch]:
-                print("cat ==> ",cat)
                 row += 1
                 col = 1
                 worksheet.write(row, col, cat, STYLE_LINE_Data)
