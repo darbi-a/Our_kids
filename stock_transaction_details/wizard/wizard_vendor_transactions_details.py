@@ -67,6 +67,7 @@ class VendorTransactions(models.TransientModel):
                      self.env['product.category'].search([('id', 'child_of', self.category_ids.ids)])
         warehouses = self.warehouse_ids or self.env['stock.warehouse'].search([])
         partners_refs = vendors and list(set(vendors.mapped('ref')))
+        partners_refs = partners_refs and list(filter(None, partners_refs))
         locations = self.get_warehouse_locations(warehouses)
         query = """
            select p.id  As product_id, m.id from 
@@ -87,6 +88,8 @@ class VendorTransactions(models.TransientModel):
         product_ids = [x[0] for x in self.env.cr.fetchall()]
         product_ids = list(set(product_ids))
         products = self.env['product.product'].browse(product_ids)
+        if not products:
+            raise ValidationError(_("There are no products match the specified parameters"))
         loss_locations = self.env['stock.location'].search([('usage', '=', 'inventory')])
         data = []
         for product in products:
