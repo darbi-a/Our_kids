@@ -18,8 +18,6 @@
                     </group>
                     <footer>
                         <button string="Import" name="import_button" type="object" class="btn-primary"/>
-                        <button string="Del supplier" name="delete_all_sellers" type="object" class="btn-primary"/>
-                        <button string="Assign supplier" name="assin_seller" type="object" class="btn-primary"/>
                         <button string="Cancel" class="oe_link" special="cancel"/>
                     </footer>
                 </form>

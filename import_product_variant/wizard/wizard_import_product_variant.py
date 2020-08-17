@@ -427,20 +427,21 @@ class ImportProductVariant(models.TransientModel):
                     rec.sudo().write(vals)
 
     def assin_seller(self):
-        temp_ids = self.env['product.product'].search([('vendor_num','!=',False)])
+        temp_ids = self.env['product.product'].search([('vendor_num','!=',False),('seller_ids','=',False),('variant_seller_ids','=',False)],limit=1000)
+        print("#temp_ids ==> ",len(temp_ids))
+        x=1
         for rec in temp_ids:
-
-            if rec.vendor_num:
+            print("xx= => ",x," ** ",rec.id)
+            x+=1
+            if rec.vendor_num and not rec.seller_ids and not rec.variant_seller_ids:
                 vendor = self.env['res.partner'].search([('ref', '=', rec.vendor_num)], limit=1)
                 if vendor:
-                    seller = self.env['product.supplierinfo'].create({
+                    self.env['product.supplierinfo'].create({
                         'product_tmpl_id': rec.product_tmpl_id.id,
                         'name': vendor.id,
                     })
-                    print("seller ==> ", seller)
     def delete_all_sellers(self):
-        sellers = self.env['product.supplierinfo'].search([])
-        print("sellers == ",len(sellers))
-        for rec in sellers:
-            print("rec ==> ",rec)
-            rec.unlink()
+        sellers = self.env['product.supplierinfo']
+        sql = "delete from %s" % sellers._table
+        self._cr.execute(sql)
+
