@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <odoo>
+
+
+    <record id="resalt_import_product_variant" model="ir.ui.view">
+            <field name="name">wizard.resalt.variant.form</field>
+            <field name="model">wizard.resalt.variant</field>
+            <field name="arch" type="xml">
+                <form string="Import product Variants">
+                        <group col="1">
+                        <div class="o_row" name="count_items">
+                            <label for="count_items"/>
+                            <field name="count_items"/>
+                            <button name="display_count_items" string="Display" class="oe_highlight" type="object" attrs="{'invisible':[('count_items','&lt;=',0)]}"/>
+
+                        </div>
+                        <div class="o_row" name="count_items_edit">
+                            <label for="count_items_edit"/>
+                            <field name="count_items_edit"/>
+                            <button name="display_items_edit" string="Display" class="oe_highlight" type="object" attrs="{'invisible':[('count_items_edit','&lt;=',0)]}"/>
+                        </div>
+
+                        <div class="o_row" name="count_variant">
+                            <label for="count_variant"/>
+                            <field name="count_variant"/>
+                            <button name="display_count_variant" string="Display" class="oe_highlight" type="object" attrs="{'invisible':[('count_variant','&lt;=',0)]}"/>
+
+                        </div>
+                        <div class="o_row" name="count_edit">
+                            <label for="count_edit"/>
+                            <field name="count_edit"/>
+                            <button name="display_count_edit" string="Display" class="oe_highlight" type="object" attrs="{'invisible':[('count_edit','&lt;=',0)]}"/>
+
+                        </div>
+
+                    </group>
+
+                    <footer>
+                        <button string="OK" class="oe_highlight" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+
+    </odoo>

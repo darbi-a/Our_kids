@@ -2,3 +2,4 @@
 
 from . import wizard_import_product_variant
 from . import resalt
+from . import wizard_seller
