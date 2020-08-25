@@ -134,8 +134,9 @@ class VendorTransactions(models.TransientModel):
                 for location in sales:
                     loc = list(location)
                     return_qty = sum(rec[0] for rec in sales_return if rec[1] == loc[1])
-                    locations_data[loc[1]]["sale_qty"] = loc[0] - return_qty
-                    locations_data[loc[1]]["total_sale"] = loc[0] * product.sale_price
+                    qty = loc[0] - return_qty
+                    locations_data[loc[1]]["sale_qty"] = qty
+                    locations_data[loc[1]]["total_sale"] = qty * product.sale_price
             query = """
                      select sum(m.product_uom_qty) As purchase_qty , dest.id as loc_id from
                      stock_move m join stock_location l ON m.location_id = l.id
