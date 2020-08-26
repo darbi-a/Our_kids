@@ -14,6 +14,7 @@
                             <field name="branches_ids"  widget="many2many_tags" />
                             <field name="categ_ids"  widget="many2many_tags" />
                             <field name="season_ids"  widget="many2many_tags"/>
+                            <field name="vendor_ids"  widget="many2many_tags"/>
                             <field name="type" widget="radio"/>
                         </group>
                     </sheet>

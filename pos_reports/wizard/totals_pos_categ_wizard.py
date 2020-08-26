@@ -50,6 +50,8 @@ class TotalsSaleCategWizard(models.TransientModel):
     branches_ids = fields.Many2many(comodel_name="pos.branch")
     season_ids = fields.Many2many(comodel_name="product.season", string="Seasons", )
     categ_ids = fields.Many2many(comodel_name="product.category",default=get_categ, string="Product Categories", )
+    vendor_ids = fields.Many2many(comodel_name="res.partner", string="Vendors", )
+
     type = fields.Selection(string="Report Type",default="xls", selection=[('xls', 'XLS'), ('pdf', 'PDF'), ], required=True, )
 
     def get_dates(self):
@@ -81,35 +83,48 @@ class TotalsSaleCategWizard(models.TransientModel):
         total_bank = 0
         month_names = []
         branch_names = []
+        vendor_nums = []
         # data['date_from'] = convert_date_to_local(self.date_from,self.env.user.tz)
         # data['date_from'] = convert_date_to_local(self.date_from,self.env.user.tz)
         data['date_from'] = self.date_from
         data['date_to'] = self.date_to
         monthes = self.get_dates()
-        products = self.env['product.product'].sudo().search(['|', ('active', '=', True), ('active', '=', False)])
-
+        # products = self.env['product.product'].sudo().search(['|', ('active', '=', True), ('active', '=', False)])
+        product_obj = self.env['product.product']
+        domain = ['|', ('active', '=', True), ('active', '=', False)]
+        if self.vendor_ids:
+            # vendor_product_info = self.env['product.supplierinfo'].sudo().search([('name','in',self.vendor_ids.ids)])
+            # products = products.filtered(lambda p:p.variant_seller_ids in vendor_product_info)
+            vendor_nums = self.vendor_ids.mapped('ref')
+            if type(vendor_nums) is not list:
+                vendor_nums = list(vendor_nums)
+            domain += [('vendor_num','in',vendor_nums)]
         if self.branches_ids:
             branches = self.branches_ids
         else:
             branches = self.env['pos.branch'].search([])
+
         if self.season_ids:
             seasons = self.season_ids.ids
-        else:
-            seasons = self.env['product.season'].search([]).ids
+            domain += [('season_id', 'in', seasons)]
+
         if self.categ_ids:
             categ_ids =self.categ_ids
             categories = self.env['product.category'].sudo().search([('id', 'child_of', self.categ_ids.ids)])
-        else:
-            lst_ids = self.get_categ()
-            if lst_ids:
-                categ_ids = self.env['product.category'].sudo().browse(lst_ids[0][2])
-                print("categ_ids",categ_ids)
-                categories = self.env['product.category'].sudo().search([('id', 'child_of', categ_ids.ids)])
-            else:
-               lst_ids= self.env['product.category'].search([])
-               categ_ids= lst_ids
-               categories = self.env['product.category'].sudo().search([('id', 'child_of', categ_ids.ids)])
-
+            domain += [('categ_id', 'in',  categories.ids)]
+        # else:
+        #     lst_ids = self.get_categ()
+        #     if lst_ids:
+        #         categ_ids = self.env['product.category'].sudo().browse(lst_ids[0][2])
+        #         print("categ_ids",categ_ids)
+        #         categories = self.env['product.category'].sudo().search([('id', 'child_of', categ_ids.ids)])
+        #     else:
+        #        lst_ids= self.env['product.category'].search([])
+        #        categ_ids= lst_ids
+        #        categories = self.env['product.category'].sudo().search([('id', 'child_of', categ_ids.ids)])
+        products = product_obj.sudo().search(domain)
+        print("domain == > ",domain)
+        print("products == > ",products)
         for branch in branches:
             branch_names.append(branch.name)
             data.setdefault('branches',{})
@@ -125,19 +140,11 @@ class TotalsSaleCategWizard(models.TransientModel):
                 total_cost=0
                 total_sale=0
                 for line in pos_lines:
-                    if line.product_id.categ_id.id in categories.ids :
-                        if line.product_id.season_id:
-                            if  line.product_id.season_id.id in seasons:
-                                total_qty += self.get_rounding(line.qty)
-                                total_sale += self.get_rounding(line.price_subtotal)
-                                total_cost += self.get_rounding(line.qty * line.product_id.standard_price)
-                        else:
-                            total_qty += self.get_rounding(line.qty)
-                            total_sale += self.get_rounding(line.price_subtotal)
-                            total_cost += self.get_rounding(line.qty * line.product_id.standard_price)
-                        print("line.product_id ",line.product_id.name)
-                        print("product_id ",line.qty)
-                        print("*****************",)
+                    if line.product_id.id in products.ids :
+                        total_qty += self.get_rounding(line.qty)
+                        total_sale += self.get_rounding(line.price_subtotal_incl)
+                        total_cost += self.get_rounding(line.qty * line.product_id.standard_price)
+
                 data['branches'][branch.name][cat.name] = {
                     'total_qty': round(total_qty,2),
                     'total_sale': round(total_sale,2),
@@ -196,7 +203,7 @@ class TotalsSaleCategWizard(models.TransientModel):
         STYLE_LINE = xlwt.easyxf(
             'align: vertical center, horizontal center, wrap off;',
             'borders: left thin, right thin, top thin, bottom thin; '
-            # 'num_format_str: General'
+            # 'num_format_str:SDKYSFMAJ  General'
         )
         STYLE_Description_LINE = xlwt.easyxf(
             'align: vertical center, horizontal left, wrap 1;',
