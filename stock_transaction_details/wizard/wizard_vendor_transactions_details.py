@@ -115,13 +115,28 @@ class VendorTransactions(models.TransientModel):
                        group by loc_id
                       """
 
+            query_return = """
+                      select sum(m.product_uom_qty) As return , dest.id as loc_id from
+                      stock_move m join stock_location l ON m.location_id = l.id
+                      join stock_location dest ON dest.id = m.location_dest_id
+                      where m.product_id = %s and dest.usage = 'internal' and
+                      m.date between %s and %s and m.state = 'done'
+                      and l.usage = 'customer' and dest.id in %s
+                      group by loc_id
+            """
+
             self.env.cr.execute(query, [product.id, start_date, end_date, tuple(locations.ids)])
             sales = self.env.cr.fetchall()
+            self.env.cr.execute(query_return, [product.id, start_date, end_date, tuple(locations.ids)])
+            sales_return = self.env.cr.fetchall()
+
             if sales:
                 for location in sales:
                     loc = list(location)
-                    locations_data[loc[1]]["sale_qty"] = loc[0]
-                    locations_data[loc[1]]["total_sale"] = loc[0] * product.sale_price
+                    return_qty = sum(rec[0] for rec in sales_return if rec[1] == loc[1])
+                    qty = loc[0] - return_qty
+                    locations_data[loc[1]]["sale_qty"] = qty
+                    locations_data[loc[1]]["total_sale"] = qty * product.sale_price
             query = """
                      select sum(m.product_uom_qty) As purchase_qty , dest.id as loc_id from
                      stock_move m join stock_location l ON m.location_id = l.id
