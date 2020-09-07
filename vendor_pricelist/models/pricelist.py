@@ -23,6 +23,7 @@ class product_pricelist_item(models.Model):
 
     partner_id = fields.Many2one(comodel_name="res.partner", string="Vendor", required=False, )
     vendor_num = fields.Char(string="Vendor Number", required=False,related='partner_id.ref',store=True, )
+    product_barcode = fields.Char(related="product_id.barcode",readonly=True )
 
 
     @api.onchange('applied_on')

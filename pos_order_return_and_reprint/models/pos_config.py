@@ -11,4 +11,4 @@ class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     allow_return_password = fields.Boolean()
-    return_order_password = fields.Char()
+    return_order_password = fields.Char(u'password')

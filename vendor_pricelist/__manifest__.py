@@ -12,6 +12,7 @@
     "license": "LGPL-3",
     "data": [
         #'views/product_view.xml',
+        'wizard/update_vendor_pricelist.xml',
         'views/pricelist_view.xml'
     ],
 

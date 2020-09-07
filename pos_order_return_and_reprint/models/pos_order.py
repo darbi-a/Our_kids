@@ -44,12 +44,13 @@ class pos_order(models.Model):
 
         return order_fields
 
-    def convert_date_to_local(self,date, tz):
-        local = pytz.timezone(tz)
-        date = date.replace(tzinfo=pytz.utc)
-        date = date.astimezone(local)
-        date.strftime('%Y-%m-%d: %H:%M:%S')
-        return date.replace(tzinfo=None)
+    def convert_date_to_local(self,dat, tz):
+        local = tz and pytz.timezone(tz) or pytz.timezone('UTC')
+        dat = fieldsDatetime.from_string(dat)
+        dat = dat.replace(tzinfo=pytz.utc)
+        dat = dat.astimezone(local)
+        dat.strftime('%Y-%m-%d: %H:%M:%S')
+        return dat.replace(tzinfo=None)
 
     def return_new_order(self):
         lines = []

@@ -43,6 +43,9 @@ models.Order = models.Order.extend({
             if (this.sale_person_code) {
                 json.sale_person_code = this.sale_person_code;
             }
+            if (this.sale_person_name) {
+                json.sale_person_name = this.sale_person_name;
+            }
             if (this.sale_person_id) {
                 json.sale_person_id = this.sale_person_id;
             }
@@ -53,11 +56,19 @@ models.Order = models.Order.extend({
             _super_order.init_from_JSON.apply(this,arguments);
             this.sale_person_id = json.sale_person_id;
             this.sale_person_code = json.sale_person_code;
+            this.sale_person_name = json.sale_person_name;
         },
 })
 
 var SalePersonButtonWidget = screens.ActionButtonWidget.extend({
     template: 'SalePersonButtonWidget',
+//    init: function (parent, options) {
+//        this._super(parent, options);
+//        console.log(this.pos.get_order().sale_person_name);
+//        $('.sale_person').text( this.pos.get_order().sale_person_name || ' Sale Person' );
+//
+//    },
+
     button_click: function() {
         var self = this;
         var selection_list = _.map(self.pos.db.sale_persons, function (sale_person) {
@@ -73,8 +84,9 @@ var SalePersonButtonWidget = screens.ActionButtonWidget.extend({
                 var order = self.pos.get_order();
                 order.sale_person_id = sale_person.id;
                 order.sale_person_code = sale_person.pos_code;
+                order.sale_person_name = sale_person.name;
                 order.trigger('change');
-//                $('.sale_person_button').text(sale_person.pos_code);
+                $('.sale_person').text(sale_person.name);
             },
 
         });
@@ -89,6 +101,15 @@ screens.define_action_button({
         return true;
     },
 });
+
+screens.ProductScreenWidget.include({
+
+    show: function(reset){
+        this._super();
+         $('.sale_person').text( this.pos.get_order().sale_person_name || ' Sale Person' );
+    },
+
+})
 
 
 

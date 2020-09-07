@@ -897,6 +897,7 @@ myDate.setSeconds(0);
 		            var global_discount = output[10];
 		            var all_discount = output[11];
 		            var total_qty = output[12];
+		            var sale_person_name = output[13];
 		            self.gui.show_screen('ReceiptScreenWidgetNew');
 		            $('.pos-receipt-container').html(QWeb.render('PosTicket1',{
 		                widget:self,
@@ -917,6 +918,7 @@ myDate.setSeconds(0);
                         global_discount: global_discount,
                         all_discount : all_discount,
                         total_qty : total_qty,
+                        sale_person_name : sale_person_name,
 		            }));
 				});
             });
@@ -1589,14 +1591,50 @@ $(".neworder-button").css("display","none");
 
 		        var self = this;
 		        this.$('.view-orders').click(function(){
-            		self.gui.show_screen('see_all_orders_screen_widget', {});
+//            		self.gui.show_screen('see_all_orders_screen_widget', {});
+                    if (self.pos.config.allow_return_password == true) {
+                        self.gui.show_popup('passwordinput', {
+                            'title': _t('Password ?'),
+                             confirm: function (pw) {
+                                if (pw !== self.pos.config.return_order_password) {
+                                    self.gui.show_popup('error', {
+                                        'title': _t('Error'),
+                                        'body': _t('Incorrect password. Please try again'),
+                                    });
+                                } else {
+                                    self.gui.show_screen('see_all_orders_screen_widget', {});
+                                }
+                                },
+                            });
+                        } else {
+                                self.gui.show_screen('see_all_orders_screen_widget', {});
+                        }
+//            this.gui.show_screen('see_all_orders_screen_widget', {});
             	});
 
 
             $('.selected-client-orders').on("click", function() {
-                self.gui.show_screen('see_all_orders_screen_widget', {
-                    'selected_partner_id': this.id
-                });
+//                self.gui.show_screen('see_all_orders_screen_widget', {
+//                    'selected_partner_id': this.id
+//                });
+                var this_el = this;
+                if (self.pos.config.allow_return_password == true) {
+                    self.gui.show_popup('passwordinput', {
+                    'title': _t('Password ?'),
+                     confirm: function (pw) {
+                            if (pw !== self.pos.config.return_order_password) {
+                                self.gui.show_popup('error', {
+                                    'title': _t('Error'),
+                                    'body': _t('Incorrect password. Please try again'),
+                                });
+                            } else {
+                                self.gui.show_screen('see_all_orders_screen_widget', {'selected_partner_id': this_el.id});
+                            }
+                        },
+                    });
+                } else {
+                        self.gui.show_screen('see_all_orders_screen_widget', {'selected_partner_id': this_el.id});
+                }
             });
 
         },
@@ -1829,6 +1867,19 @@ screens.ActionpadWidget.include({
 
 
 });
+
+screens.OrderWidget.include({
+
+    update_summary: function(){
+        this._super();
+        var order = this.pos.get_order();
+        if(order && this.el.querySelector('.summary .total .qtytotal .value')){
+            this.el.querySelector('.summary .total .qtytotal .value').textContent = order.get_total_order_qty();
+        }
+    }
+
+
+})
 
 
 })

@@ -28,6 +28,7 @@
         'views/stock_location.xml',
         'views/purchase_order.xml',
         'views/res_partner.xml',
+        'views/stock_quant.xml',
 
     ],
 

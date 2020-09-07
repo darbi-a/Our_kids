@@ -25,3 +25,10 @@ class PosOrder(models.Model):
             })
 
         return order_fields
+
+    @api.multi
+    def print_pos_receipt(self):
+        data = super(PosOrder,self).print_pos_receipt()
+        data.append(self.sale_person_id.name)
+        return data
+
