@@ -400,7 +400,7 @@
 				                        	<td><t t-esc='item.product_id[1]' /></td>
                                             <!--<td><t t-esc=" widget.options.orderlines" /></td>-->
 		                                     <td class="entered_item_qty">
-		                                     	<input id="entered_item_qty" t-att-line-id='item.id' t-att-qty-id='item.qty' t-att-nqty='item.return_qty' type="text" class="input-field" name="code"></input>
+		                                     	<input id="entered_item_qty" t-att-line-id='item.id' t-att-product-id='item.product_id[0]' t-att-qty-id='item.qty' t-att-nqty='item.return_qty' type="text" class="input-field" name="code"></input>
 		                                     </td>
 
 
@@ -449,12 +449,15 @@
      <t t-name="PosTicket1">
          <div class="pos-sale-ticket">
                 <div>
-                    <div style="width: 55%; float: left; padding: 20px 0px;">
+                    <div style="width: 75%; float: left; padding: 20px 0px;">
 <!--                        <t t-if="widget.pos.company.phone">-->
 <!--                            Phone: <t t-esc="widget.pos.company.phone || ''"/><br />-->
 <!--                        </t>-->
                         Cashier: <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br />
-                        <t t-esc="order.pos_reference"/>
+                        <t t-if="sale_person_name">
+                            Sale Person: <t t-esc="sale_person_name"/><br />
+                        </t>
+                        <t t-esc="order.pos_reference"/><br />
                         <t t-esc="moment(date_order).format('L LT')"/>
                     </div>
 <!--                    <div style="width: 45%;float: left; ">-->
@@ -884,12 +887,15 @@
         <t t-jquery='.pos-sale-ticket' t-operation='replace'>
             <div class="pos-sale-ticket">
                 <div>
-                    <div style="width: 55%; float: left; padding: 20px 0px;">
+                    <div style="width: 75%; float: left; padding: 20px 0px;">
 <!--                        <t t-if="widget.pos.company.phone">-->
 <!--                            Phone: <t t-esc="widget.pos.company.phone || ''"/><br />-->
 <!--                        </t>-->
                         Cashier: <t t-esc="widget.pos.cashier ? widget.pos.cashier.name : widget.pos.user.name"/><br />
-                        <t t-esc="order.name"/>
+                        <t t-if="order.sale_person_name">
+                            Sale Person: <t t-esc="order.sale_person_name"/><br />
+                        </t>
+                        <t t-esc="order.name"/><br />
                         <t t-esc="moment().format('L LT')"/>
                     </div>
 <!--                    <div style="width: 45%;float: left; ">-->
@@ -1133,6 +1139,12 @@
                     })
                 </script>
             </div>
+        </t>
+    </t>
+
+    <t t-extend="OrderWidget">
+        <t t-jquery="div.subentry" t-operation="after">
+            <div class='qtytotal'>Total Qty: <span class="value">0</span></div>
         </t>
     </t>
 

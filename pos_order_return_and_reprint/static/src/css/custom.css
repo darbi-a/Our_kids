@@ -221,6 +221,13 @@
     .o_thread_window{
         display: none !important;
     }
+
+    .pos .order .summary .line .qtytotal{
+        font-size: 16px;
+        font-weight: normal;
+        text-align: center;
+    }
+
 }
 
 

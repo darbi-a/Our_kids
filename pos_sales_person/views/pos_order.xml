@@ -15,6 +15,33 @@
                 
             </field>
         </record>
+
+        <record id="view_pos_order_tree_inherit" model="ir.ui.view">
+            <field name="name">pos.order.tree.inherit</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='user_id']" position="after">
+                     <field name="sale_person_id" />
+                </xpath>
+
+            </field>
+        </record>
+        
+        <record id="view_pos_order_search_inherit" model="ir.ui.view">
+            <field name="name">pos.order.search.inherit</field>
+            <field name="model">pos.order</field>
+            <field name="inherit_id" ref="point_of_sale.view_pos_order_filter"/>
+            <field name="arch" type="xml">
+                
+                <xpath expr="//filter[@name='salesman']" position="replace">
+                    <filter string="Cashier" name="cashier" domain="[]" context="{'group_by':'user_id'}"/>
+                    <filter string="Salesperson" name="salesman" domain="[]" context="{'group_by':'sale_person_id'}"/>
+                </xpath>
+                
+            </field>
+        </record>
     
     </data>
 </odoo>

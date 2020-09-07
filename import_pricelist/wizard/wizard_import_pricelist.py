@@ -81,7 +81,7 @@ class ImportPriceList(models.TransientModel):
                     raise UserError(_('The line Number %s :  Is a duplicate!.') % (str(cont)))
 
             vals = {
-                'base': 'pricelist',
+                # 'base': 'pricelist',
                 'pricelist_id': pricelist_id.id,
             }
 
