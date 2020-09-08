@@ -550,9 +550,16 @@
 
                     <tr>
 <!--                        <td></td>-->
-                        <td>Total Qty:</td>
+                        <td>Total Sale Qty:</td>
                         <td style='text-align:center'>
-                            <t t-esc="total_qty"/>
+                            <t t-esc="total_sale_qty"/>
+                        </td>
+                    </tr>
+                    <tr>
+<!--                        <td></td>-->
+                        <td>Total Return Qty:</td>
+                        <td style='text-align:center'>
+                            <t t-esc="total_return_qty"/>
                         </td>
                     </tr>
                     <tr>
@@ -997,9 +1004,16 @@
 
                     <tr>
 <!--                        <td></td>-->
-                        <td>Total Qty:</td>
+                        <td>Total Sale Qty:</td>
                         <td style='text-align:center'>
-                            <t t-esc="order.get_total_order_qty()"/>
+                            <t t-esc="order.get_total_order_sale_qty()"/>
+                        </td>
+                    </tr>
+                    <tr>
+<!--                        <td></td>-->
+                        <td>Total Return Qty:</td>
+                        <td style='text-align:center'>
+                            <t t-esc="order.get_total_order_return_qty()"/>
                         </td>
                     </tr>
                     <tr>
@@ -1144,7 +1158,8 @@
 
     <t t-extend="OrderWidget">
         <t t-jquery="div.subentry" t-operation="after">
-            <div class='qtytotal'>Total Qty: <span class="value">0</span></div>
+            <div class='qtytotal_sale'>Total Sale Qty: <span class="value">0</span></div>
+            <div class='qtytotal_return'>Total Return Qty: <span class="value">0</span></div>
         </t>
     </t>
 

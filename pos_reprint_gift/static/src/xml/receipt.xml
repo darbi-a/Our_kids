@@ -57,9 +57,15 @@
             <br/>
             <table class='receipt-total'>
                 <tr>
-                    <td>Total Qty:</td>
+                    <td>Total Sale Qty:</td>
                     <td style='text-align:center'>
-                        <t t-esc="order.get_total_order_qty()"/>
+                        <t t-esc="order.get_total_order_sale_qty()"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Total Return Qty:</td>
+                    <td style='text-align:center'>
+                        <t t-esc="order.get_total_order_return_qty()"/>
                     </td>
                 </tr>
             </table>
