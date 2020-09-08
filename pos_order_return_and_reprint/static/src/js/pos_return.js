@@ -217,6 +217,34 @@ var field_utils = require('web.field_utils');
 
             }), 0);
         },
+        get_total_order_sale_qty: function(){
+            var self = this;
+            var global_discount_line = this.get_global_discount_product()
+            return this.orderlines.reduce((function(sum, orderLine) {
+                var line_qty = orderLine.get_quantity();
+                if( line_qty && line_qty > 0 && (!global_discount_line || global_discount_line.get_product().id !== orderLine.get_product().id )){
+                    return sum + line_qty;
+                }
+                else{
+                    return sum
+                }
+
+            }), 0);
+        },
+        get_total_order_return_qty: function(){
+            var self = this;
+            var global_discount_line = this.get_global_discount_product()
+            return this.orderlines.reduce((function(sum, orderLine) {
+                var line_qty = orderLine.get_quantity();
+                if(line_qty && line_qty < 0 && (!global_discount_line || global_discount_line.get_product().id !== orderLine.get_product().id )){
+                    return sum + line_qty;
+                }
+                else{
+                    return sum
+                }
+
+            }), 0);
+        },
 
         get_global_discount_product:function(){
             var lines = this.get_orderlines();
@@ -896,8 +924,9 @@ myDate.setSeconds(0);
 		            var total_line_discount = output[9];
 		            var global_discount = output[10];
 		            var all_discount = output[11];
-		            var total_qty = output[12];
-		            var sale_person_name = output[13];
+		            var total_sale_qty = output[12];
+		            var total_return_qty = output[13];
+		            var sale_person_name = output[14];
 		            self.gui.show_screen('ReceiptScreenWidgetNew');
 		            $('.pos-receipt-container').html(QWeb.render('PosTicket1',{
 		                widget:self,
@@ -917,7 +946,8 @@ myDate.setSeconds(0);
                         total_line_discount : total_line_discount,
                         global_discount: global_discount,
                         all_discount : all_discount,
-                        total_qty : total_qty,
+                        total_sale_qty : total_sale_qty,
+                        total_return_qty : total_return_qty,
                         sale_person_name : sale_person_name,
 		            }));
 				});
@@ -1873,8 +1903,9 @@ screens.OrderWidget.include({
     update_summary: function(){
         this._super();
         var order = this.pos.get_order();
-        if(order && this.el.querySelector('.summary .total .qtytotal .value')){
-            this.el.querySelector('.summary .total .qtytotal .value').textContent = order.get_total_order_qty();
+        if(order && this.el.querySelector('.summary .total .qtytotal_sale .value')){
+            this.el.querySelector('.summary .total .qtytotal_sale .value').textContent = order.get_total_order_sale_qty();
+            this.el.querySelector('.summary .total .qtytotal_return .value').textContent = order.get_total_order_return_qty();
         }
     }
 
